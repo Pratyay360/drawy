@@ -136,9 +136,7 @@ function Home() {
                                                     {canvas.title}
                                                 </Text>
                                                 {!canvas.isOwner && (
-                                                    <Token
-                                                        label={`Shared by ${canvas.owner}`}
-                                                    />
+                                                    <Token label={`Shared by ${canvas.owner}`} />
                                                 )}
                                             </HStack>
                                             <Text type="supporting">

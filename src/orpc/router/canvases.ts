@@ -20,7 +20,7 @@ function getSharedWith(appState: unknown): string[] {
         "sharedWith" in appState &&
         Array.isArray((appState as { sharedWith: unknown }).sharedWith)
     ) {
-        return ((appState as { sharedWith: unknown[] }).sharedWith).filter(
+        return (appState as { sharedWith: unknown[] }).sharedWith.filter(
             (u): u is string => typeof u === "string",
         );
     }
@@ -392,18 +392,14 @@ export const unshare = base
         if (error) return fail(error);
     });
 
-export const listUsers = base
-    .output(z.array(z.string()))
-    .handler(async ({ context }) => {
-        const username = context.user?.username;
-        const supabase = createSupabaseAdminClient();
-        const { data, error } = await supabase
-            .from("app_users")
-            .select("username")
-            .order("username", { ascending: true });
+export const listUsers = base.output(z.array(z.string())).handler(async ({ context }) => {
+    const username = context.user?.username;
+    const supabase = createSupabaseAdminClient();
+    const { data, error } = await supabase
+        .from("app_users")
+        .select("username")
+        .order("username", { ascending: true });
 
-        if (error) return fail(error);
-        return (data || [])
-            .map((u) => u.username)
-            .filter((u) => u !== username);
-    });
+    if (error) return fail(error);
+    return (data || []).map((u) => u.username).filter((u) => u !== username);
+});

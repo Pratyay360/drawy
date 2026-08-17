@@ -9,19 +9,19 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import router from "#/orpc/router";
 
 const getORPCClient = createIsomorphicFn()
-  .server(() =>
-    createRouterClient(router, {
-      context: () => ({
-        request: { headers: getRequestHeaders() },
-      }),
-    }),
-  )
-  .client((): RouterClient<typeof router> => {
-    const link = new RPCLink({
-      url: `${window.location.origin}/api/rpc`,
+    .server(() =>
+        createRouterClient(router, {
+            context: () => ({
+                request: { headers: getRequestHeaders() },
+            }),
+        }),
+    )
+    .client((): RouterClient<typeof router> => {
+        const link = new RPCLink({
+            url: `${window.location.origin}/api/rpc`,
+        });
+        return createORPCClient(link);
     });
-    return createORPCClient(link);
-  });
 
 export const client: RouterClient<typeof router> = getORPCClient();
 

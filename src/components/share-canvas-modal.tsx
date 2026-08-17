@@ -10,11 +10,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { Token } from "@astryxdesign/core/Token";
 import { Check, Copy, Loader2, Share2, UserPlus, UserX } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import {
-    listAvailableUsers,
-    shareCanvas,
-    unshareCanvas,
-} from "../services/canvases";
+import { listAvailableUsers, shareCanvas, unshareCanvas } from "../services/canvases";
 
 interface ShareCanvasModalProps {
     isOpen: boolean;
@@ -193,11 +189,7 @@ export function ShareCanvasModal({
                                         </VStack>
                                     )}
 
-                                    {errorMsg && (
-                                        <Text type="supporting">
-                                            {errorMsg}
-                                        </Text>
-                                    )}
+                                    {errorMsg && <Text type="supporting">{errorMsg}</Text>}
                                 </VStack>
                             )}
 
@@ -218,11 +210,7 @@ export function ShareCanvasModal({
 
                                     {/* Shared users */}
                                     {sharedWith.map((user) => (
-                                        <HStack
-                                            key={user}
-                                            justify="between"
-                                            align="center"
-                                        >
+                                        <HStack key={user} justify="between" align="center">
                                             <VStack gap={0}>
                                                 <Text weight="medium">{user}</Text>
                                                 <Text type="supporting">Can view and edit</Text>
@@ -244,9 +232,7 @@ export function ShareCanvasModal({
                                     ))}
 
                                     {sharedWith.length === 0 && (
-                                        <Text type="supporting">
-                                            Not shared with anyone yet.
-                                        </Text>
+                                        <Text type="supporting">Not shared with anyone yet.</Text>
                                     )}
                                 </VStack>
                             </VStack>
