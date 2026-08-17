@@ -1,0 +1,4 @@
+name: drawy
+owner: dudec2175
+package: .
+kind: wasmer.io/App.v0
