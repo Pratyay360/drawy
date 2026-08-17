@@ -115,9 +115,7 @@ export async function listAvailableUsers(): Promise<string[]> {
 }
 
 /** Keep only the app-state fields we persist, dropping transient editor state. */
-export function sanitizeExcalidrawAppState(
-    appState: Partial<AppState> | null | undefined,
-): Partial<AppState> {
+export function sanitizeExcalidrawAppState(appState: Partial<AppState>): Partial<AppState> {
     if (!appState || typeof appState !== "object") return {};
     return {
         viewBackgroundColor: appState.viewBackgroundColor,
