@@ -60,7 +60,6 @@
     "@vitejs/plugin-react": "^6.0.5",
     "astrix": "^0.0.0",
     "babel-plugin-react-compiler": "^1.0.0",
-    "netlify-cli": "^27.1.1",
     "typescript": "^6.0.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.9",
     "vite-plus": "0.2.9"
@@ -81,9 +80,7 @@
     "esbuild": true,
     "workerd": true,
     "lightningcss": true,
-    "netlify-cli": true,
-    "sharp": true,
-    "unix-dgram": true
+    "sharp": true
   },
   "packageManager": "bun@1.3.14+sha512.681e8655de36c7563989ed4ad7a485fa82c6b604a4c17f618280dd216f3ca63bdf4dc714f05d6f7e9a0eb77e102efd1d675bf75e29ad6b13e56541bcd46c7d66"
 }
