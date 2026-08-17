@@ -25,3 +25,6 @@ todos.json
 .agents/skills/.cache/
 .cache/
 
+
+# Local Netlify folder
+.netlify

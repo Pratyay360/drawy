@@ -4,6 +4,7 @@ nub = "latest"
 sops = "latest"
 supabase = "latest"
 biome = "latest"
+"npm:netlify-cli" = "latest"
 
 [deps]
 bun = { auto = true }
