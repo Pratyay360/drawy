@@ -1,4 +1,3 @@
--- Canvas drawings, isolated per tenant (Supabase auth user) via RLS.
 create table if not exists public.canvases (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users (id) on delete cascade,

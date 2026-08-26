@@ -7,16 +7,24 @@ const STORAGE_KEY = "drawy-theme";
 const SERVER_THEME: Theme = "light";
 
 function getInitialTheme(): Theme {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "light" || stored === "dark") {
-        return stored;
-    }
+    if (typeof window === "undefined") return SERVER_THEME;
+    try {
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        if (stored === "light" || stored === "dark") {
+            return stored;
+        }
 
-    const prefersDark = matchMedia("(prefers-color-scheme: dark)").matches;
-    return prefersDark ? "dark" : "light";
+        const prefersDark = window.matchMedia
+            ? window.matchMedia("(prefers-color-scheme: dark)").matches
+            : false;
+        return prefersDark ? "dark" : "light";
+    } catch {
+        return SERVER_THEME;
+    }
 }
 
 function applyTheme(theme: Theme) {
+    if (typeof document === "undefined") return;
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
     root.dataset.theme = theme;

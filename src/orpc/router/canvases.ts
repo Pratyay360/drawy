@@ -174,7 +174,6 @@ export const create = base
             .select("id, user_id, title, app_state, created_at, updated_at")
             .single();
         if (error) return fail(error);
-        // SAFETY: Supabase .single() returns one row matching the CanvasRow schema.
         return toMeta(data as CanvasRow, username);
     });
 
