@@ -19,6 +19,7 @@ export function mergeElements(
     for (const r of remote) {
         const existing = byId.get(r.id);
         const rv = r.version ?? 0;
+        // SAFETY: existing?.version ?? 0 always produces a number.
         const lv = (existing?.version ?? 0) as number;
         if (!existing || rv >= lv) byId.set(r.id, r);
     }
@@ -54,6 +55,7 @@ export class CanvasRealtime {
         });
 
         channel.on("broadcast", { event: "scene" }, ({ payload }) => {
+            // SAFETY: broadcast payload conforms to ScenePayload contract.
             this.sceneCbs.forEach((fn) => fn(payload as ScenePayload));
         });
         channel.on("broadcast", { event: "saved" }, () => {

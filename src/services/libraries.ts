@@ -78,6 +78,7 @@ export function requestLibraryBrowse(libraryId: string | null): void {
 
 export function onLibraryBrowseRequested(callback: (libraryId: string | null) => void): () => void {
     const handler = (event: Event) => {
+        // SAFETY: Event dispatched via CustomEvent with libraryId detail.
         const libraryId = (event as CustomEvent).detail?.libraryId ?? null;
         callback(libraryId);
     };
@@ -90,6 +91,7 @@ export function onLibraryItemsInstalled(
     callback: (items: readonly LibraryItem[]) => void,
 ): () => void {
     const handler = (event: Event) => {
+        // SAFETY: Event dispatched via CustomEvent with items array detail.
         const detail = (event as CustomEvent).detail;
         if (Array.isArray(detail)) callback(detail);
     };
@@ -153,6 +155,7 @@ export async function toLibraryItems(
     try {
         // Lazy import keeps Excalidraw (and its JSON imports) out of the SSR bundle.
         const { restoreLibraryItems } = await import("@excalidraw/excalidraw");
+        // SAFETY: restoreLibraryItems returns normalized v2 LibraryItems.
         const restored = restoreLibraryItems(raw, "published") as LibraryItems;
         return restored.map((item) => {
             const elementIds = (item.elements || [])

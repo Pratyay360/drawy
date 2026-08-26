@@ -6,6 +6,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { type ComponentType, useEffect, useState } from "react";
+import { getCurrentUser } from "#/lib/session";
 import { Sidebar } from "../../../components/sidebar";
 export const Route = createFileRoute("/_authenticated/canvas/$id")({
     component: CanvasRoute,
@@ -26,10 +27,19 @@ function LoadingShell() {
 
 function CanvasRoute() {
     const { id } = Route.useParams();
-    const [Editor, setEditor] = useState<ComponentType<{ id: string }> | null>(null);
+    const [Editor, setEditor] = useState<ComponentType<{
+        id: string;
+        username?: string;
+    }> | null>(null);
+    const [username, setUsername] = useState<string>("");
 
     useEffect(() => {
         let cancelled = false;
+        void getCurrentUser().then((currentUser) => {
+            if (!cancelled && currentUser?.username) {
+                setUsername(currentUser.username);
+            }
+        });
         void import("../../../components/canvas-editor").then((module) => {
             if (!cancelled) setEditor(() => module.CanvasEditor);
         });
@@ -39,5 +49,5 @@ function CanvasRoute() {
     }, []);
 
     if (!Editor) return <LoadingShell />;
-    return <Editor id={id} />;
+    return <Editor id={id} username={username} />;
 }

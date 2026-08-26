@@ -1,6 +1,5 @@
 import "@excalidraw/excalidraw/index.css";
 import { AppShell } from "@astryxdesign/core/AppShell";
-import { AvatarGroup } from "@astryxdesign/core/AvatarGroup";
 import { Button } from "@astryxdesign/core/Button";
 import { Center } from "@astryxdesign/core/Center";
 import { Divider } from "@astryxdesign/core/Divider";
@@ -36,18 +35,17 @@ import {
     Download,
     FileCode,
     Image,
+    Layers,
     Loader2,
     Pencil,
     PenTool,
     Save,
-    Shapes,
     Share2,
     Upload,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usernameError } from "#/lib/username";
+import { getCurrentUser } from "#/lib/session";
 import { RealtimeCursors } from "@/components/realtime-cursors";
-import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "../hooks/usetheme";
 import {
     type CanvasData,
@@ -85,7 +83,7 @@ function areAppStatesEqual(a: Partial<AppState>, b: Partial<AppState>): boolean 
 }
 
 function getPersistentAppState(appState: Partial<AppState>): Partial<AppState> {
-    if (!appState || typeof appState !== "object") return {};
+    if (!appState) return {};
     return {
         viewBackgroundColor: appState.viewBackgroundColor,
         gridSize: appState.gridSize,
@@ -97,11 +95,29 @@ function getPersistentAppState(appState: Partial<AppState>): Partial<AppState> {
 
 interface CanvasEditorProps {
     id: string;
+    username?: string;
 }
 
-export function CanvasEditor({ id }: CanvasEditorProps) {
+export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) {
     const navigate = useNavigate();
     const { theme } = useTheme();
+    const [username, setUsername] = useState(propUsername || "");
+
+    useEffect(() => {
+        if (propUsername) {
+            setUsername(propUsername);
+            return;
+        }
+        let cancelled = false;
+        void getCurrentUser().then((currentUser) => {
+            if (!cancelled && currentUser?.username) {
+                setUsername(currentUser.username);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [propUsername]);
     const [canvasData, setCanvasData] = useState<CanvasData | null>(null);
     const [loading, setLoading] = useState(true);
     const [isChangingCanvas, setIsChangingCanvas] = useState(false);
@@ -195,6 +211,7 @@ export function CanvasEditor({ id }: CanvasEditorProps) {
                     };
 
                     if (excalidrawAPI) {
+                        // SAFETY: sanitizedAppState is Partial<AppState> produced by sanitizeExcalidrawAppState.
                         excalidrawAPI.updateScene({
                             elements: resolvedElements,
                             appState: {
@@ -409,6 +426,7 @@ export function CanvasEditor({ id }: CanvasEditorProps) {
 
         excalidrawAPI.updateScene({
             elements: elements,
+            // SAFETY: appState is Partial<AppState> maintained by getPersistentAppState.
             appState: appState as AppState,
         });
     }, [excalidrawAPI, elements, appState]);
@@ -436,16 +454,19 @@ export function CanvasEditor({ id }: CanvasEditorProps) {
         input.type = "file";
         input.accept = ".json,.excalidraw";
         input.onchange = (e) => {
+            // SAFETY: Input onchange event.target is always an HTMLInputElement.
             const file = (e.target as HTMLInputElement).files?.[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
+                    // SAFETY: FileReader onload result is always a string when readAsText is used.
                     const imported = JSON.parse(event.target?.result as string);
                     if (imported && Array.isArray(imported.elements)) {
                         if (excalidrawAPI) {
                             const importedAppState = getPersistentAppState(imported.appState || {});
+                            // SAFETY: importedAppState is Partial<AppState> produced by getPersistentAppState.
                             excalidrawAPI.updateScene({
                                 elements: imported.elements,
                                 appState: {
@@ -568,8 +589,11 @@ export function CanvasEditor({ id }: CanvasEditorProps) {
                             </HStack>
 
                             <HStack gap={2} align="center">
-                                {collaborators > 1 && (
-                                    <Text type="supporting">{collaborators} online</Text>
+                                {collaborators >= 1 && (
+                                    <Text type="supporting">
+                                        {collaborators} active{" "}
+                                        {collaborators === 1 ? "user" : "users"}
+                                    </Text>
                                 )}
                                 <Text type="supporting">
                                     {saveStatus === "saving"
@@ -602,7 +626,7 @@ export function CanvasEditor({ id }: CanvasEditorProps) {
                     <LayoutContent isScrollable={false} padding={0}>
                         <div className="relative h-full w-full overflow-hidden">
                             <div className="absolute inset-0">
-                                <RealtimeCursors roomName={id as string} username={usernameError} />
+                                <RealtimeCursors roomName={id} username={username || "Anonymous"} />
                                 <Excalidraw
                                     excalidrawAPI={(api) => setExcalidrawAPI(api)}
                                     theme={theme}
@@ -670,7 +694,7 @@ export function CanvasEditor({ id }: CanvasEditorProps) {
                                                 title="Drawy libraries"
                                                 aria-label="Drawy libraries"
                                             >
-                                                <Icon icon={Shapes} size="sm" />
+                                                <Icon icon={Layers} size="sm" />
                                             </ExcalidrawSidebar.TabTrigger>
                                         </DefaultSidebar.TabTriggers>
                                         <ExcalidrawSidebar.Tab tab="drawy-libraries">

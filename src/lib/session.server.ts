@@ -34,6 +34,7 @@ function getSessionConfig() {
 }
 
 function hashPassword(password: string, salt = randomBytes(PASSWORD_SALT_LENGTH).toString("hex")) {
+    // SAFETY: scryptSync returns a Buffer when keylen <= MAX_LENGTH (64 is well within range).
     const derivedKey = scryptSync(password, salt, PASSWORD_KEY_LENGTH) as Buffer;
     return `scrypt$${salt}$${derivedKey.toString("hex")}`;
 }
@@ -42,6 +43,7 @@ function verifyPassword(password: string, storedHash: string): boolean {
     const [scheme, salt, keyHex] = storedHash.split("$");
     if (scheme !== "scrypt" || !salt || !keyHex) return false;
 
+    // SAFETY: scryptSync returns a Buffer when keylen is within range.
     const derivedKey = scryptSync(password, salt, keyHex.length / 2) as Buffer;
     const expected = Buffer.from(keyHex, "hex");
     if (expected.length !== derivedKey.length) return false;

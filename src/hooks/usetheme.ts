@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 export type Theme = "light" | "dark";
 
@@ -7,7 +7,7 @@ const STORAGE_KEY = "drawy-theme";
 const SERVER_THEME: Theme = "light";
 
 function getInitialTheme(): Theme {
-    const stored = window.window.localStorage.getItem(STORAGE_KEY);
+    const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored === "light" || stored === "dark") {
         return stored;
     }
@@ -17,7 +17,6 @@ function getInitialTheme(): Theme {
 }
 
 function applyTheme(theme: Theme) {
-    if (typeof document === "undefined") return;
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
     root.dataset.theme = theme;
@@ -27,10 +26,16 @@ function applyTheme(theme: Theme) {
 // Module-level store shared by every useTheme() consumer, so toggling the
 // theme from one place (e.g. the sidebar) re-renders all others (e.g. the
 // canvas) and keeps them in sync.
-let currentTheme: Theme = getInitialTheme();
-const listeners = new Set<() => void>();
+let currentTheme: Theme | undefined;
 
-applyTheme(currentTheme);
+function getCurrentTheme(): Theme {
+    if (currentTheme === undefined) {
+        currentTheme = getInitialTheme();
+    }
+    return currentTheme;
+}
+
+const listeners = new Set<() => void>();
 
 function subscribe(listener: () => void) {
     listeners.add(listener);
@@ -40,7 +45,7 @@ function subscribe(listener: () => void) {
 }
 
 function setThemeInternal(next: Theme) {
-    if (next === currentTheme) return;
+    if (next === getCurrentTheme()) return;
     currentTheme = next;
     applyTheme(next);
     try {
@@ -56,7 +61,7 @@ function setThemeInternal(next: Theme) {
 export function useTheme() {
     const theme = useSyncExternalStore(
         subscribe,
-        () => currentTheme,
+        getCurrentTheme,
         // The server has no localStorage/matchMedia, so it always renders
         // SERVER_THEME. Returning the same value here keeps the hydration pass in
         // agreement with the server HTML; React re-checks the client snapshot
@@ -64,12 +69,16 @@ export function useTheme() {
         () => SERVER_THEME,
     );
 
+    useEffect(() => {
+        applyTheme(theme);
+    }, [theme]);
+
     const setTheme = useCallback((next: Theme) => {
         setThemeInternal(next);
     }, []);
 
     const toggleTheme = useCallback(() => {
-        setThemeInternal(currentTheme === "dark" ? "light" : "dark");
+        setThemeInternal(getCurrentTheme() === "dark" ? "light" : "dark");
     }, []);
 
     return { theme, setTheme, toggleTheme };

@@ -39,7 +39,6 @@ import {
     X,
     XCircle,
 } from "lucide-react";
-import React from "react";
 
 const iconProps = {
     size: "1em",

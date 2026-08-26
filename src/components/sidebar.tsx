@@ -27,20 +27,20 @@ interface DisplayUser {
 const SIDEBAR_COLLAPSED_KEY = "drawy-sidebar-collapsed";
 
 function isSidebarCollapsed(): boolean {
+    if (import.meta.env.SSR) return false;
     return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
 }
 
-function groupCanvasesByDate(canvases: Canvas[]): {
+interface CanvasGroup {
     Today: Canvas[];
     Older: Canvas[];
-} {
+}
+
+function groupCanvasesByDate(canvases: Canvas[]): CanvasGroup {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    const grouped: { Today: Canvas[]; Older: Canvas[] } = {
-        Today: [],
-        Older: [],
-    };
+    const grouped: CanvasGroup = { Today: [], Older: [] };
 
     canvases.forEach((canvas) => {
         const canvasDate = new Date(canvas.updatedAt);

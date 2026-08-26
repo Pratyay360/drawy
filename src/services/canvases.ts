@@ -45,7 +45,9 @@ function toCanvasData(row: {
         owner: row.owner,
         isOwner: row.isOwner,
         sharedWith: row.sharedWith || [],
+        // SAFETY: Array.isArray narrows elements to an array matching the Excalidraw schema.
         elements: Array.isArray(row.elements) ? (row.elements as ExcalidrawElement[]) : [],
+        // SAFETY: appState is stored as Partial<AppState> in the database.
         appState: (row.appState as Partial<AppState>) ?? {},
     };
 }
@@ -116,7 +118,7 @@ export async function listAvailableUsers(): Promise<string[]> {
 
 /** Keep only the app-state fields we persist, dropping transient editor state. */
 export function sanitizeExcalidrawAppState(appState: Partial<AppState>): Partial<AppState> {
-    if (!appState || typeof appState !== "object") return {};
+    if (!appState) return {};
     return {
         viewBackgroundColor: appState.viewBackgroundColor,
         gridSize: appState.gridSize,

@@ -13,23 +13,29 @@ interface CanvasRow {
     updated_at: string;
 }
 
-function getSharedWith(appState: unknown): string[] {
-    if (
-        appState &&
-        typeof appState === "object" &&
-        "sharedWith" in appState &&
-        Array.isArray((appState as { sharedWith: unknown }).sharedWith)
-    ) {
-        return (appState as { sharedWith: unknown[] }).sharedWith.filter(
-            (u): u is string => typeof u === "string",
-        );
-    }
-    return [];
+const SharedWithFieldSchema = z.object({ sharedWith: z.array(z.string()) });
+const CanvasAppStateSchema = z.object({}).passthrough();
+
+interface CanvasAppState {
+    sharedWith: string[];
+}
+
+function parseCanvasAppState(
+    raw: Parameters<typeof CanvasAppStateSchema.safeParse>[0],
+): CanvasAppState {
+    const parsed = CanvasAppStateSchema.safeParse(raw);
+    if (!parsed.success) return { sharedWith: [] } satisfies CanvasAppState;
+    const shared = SharedWithFieldSchema.safeParse(parsed.data);
+    return shared.success ? shared.data : ({ sharedWith: [] } satisfies CanvasAppState);
+}
+
+function getSharedWith(appState: CanvasAppState): string[] {
+    return appState.sharedWith;
 }
 
 function toMeta(row: CanvasRow, currentUser?: string) {
     const owner = row.user_id || "Anonymous";
-    const sharedWith = getSharedWith(row.app_state);
+    const sharedWith = getSharedWith(parseCanvasAppState(row.app_state));
     const isOwner = currentUser ? row.user_id === currentUser : false;
     return {
         id: row.id,
@@ -84,7 +90,7 @@ export const list = base
         const rows = data as CanvasRow[];
         const filtered = rows.filter((row) => {
             if (row.user_id === username) return true;
-            const shared = getSharedWith(row.app_state);
+            const shared = getSharedWith(parseCanvasAppState(row.app_state));
             return shared.includes(username);
         });
 
@@ -121,9 +127,8 @@ export const get = base
             .maybeSingle();
         if (error) return fail(error);
         if (!data) return null;
-
         const row = data as CanvasRow;
-        const sharedWith = getSharedWith(row.app_state);
+        const sharedWith = getSharedWith(parseCanvasAppState(row.app_state));
         const isOwner = row.user_id === username;
         if (!isOwner && !sharedWith.includes(username)) {
             throw new ORPCError("FORBIDDEN", {
@@ -169,6 +174,7 @@ export const create = base
             .select("id, user_id, title, app_state, created_at, updated_at")
             .single();
         if (error) return fail(error);
+        // SAFETY: Supabase .single() returns one row matching the CanvasRow schema.
         return toMeta(data as CanvasRow, username);
     });
 
@@ -198,15 +204,16 @@ export const save = base
         }
 
         const isOwner = existing.user_id === username;
-        const sharedWith = getSharedWith(existing.app_state);
+        const sharedWith = getSharedWith(parseCanvasAppState(existing.app_state));
         if (!isOwner && !sharedWith.includes(username)) {
             throw new ORPCError("FORBIDDEN", {
                 message: "You do not have permission to edit this canvas.",
             });
         }
 
+        const appStateBase = parseCanvasAppState(input.appState);
         const mergedAppState = {
-            ...(typeof input.appState === "object" && input.appState ? input.appState : {}),
+            ...appStateBase,
             sharedWith,
         };
 
@@ -334,14 +341,15 @@ export const share = base
             });
         }
 
-        const currentShared = getSharedWith(canvas.app_state);
+        const currentShared = getSharedWith(parseCanvasAppState(canvas.app_state));
         if (currentShared.includes(target)) {
             return;
         }
 
         const updatedShared = [...currentShared, target];
+        const appStateBase = parseCanvasAppState(canvas.app_state);
         const newAppState = {
-            ...(typeof canvas.app_state === "object" && canvas.app_state ? canvas.app_state : {}),
+            ...appStateBase,
             sharedWith: updatedShared,
         };
 
@@ -380,11 +388,12 @@ export const unshare = base
             });
         }
 
-        const currentShared = getSharedWith(canvas.app_state);
+        const currentShared = getSharedWith(parseCanvasAppState(canvas.app_state));
         const updatedShared = currentShared.filter((u) => u !== target);
 
+        const appStateBase = parseCanvasAppState(canvas.app_state);
         const newAppState = {
-            ...(typeof canvas.app_state === "object" && canvas.app_state ? canvas.app_state : {}),
+            ...appStateBase,
             sharedWith: updatedShared,
         };
 

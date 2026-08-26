@@ -1,12 +1,16 @@
 // "use client";
 
-import { Cursor } from "./cursor";
 import { useRealtimeCursors } from "../hooks/realtime-cursor-react";
+import { Cursor } from "./cursor";
 
 const THROTTLE_MS = 50;
 
 export const RealtimeCursors = ({ roomName, username }: { roomName: string; username: string }) => {
-    const { cursors } = useRealtimeCursors({ roomName, username, throttleMs: THROTTLE_MS });
+    const { cursors } = useRealtimeCursors({
+        roomName,
+        username,
+        throttleMs: THROTTLE_MS,
+    });
 
     return (
         <div>
