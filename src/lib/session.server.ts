@@ -115,7 +115,6 @@ export async function signUpServer(username: string, password: string): Promise<
     .eq("username", username)
     .maybeSingle();
 
-  // ✅ Don't leak database errors
   if (existingError) {
     throw new Error("Failed to check username availability.");
   }
