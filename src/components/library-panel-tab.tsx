@@ -5,18 +5,19 @@ import { List, ListItem } from "@astryxdesign/core/List";
 import { HStack, StackItem, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Compass, Eye, Library } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useLibraryStore } from "#/stores/library";
 import {
 	getLibraryAssetUrl,
 	getSavedLibraries,
 	libraryItemCount,
 	onLibraryConfigUpdated,
 	requestLibraryBrowse,
-	type SavedLibrary,
 } from "../services/libraries.ts";
 
 export function LibraryPanelTab() {
-	const [savedLibraries, setSavedLibraries] = useState<SavedLibrary[]>([]);
+	const savedLibraries = useLibraryStore((s) => s.savedLibraries);
+	const setSavedLibraries = useLibraryStore((s) => s.setSavedLibraries);
 
 	useEffect(() => {
 		let active = true;
@@ -31,7 +32,7 @@ export function LibraryPanelTab() {
 			active = false;
 			unsubscribe();
 		};
-	}, []);
+	}, [setSavedLibraries]);
 
 	return (
 		<VStack gap={3} height="100%" isScrollable>

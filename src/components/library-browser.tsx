@@ -26,7 +26,8 @@ import {
 	RefreshCw,
 	Search,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect } from "react";
+import { useLibraryStore } from "#/stores/library";
 import {
 	type ExcalidrawLibrary,
 	fetchLibraries,
@@ -43,7 +44,12 @@ import {
 	searchLibraries,
 	toLibraryItems,
 } from "../services/libraries.ts";
-import { LibraryItemBrowser } from "./library-item-browser.tsx";
+
+const LibraryItemBrowser = lazy(() =>
+	import("./library-item-browser.tsx").then((m) => ({
+		default: m.LibraryItemBrowser,
+	})),
+);
 
 interface LibraryBrowserProps {
 	onLibrarySelect?: (library: ExcalidrawLibrary) => void;
@@ -66,27 +72,42 @@ export function LibraryBrowser({
 	initialBrowseId = null,
 	source = "canvas",
 }: LibraryBrowserProps) {
-	const [libraries, setLibraries] = useState<ExcalidrawLibrary[]>([]);
-	const [filteredLibraries, setFilteredLibraries] = useState<
-		ExcalidrawLibrary[]
-	>([]);
-	const [savedLibraries, setSavedLibraries] = useState<SavedLibrary[]>([]);
-	const [savingId, setSavingId] = useState<string | null>(null);
-	const [refreshingId, setRefreshingId] = useState<string | null>(null);
-	const [removingId, setRemovingId] = useState<string | null>(null);
-	const [loading, setLoading] = useState(true);
-	const [savedLoaded, setSavedLoaded] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [browsingId, setBrowsingId] = useState<string | null>(initialBrowseId);
-	const [pendingBrowseId, setPendingBrowseId] = useState<string | null>(
-		initialBrowseId,
-	);
+	const libraries = useLibraryStore((s) => s.libraries);
+	const filteredLibraries = useLibraryStore((s) => s.filteredLibraries);
+	const savedLibraries = useLibraryStore((s) => s.savedLibraries);
+	const savingId = useLibraryStore((s) => s.savingId);
+	const refreshingId = useLibraryStore((s) => s.refreshingId);
+	const removingId = useLibraryStore((s) => s.removingId);
+	const loading = useLibraryStore((s) => s.loading);
+	const savedLoaded = useLibraryStore((s) => s.savedLoaded);
+	const searchQuery = useLibraryStore((s) => s.searchQuery);
+	const browsingId = useLibraryStore((s) => s.browsingId);
+	const pendingBrowseId = useLibraryStore((s) => s.pendingBrowseId);
+	const {
+		init,
+		setLibraries,
+		setFilteredLibraries,
+		setSavedLibraries,
+		setSavingId,
+		setRefreshingId,
+		setRemovingId,
+		setLoading,
+		setSavedLoaded,
+		setSearchQuery,
+		setBrowsingId,
+		setPendingBrowseId,
+	} = useLibraryStore.getState();
 
 	const refreshSaved = useCallback(async () => {
 		const saved = await getSavedLibraries();
 		setSavedLibraries(saved);
 		setSavedLoaded(true);
-	}, []);
+	}, [setSavedLibraries, setSavedLoaded]);
+
+	// Seed browse state whenever the modal is (re)opened at a different library.
+	useEffect(() => {
+		init(initialBrowseId);
+	}, [initialBrowseId, init]);
 
 	useEffect(() => {
 		if (pendingBrowseId == null) return;
@@ -94,10 +115,15 @@ export function LibraryBrowser({
 			setBrowsingId(pendingBrowseId);
 			setPendingBrowseId(null);
 		} else if (savedLoaded) {
-			// The library isn't saved anymore — fall back to the main view.
 			setPendingBrowseId(null);
 		}
-	}, [pendingBrowseId, savedLibraries, savedLoaded]);
+	}, [
+		pendingBrowseId,
+		savedLibraries,
+		savedLoaded,
+		setBrowsingId,
+		setPendingBrowseId,
+	]);
 
 	useEffect(() => {
 		void fetchLibraries().then((libs) => {
@@ -109,7 +135,7 @@ export function LibraryBrowser({
 		return onLibraryConfigUpdated(() => {
 			void refreshSaved();
 		});
-	}, [refreshSaved]);
+	}, [refreshSaved, setLibraries, setFilteredLibraries, setLoading]);
 
 	useEffect(() => {
 		if (searchQuery) {
@@ -117,7 +143,7 @@ export function LibraryBrowser({
 		} else {
 			setFilteredLibraries(libraries);
 		}
-	}, [searchQuery, libraries]);
+	}, [searchQuery, libraries, setFilteredLibraries]);
 
 	const isSaved = useCallback(
 		(libraryId: string) => savedLibraries.some((lib) => lib.id === libraryId),
@@ -226,12 +252,20 @@ export function LibraryBrowser({
 
 	if (browsingLibrary) {
 		return (
-			<LibraryItemBrowser
-				library={browsingLibrary}
-				source={source}
-				onBack={() => setBrowsingId(null)}
-				onRefreshContent={() => handleRefreshLibrary(browsingLibrary)}
-			/>
+			<Suspense
+				fallback={
+					<Center>
+						<Icon icon={Loader2} size="lg" />
+					</Center>
+				}
+			>
+				<LibraryItemBrowser
+					library={browsingLibrary}
+					source={source}
+					onBack={() => setBrowsingId(null)}
+					onRefreshContent={() => handleRefreshLibrary(browsingLibrary)}
+				/>
+			</Suspense>
 		);
 	}
 

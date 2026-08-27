@@ -52,5 +52,4 @@ create policy canvases_delete on public.canvases
   for delete to authenticated
   using (auth.uid() = user_id);
 
--- Stream canvas changes to subscribed clients (Supabase Realtime respects RLS).
 alter publication supabase_realtime add table public.canvases;

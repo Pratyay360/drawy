@@ -1,5 +1,7 @@
 import type { LibraryItem, LibraryItems } from "@excalidraw/excalidraw/types";
 
+import { useUIStore } from "#/stores/ui";
+
 interface ExcalidrawLibraryFile {
 	type?: string;
 	libraryItems?: unknown;
@@ -54,7 +56,6 @@ const USER_LIBRARY_KEY = "drawy_user_library";
 
 const LIBRARY_CONFIG_UPDATED_EVENT = "library-config-updated";
 const LIBRARY_ITEMS_INSTALLED_EVENT = "library-items-installed";
-const LIBRARY_BROWSE_REQUESTED_EVENT = "library-browse-requested";
 
 function notifyLibraryConfigUpdated() {
 	globalThis.dispatchEvent(new Event(LIBRARY_CONFIG_UPDATED_EVENT));
@@ -74,24 +75,9 @@ function notifyLibraryItemsInstalled(items: readonly LibraryItem[]) {
 
 /** Ask the app to open the library browser modal, optionally at a saved library. */
 export function requestLibraryBrowse(libraryId: string | null): void {
-	globalThis.dispatchEvent(
-		new CustomEvent(LIBRARY_BROWSE_REQUESTED_EVENT, {
-			detail: { libraryId },
-		}),
-	);
-}
-
-export function onLibraryBrowseRequested(
-	callback: (libraryId: string | null) => void,
-): () => void {
-	const handler = (event: Event) => {
-		// SAFETY: Event dispatched via CustomEvent with libraryId detail.
-		const libraryId = (event as CustomEvent).detail?.libraryId ?? null;
-		callback(libraryId);
-	};
-	globalThis.addEventListener(LIBRARY_BROWSE_REQUESTED_EVENT, handler);
-	return () =>
-		globalThis.removeEventListener(LIBRARY_BROWSE_REQUESTED_EVENT, handler);
+	// Delegated to the zustand UI store so any component can open the modal
+	// without prop drilling or global custom events.
+	useUIStore.getState().openLibraryBrowser(libraryId);
 }
 
 /** Subscribe to libraries being installed/refreshed so canvases can merge them in. */
@@ -165,19 +151,35 @@ export async function toLibraryItems(
 	const raw = content?.libraryItems ?? content?.library;
 	if (!Array.isArray(raw)) return [];
 	try {
-		// Lazy import keeps Excalidraw (and its JSON imports) out of the SSR bundle.
-		const { restoreLibraryItems } = await import("@excalidraw/excalidraw");
-		// SAFETY: restoreLibraryItems returns normalized v2 LibraryItems.
-		const restored = restoreLibraryItems(raw, "published") as LibraryItems;
-		return restored.map((item) => {
-			const elementIds = (item.elements || [])
-				.map((element) => element.id)
+		return raw.map((rawItem: any) => {
+			const elements = Array.isArray(rawItem)
+				? rawItem
+				: Array.isArray(rawItem?.elements)
+					? rawItem.elements
+					: [];
+			const id = rawItem?.id || "";
+			const status = rawItem?.status || "published";
+			const created = rawItem?.created || Date.now();
+			const name = rawItem?.name;
+			const error = rawItem?.error;
+
+			const elementIds = elements
+				.map((element: any) => element?.id)
+				.filter(Boolean)
 				.sort()
 				.join(",");
 			const suffix = elementIds
 				? hashString(elementIds)
-				: hashString(`${libraryId}${item.id}`);
-			return { ...item, id: `${libraryId}-${suffix}` };
+				: hashString(`${libraryId}${id}`);
+
+			return {
+				id: `${libraryId}-${suffix}`,
+				status,
+				elements,
+				created,
+				name,
+				error,
+			} as LibraryItem;
 		});
 	} catch (error) {
 		console.error("Failed to normalize library items:", error);
@@ -275,9 +277,9 @@ export function installLibraryItems(
 	const task = installQueue.then(async () => {
 		try {
 			const current = await getUserLibrary();
-			// Lazy import keeps Excalidraw (and its JSON imports) out of the SSR bundle.
-			const { mergeLibraryItems } = await import("@excalidraw/excalidraw");
-			await setUserLibrary(mergeLibraryItems(current, items));
+			const existingIds = new Set(current.map((item) => item.id));
+			const newItems = items.filter((item) => !existingIds.has(item.id));
+			await setUserLibrary([...current, ...newItems]);
 		} catch (error) {
 			console.error("Failed to persist installed library items:", error);
 		}

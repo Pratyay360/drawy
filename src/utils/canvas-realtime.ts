@@ -33,7 +33,7 @@ type PresenceCb = (count: number) => void;
 
 export class CanvasRealtime {
 	private client = getSupabaseBrowserClient();
-	private channel: RealtimeChannel | null = null;
+	private channel: RealtimeChannel | undefined;
 	private readonly canvasId: string;
 	private sceneCbs = new Set<SceneCb>();
 	private savedCbs = new Set<SavedCb>();
@@ -131,7 +131,7 @@ export class CanvasRealtime {
 		}
 		if (this.channel) {
 			void this.channel.unsubscribe();
-			this.channel = null;
+			this.channel = undefined;
 		}
 		this.sceneCbs.clear();
 		this.savedCbs.clear();

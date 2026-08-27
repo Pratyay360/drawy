@@ -4,6 +4,7 @@ import {
 } from "@supabase/supabase-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useRealtimeCursorStore } from "#/stores/realtime-cursor";
 import { createClient } from "../lib/supabase/client";
 
 const useThrottleCallback = <Params extends unknown[], Return>(
@@ -50,7 +51,7 @@ const generateClientId = () => {
 
 const EVENT_NAME = "realtime-cursor-move";
 
-type CursorEventPayload = {
+export type CursorEventPayload = {
 	position: {
 		x: number;
 		y: number;
@@ -74,12 +75,11 @@ export const useRealtimeCursors = ({
 }) => {
 	const [color] = useState(generateRandomColor());
 	const [userId] = useState(generateClientId());
-	const [cursors, setCursors] = useState<Record<string, CursorEventPayload>>(
-		{},
-	);
-	const cursorPayload = useRef<CursorEventPayload | null>(null);
+	const setCursors = useRealtimeCursorStore((s) => s.setCursors);
+	const cursors = useRealtimeCursorStore((s) => s.cursors);
+	const cursorPayload = useRef<CursorEventPayload>(null);
 
-	const channelRef = useRef<RealtimeChannel | null>(null);
+	const channelRef = useRef<RealtimeChannel>(null);
 
 	const callback = useCallback(
 		(event: MouseEvent) => {
@@ -119,7 +119,6 @@ export const useRealtimeCursors = ({
 		channel
 			.on("presence", { event: "leave" }, ({ leftPresences }) => {
 				leftPresences.forEach((element) => {
-					// Remove cursor when user leaves
 					setCursors((prev) => {
 						if (prev[element.key]) {
 							delete prev[element.key];
@@ -142,9 +141,7 @@ export const useRealtimeCursors = ({
 				{ event: EVENT_NAME },
 				(data: { payload: CursorEventPayload }) => {
 					const { user } = data.payload;
-					// Don't render your own cursor
 					if (user.id === userId) return;
-
 					setCursors((prev) => {
 						if (prev[userId]) {
 							delete prev[userId];
@@ -171,13 +168,10 @@ export const useRealtimeCursors = ({
 			void channel.unsubscribe();
 			channelRef.current = null;
 		};
-	}, [roomName, userId]);
+	}, [roomName, userId, setCursors]);
 
 	useEffect(() => {
-		// Add event listener for mousemove
 		addEventListener("mousemove", handleMouseMove);
-
-		// Cleanup on unmount
 		return () => {
 			removeEventListener("mousemove", handleMouseMove);
 		};

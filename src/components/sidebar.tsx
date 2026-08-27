@@ -17,8 +17,9 @@ import {
 	useRouter,
 } from "@tanstack/react-router";
 import { Library, Loader2, LogOut, PenTool, Plus, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { getCurrentUser, logout } from "#/lib/session";
+import { useSidebarStore } from "#/stores/sidebar";
 import { subscribeCanvasListChanged } from "#/utils/canvas-realtime";
 import {
 	type Canvas,
@@ -29,17 +30,6 @@ import {
 import { requestLibraryBrowse } from "../services/libraries.ts";
 import { subscribeCanvasEvents } from "../utils/realtime.ts";
 import { ThemeToggle } from "./theme-toggle.tsx";
-
-interface DisplayUser {
-	username: string;
-}
-
-const SIDEBAR_COLLAPSED_KEY = "drawy-sidebar-collapsed";
-
-function isSidebarCollapsed(): boolean {
-	if (import.meta.env.SSR) return false;
-	return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
-}
 
 interface CanvasGroup {
 	Today: Canvas[];
@@ -63,11 +53,14 @@ function groupCanvasesByDate(canvases: Canvas[]): CanvasGroup {
 
 	return grouped;
 }
+
 function SidebarFooter() {
 	const router = useRouter();
 	const navigate = useNavigate();
-	const [user, setUser] = useState<DisplayUser | null>(null);
-	const [signingOut, setSigningOut] = useState(false);
+	const user = useSidebarStore((s) => s.user);
+	const setUser = useSidebarStore((s) => s.setUser);
+	const signingOut = useSidebarStore((s) => s.signingOut);
+	const setSigningOut = useSidebarStore((s) => s.setSigningOut);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -80,7 +73,7 @@ function SidebarFooter() {
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [setUser]);
 
 	async function handleSignOut() {
 		setSigningOut(true);
@@ -114,16 +107,16 @@ function SidebarFooter() {
 }
 
 export function Sidebar() {
-	const [isCollapsed, setIsCollapsed] = useState(isSidebarCollapsed);
-	const [canvases, setCanvases] = useState<Canvas[]>([]);
-	const [isCreating, setIsCreating] = useState(false);
-	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const isCollapsed = useSidebarStore((s) => s.isCollapsed);
+	const setIsCollapsed = useSidebarStore((s) => s.setIsCollapsed);
+	const canvases = useSidebarStore((s) => s.canvases);
+	const setCanvases = useSidebarStore((s) => s.setCanvases);
+	const isCreating = useSidebarStore((s) => s.isCreating);
+	const setIsCreating = useSidebarStore((s) => s.setIsCreating);
+	const deletingId = useSidebarStore((s) => s.deletingId);
+	const setDeletingId = useSidebarStore((s) => s.setDeletingId);
 	const { id: currentCanvasId } = useParams({ strict: false });
 	const navigate = useNavigate();
-
-	useEffect(() => {
-		localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(isCollapsed));
-	}, [isCollapsed]);
 
 	const loadCanvases = useCallback(async () => {
 		try {
@@ -132,7 +125,7 @@ export function Sidebar() {
 		} catch (error) {
 			console.error("Failed to load canvases:", error);
 		}
-	}, []);
+	}, [setCanvases]);
 
 	useEffect(() => {
 		void loadCanvases();

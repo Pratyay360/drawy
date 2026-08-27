@@ -21,6 +21,7 @@ import {
 	Search,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useLibraryItemStore } from "#/stores/library-item";
 import type { SavedLibrary } from "../services/libraries.ts";
 
 interface LibraryItemBrowserProps {
@@ -51,6 +52,7 @@ function LibraryItemThumbnail({ itemId, elements }: LibraryItemThumbnailProps) {
 	const [failed, setFailed] = useState(false);
 
 	useEffect(() => {
+		if (typeof window === "undefined") return;
 		if (url) return;
 		let cancelled = false;
 
@@ -140,8 +142,10 @@ export function LibraryItemBrowser({
 	onBack,
 	onRefreshContent,
 }: LibraryItemBrowserProps) {
-	const [query, setQuery] = useState("");
-	const [refreshing, setRefreshing] = useState(false);
+	const query = useLibraryItemStore((s) => s.query);
+	const refreshing = useLibraryItemStore((s) => s.refreshing);
+	const setQuery = useLibraryItemStore((s) => s.setQuery);
+	const setRefreshing = useLibraryItemStore((s) => s.setRefreshing);
 
 	const hasContent = Array.isArray(library.items) && library.items.length > 0;
 	const items = useMemo(() => {
@@ -175,7 +179,9 @@ export function LibraryItemBrowser({
 		};
 		globalThis.addEventListener("keydown", handler);
 		return () => globalThis.removeEventListener("keydown", handler);
-	}, [query, onBack]);
+	}, [query, onBack, setQuery]);
+
+	useEffect(() => () => useLibraryItemStore.getState().reset(), []);
 
 	async function handleRefresh() {
 		setRefreshing(true);

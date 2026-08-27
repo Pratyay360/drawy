@@ -9,95 +9,104 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Token } from "@astryxdesign/core/Token";
 import { Check, Copy, Loader2, Share2, UserPlus, UserX } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { useUIStore } from "#/stores/ui";
 import {
 	listAvailableUsers,
 	shareCanvas,
 	unshareCanvas,
 } from "../services/canvases";
 
-interface ShareCanvasModalProps {
-	isOpen: boolean;
-	onOpenChange: (open: boolean) => void;
-	canvasId: string;
-	owner: string;
-	isOwner: boolean;
-	sharedWith: string[];
-	onShareChange?: () => void;
-}
+/** Global share-canvas modal driven by the zustand UI store. */
+export function ShareCanvasModal() {
+	const isOpen = useUIStore((s) => s.shareModal.isOpen);
+	const canvasId = useUIStore((s) => s.shareModal.canvasId);
+	const owner = useUIStore((s) => s.shareModal.owner);
+	const isOwner = useUIStore((s) => s.shareModal.isOwner);
+	const sharedWith = useUIStore((s) => s.shareModal.sharedWith);
+	const targetUser = useUIStore((s) => s.shareModal.targetUser);
+	const availableUsers = useUIStore((s) => s.shareModal.availableUsers);
+	const isSharing = useUIStore((s) => s.shareModal.isSharing);
+	const unsharingUser = useUIStore((s) => s.shareModal.unsharingUser);
+	const errorMsg = useUIStore((s) => s.shareModal.errorMsg);
+	const copied = useUIStore((s) => s.shareModal.copied);
+	const closeShareCanvas = useUIStore((s) => s.closeShareCanvas);
+	const setShareTargetUser = useUIStore((s) => s.setShareTargetUser);
+	const setShareAvailableUsers = useUIStore((s) => s.setShareAvailableUsers);
+	const setShareIsSharing = useUIStore((s) => s.setShareIsSharing);
+	const setShareUnsharingUser = useUIStore((s) => s.setShareUnsharingUser);
+	const setShareErrorMsg = useUIStore((s) => s.setShareErrorMsg);
+	const setShareCopied = useUIStore((s) => s.setShareCopied);
 
-export function ShareCanvasModal({
-	isOpen,
-	onOpenChange,
-	canvasId,
-	owner,
-	isOwner,
-	sharedWith,
-	onShareChange,
-}: ShareCanvasModalProps) {
-	const [targetUser, setTargetUser] = useState("");
-	const [availableUsers, setAvailableUsers] = useState<string[]>([]);
-	const [isSharing, setIsSharing] = useState(false);
-	const [unsharingUser, setUnsharingUser] = useState<string | null>(null);
-	const [errorMsg, setErrorMsg] = useState<string | null>(null);
-	const [copied, setCopied] = useState(false);
+	const onOpenChange = (open: boolean) => {
+		if (!open) closeShareCanvas();
+	};
+
+	// Notifying a mounted canvas to refresh its access list after a share change.
+	const onShareChange = () => {
+		globalThis.dispatchEvent(new Event("canvas-updated"));
+	};
 
 	const loadUsers = useCallback(async () => {
 		try {
 			const users = await listAvailableUsers();
-			setAvailableUsers(users);
+			setShareAvailableUsers(users);
 		} catch (error) {
 			console.error("Failed to load users for sharing:", error);
 		}
-	}, []);
+	}, [setShareAvailableUsers]);
 
 	useEffect(() => {
 		if (isOpen) {
 			void loadUsers();
-			setErrorMsg(null);
-			setTargetUser("");
-			setCopied(false);
+			setShareErrorMsg(null);
+			setShareTargetUser("");
+			setShareCopied(false);
 		}
-	}, [isOpen, loadUsers]);
+	}, [isOpen, loadUsers, setShareErrorMsg, setShareTargetUser, setShareCopied]);
+
+	if (!canvasId) return null;
 
 	async function handleAddShare(usernameToShare: string) {
+		if (!canvasId) return;
 		const username = usernameToShare.trim();
 		if (!username) return;
-		setIsSharing(true);
-		setErrorMsg(null);
+		setShareIsSharing(true);
+		setShareErrorMsg(null);
 		try {
 			await shareCanvas(canvasId, username);
-			setTargetUser("");
-			onShareChange?.();
+			setShareTargetUser("");
+			onShareChange();
 		} catch (error: unknown) {
 			const message =
 				error instanceof Error ? error.message : "Failed to share canvas.";
-			setErrorMsg(message);
+			setShareErrorMsg(message);
 		} finally {
-			setIsSharing(false);
+			setShareIsSharing(false);
 		}
 	}
 
 	async function handleRemoveShare(usernameToRemove: string) {
-		setUnsharingUser(usernameToRemove);
-		setErrorMsg(null);
+		if (!canvasId) return;
+		setShareUnsharingUser(usernameToRemove);
+		setShareErrorMsg(null);
 		try {
 			await unshareCanvas(canvasId, usernameToRemove);
-			onShareChange?.();
+			onShareChange();
 		} catch (error: unknown) {
 			const message =
 				error instanceof Error ? error.message : "Failed to remove user.";
-			setErrorMsg(message);
+			setShareErrorMsg(message);
 		} finally {
-			setUnsharingUser(null);
+			setShareUnsharingUser(null);
 		}
 	}
 
 	function handleCopyLink() {
 		const url = `/canvas/${canvasId}`;
 		void navigator.clipboard.writeText(url);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
 	}
 
 	const unsharedAvailableUsers = availableUsers.filter(
@@ -151,7 +160,7 @@ export function ShareCanvasModal({
 											isLabelHidden
 											placeholder="Enter username..."
 											value={targetUser}
-											onChange={(val) => setTargetUser(val)}
+											onChange={(val) => setShareTargetUser(val)}
 											onKeyDown={(e) => {
 												if (e.key === "Enter" && targetUser.trim()) {
 													void handleAddShare(targetUser);
@@ -182,7 +191,7 @@ export function ShareCanvasModal({
 														variant="ghost"
 														size="sm"
 														onClick={() => {
-															setTargetUser(user);
+															setShareTargetUser(user);
 															void handleAddShare(user);
 														}}
 													/>

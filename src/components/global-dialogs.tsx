@@ -1,4 +1,4 @@
-import { type ComponentType, useEffect, useState } from "react";
+import { type ComponentType, Suspense, useEffect, useState } from "react";
 
 export function GlobalDialogs() {
 	const [Dialogs, setDialogs] = useState<ComponentType>();
@@ -14,5 +14,9 @@ export function GlobalDialogs() {
 	}, []);
 
 	if (!Dialogs) return null;
-	return <Dialogs />;
+	return (
+		<Suspense fallback={null}>
+			<Dialogs />
+		</Suspense>
+	);
 }

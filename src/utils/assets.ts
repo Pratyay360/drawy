@@ -25,9 +25,6 @@ export function pruneUnusedFiles(
   return pruned;
 }
 
-/**
- * Compress and downscale a single image data URL if it exceeds reasonable size limits.
- */
 export async function compressDataUrl(
   dataURL: string,
   mimeType: string,
@@ -138,10 +135,6 @@ export function calculateAssetsSize(files: BinaryFiles | undefined): number {
   return bytes;
 }
 
-/**
- * Upload any local base64/dataURL assets to Supabase Storage, returning the updated BinaryFiles
- * with remote public URLs.
- */
 export async function uploadPendingAssets(
   canvasId: string,
   files: BinaryFiles,

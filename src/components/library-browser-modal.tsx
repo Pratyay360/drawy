@@ -2,29 +2,18 @@ import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Layout, LayoutContent } from "@astryxdesign/core/Layout";
 import { Library } from "lucide-react";
-import { useEffect, useState } from "react";
 
-import { onLibraryBrowseRequested } from "../services/libraries";
+import { useUIStore } from "#/stores/ui";
 import { LibraryBrowser } from "./library-browser";
 
 export function LibraryBrowserModal() {
-	const [isOpen, setIsOpen] = useState(false);
-	const [librariesBrowseId, setLibrariesBrowseId] = useState<string | null>(
-		null,
-	);
-
-	useEffect(() => {
-		return onLibraryBrowseRequested((libraryId) => {
-			setLibrariesBrowseId(libraryId);
-			setIsOpen(true);
-		});
-	}, []);
+	const isOpen = useUIStore((s) => s.libraryModal.isOpen);
+	const initialBrowseId = useUIStore((s) => s.libraryModal.initialBrowseId);
+	const closeLibraryBrowser = useUIStore((s) => s.closeLibraryBrowser);
 
 	const handleOpenChange = (open: boolean) => {
-		setIsOpen(open);
-
 		if (!open) {
-			setLibrariesBrowseId(null);
+			closeLibraryBrowser();
 		}
 	};
 
@@ -46,7 +35,7 @@ export function LibraryBrowserModal() {
 				content={
 					<LayoutContent isScrollable padding={4}>
 						<LibraryBrowser
-							initialBrowseId={librariesBrowseId}
+							initialBrowseId={initialBrowseId}
 							source="sidebar"
 						/>
 					</LayoutContent>
