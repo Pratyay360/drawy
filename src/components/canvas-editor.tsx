@@ -53,8 +53,10 @@ import {
     sanitizeExcalidrawAppState,
     saveCanvas,
     updateCanvasTitle,
+    uploadCanvasAsset,
 } from "../services/canvases";
 import { getUserLibrary, onLibraryItemsInstalled, setUserLibrary } from "../services/libraries";
+import { pruneUnusedFiles, uploadPendingAssets } from "../utils/assets";
 import { CanvasRealtime, mergeElements, type ScenePayload } from "../utils/canvas-realtime";
 import { subscribeCanvasEvents } from "../utils/realtime";
 import { LibraryPanelTab } from "./library-panel-tab";
@@ -123,12 +125,12 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
     const [isChangingCanvas, setIsChangingCanvas] = useState(false);
     const [elements, setElements] = useState<ExcalidrawElement[]>([]);
     const [appState, setAppState] = useState<Partial<AppState>>({});
+    const filesRef = useRef<BinaryFiles>({});
     const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null);
     const initialLibraryItemsRef = useRef<Promise<LibraryItems> | null>(null);
-    // if (typeof window !== "undefined" && !initialLibraryItemsRef.current) {
-    initialLibraryItemsRef.current = getUserLibrary();
-    // }s
-
+    if (!initialLibraryItemsRef.current && typeof window !== "undefined") {
+        initialLibraryItemsRef.current = getUserLibrary();
+    }
     const [saveStatus, setSaveStatus] = useState<"saved" | "unsaved" | "saving">("saved");
     const [collaborators, setCollaborators] = useState(0);
 
@@ -196,8 +198,10 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                 if (data) {
                     const sanitizedAppState = sanitizeExcalidrawAppState(data.appState);
                     const resolvedElements = data.elements || [];
+                    const resolvedFiles = data.files || {};
 
-                    setCanvasData({ ...data, appState: sanitizedAppState });
+                    filesRef.current = resolvedFiles;
+                    setCanvasData({ ...data, appState: sanitizedAppState, files: resolvedFiles });
                     setElements(resolvedElements);
                     setAppState(sanitizedAppState);
                     setTitleInput(data.title);
@@ -211,6 +215,9 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                     };
 
                     if (excalidrawAPI) {
+                        if (resolvedFiles && Object.keys(resolvedFiles).length > 0) {
+                            excalidrawAPI.addFiles(Object.values(resolvedFiles));
+                        }
                         // SAFETY: sanitizedAppState is Partial<AppState> produced by sanitizeExcalidrawAppState.
                         excalidrawAPI.updateScene({
                             elements: resolvedElements,
@@ -266,6 +273,10 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         const offScene = rt.onScene((payload: ScenePayload) => {
             const api = excalidrawAPI;
             if (!api) return;
+            if (payload.files && Object.keys(payload.files).length > 0) {
+                filesRef.current = { ...filesRef.current, ...payload.files };
+                api.addFiles(Object.values(payload.files));
+            }
             const local = api.getSceneElements();
             const merged = mergeElements(local, payload.elements);
             applyingRemoteRef.current = true;
@@ -302,7 +313,9 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
             setSaveStatus("saving");
             isSavingRef.current = true;
             try {
-                await saveCanvas(id, elements, appState);
+                const prunedFiles = pruneUnusedFiles(filesRef.current, elements);
+                filesRef.current = prunedFiles;
+                await saveCanvas(id, elements, appState, prunedFiles);
                 setSaveStatus("saved");
                 realtimeRef.current?.broadcastSaved();
             } catch (error) {
@@ -322,7 +335,9 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         setSaveStatus("saving");
         isSavingRef.current = true;
         try {
-            await saveCanvas(id, elements, appState);
+            const prunedFiles = pruneUnusedFiles(filesRef.current, elements);
+            filesRef.current = prunedFiles;
+            await saveCanvas(id, elements, appState, prunedFiles);
             setSaveStatus("saved");
             realtimeRef.current?.broadcastSaved();
         } catch (error) {
@@ -334,8 +349,8 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
     }, [id, elements, appState, saveStatus]);
 
     const broadcastScene = useCallback(
-        (excalidrawElements: readonly OrderedExcalidrawElement[]) => {
-            realtimeRef.current?.broadcastScene(excalidrawElements);
+        (excalidrawElements: readonly OrderedExcalidrawElement[], files?: BinaryFiles) => {
+            realtimeRef.current?.broadcastScene(excalidrawElements, files);
         },
         [],
     );
@@ -349,9 +364,31 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         (
             excalidrawElements: readonly OrderedExcalidrawElement[],
             excalidrawAppState: AppState,
-            _files: BinaryFiles,
+            newFiles: BinaryFiles,
         ) => {
             if (loading || isChangingCanvas) return;
+
+            let filesChanged = false;
+            let currentFiles = filesRef.current;
+
+            if (newFiles && Object.keys(newFiles).length > 0) {
+                currentFiles = { ...currentFiles, ...newFiles };
+                filesRef.current = currentFiles;
+                filesChanged = true;
+
+                if (id) {
+                    void uploadPendingAssets(id, currentFiles, uploadCanvasAsset).then(
+                        ({ updatedFiles, hasNewUploads }) => {
+                            if (hasNewUploads) {
+                                filesRef.current = updatedFiles;
+                                if (excalidrawAPI) {
+                                    excalidrawAPI.addFiles(Object.values(updatedFiles));
+                                }
+                            }
+                        },
+                    );
+                }
+            }
 
             const currentElementsSig = excalidrawElements.map((e) => ({
                 id: e.id,
@@ -368,7 +405,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                 savedPersistentState,
             );
 
-            if (!elementsChanged && !appStateChanged) return;
+            if (!elementsChanged && !appStateChanged && !filesChanged) return;
 
             setElements([...excalidrawElements]);
             setAppState(currentPersistentState);
@@ -391,11 +428,11 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                 appState: currentPersistentState,
             };
 
-            if (elementsChanged) {
-                broadcastScene(excalidrawElements);
+            if (elementsChanged || filesChanged) {
+                broadcastScene(excalidrawElements, currentFiles);
             }
         },
-        [loading, isChangingCanvas, broadcastScene],
+        [loading, isChangingCanvas, broadcastScene, id, excalidrawAPI],
     );
 
     async function handleTitleSave() {
@@ -421,16 +458,6 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         }
     }
 
-    useEffect(() => {
-        if (!excalidrawAPI) return;
-
-        excalidrawAPI.updateScene({
-            elements: elements,
-            // SAFETY: appState is Partial<AppState> maintained by getPersistentAppState.
-            appState: appState as AppState,
-        });
-    }, [excalidrawAPI, elements, appState]);
-
     const handleExportToJSON = useCallback(() => {
         if (!canvasData) return;
         const exportData = {
@@ -438,6 +465,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
             version: 2,
             elements: elements,
             appState: appState,
+            files: filesRef.current,
         };
         const jsonString = JSON.stringify(exportData, null, 2);
         const blob = new Blob([jsonString], { type: "application/json" });
@@ -454,7 +482,6 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         input.type = "file";
         input.accept = ".json,.excalidraw";
         input.onchange = (e) => {
-            // SAFETY: Input onchange event.target is always an HTMLInputElement.
             const file = (e.target as HTMLInputElement).files?.[0];
             if (!file) return;
 
@@ -466,6 +493,10 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                     if (imported && Array.isArray(imported.elements)) {
                         if (excalidrawAPI) {
                             const importedAppState = getPersistentAppState(imported.appState || {});
+                            if (imported.files && typeof imported.files === "object") {
+                                filesRef.current = { ...filesRef.current, ...imported.files };
+                                excalidrawAPI.addFiles(Object.values(imported.files));
+                            }
                             // SAFETY: importedAppState is Partial<AppState> produced by getPersistentAppState.
                             excalidrawAPI.updateScene({
                                 elements: imported.elements,
@@ -499,6 +530,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
             const blob = await exportToBlob({
                 elements: currentElements,
                 appState: currentAppState,
+                files: filesRef.current,
                 mimeType: "image/png",
                 exportPadding: 15,
             });
@@ -521,6 +553,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
             const svg = await exportToSvg({
                 elements: currentElements,
                 appState: currentAppState,
+                files: filesRef.current,
                 exportPadding: 15,
             });
             const svgString = new XMLSerializer().serializeToString(svg);
@@ -628,13 +661,14 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                             <div className="absolute inset-0">
                                 <RealtimeCursors roomName={id} username={username || "Anonymous"} />
                                 <Excalidraw
-                                    excalidrawAPI={(api) => setExcalidrawAPI(api)}
+                                    excalidrawAPI={setExcalidrawAPI}
                                     theme={theme}
                                     isCollaborating
                                     onPointerUpdate={handlePointerUpdate}
                                     initialData={{
                                         elements: elements,
                                         appState: appState,
+                                        files: filesRef.current,
                                         libraryItems: initialLibraryItemsRef.current ?? undefined,
                                     }}
                                     onChange={handleExcalidrawChange}

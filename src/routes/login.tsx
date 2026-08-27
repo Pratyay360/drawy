@@ -121,7 +121,7 @@ function LoginPage() {
                     </VStack>
 
                     <Button
-                        label={mode === "signin" ? "Sign in" : "Create account"}
+                        label={mode === "signin" ? "Sign in" : "Create an account"}
                         onClick={handleSubmit}
                         isLoading={busy}
                         width="100%"

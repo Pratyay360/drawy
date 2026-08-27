@@ -1,5 +1,5 @@
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-import type { AppState } from "@excalidraw/excalidraw/types";
+import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
 import { client } from "#/orpc/client";
 import { publishCanvasListChanged } from "#/utils/canvas-realtime";
 import { publishCanvasEvent } from "#/utils/realtime";
@@ -17,6 +17,7 @@ export interface Canvas {
 export interface CanvasData extends Canvas {
     elements: ExcalidrawElement[];
     appState: Partial<AppState>;
+    files: BinaryFiles;
 }
 
 const CANVAS_UPDATED_EVENT = "canvas-updated";
@@ -36,6 +37,7 @@ function toCanvasData(row: {
     sharedWith: string[];
     elements?: unknown;
     appState?: unknown;
+    files?: unknown;
 }): CanvasData {
     return {
         id: row.id,
@@ -44,11 +46,10 @@ function toCanvasData(row: {
         updatedAt: row.updatedAt,
         owner: row.owner,
         isOwner: row.isOwner,
-        sharedWith: row.sharedWith || [],
-        // SAFETY: Array.isArray narrows elements to an array matching the Excalidraw schema.
+        sharedWith: row.sharedWith,
         elements: Array.isArray(row.elements) ? (row.elements as ExcalidrawElement[]) : [],
-        // SAFETY: appState is stored as Partial<AppState> in the database.
-        appState: (row.appState as Partial<AppState>) ?? {},
+        appState: (row.appState as Partial<AppState>) ,
+        files: (row.files as BinaryFiles),
     };
 }
 
@@ -81,11 +82,13 @@ export async function saveCanvas(
     id: string,
     elements: readonly ExcalidrawElement[],
     appState: Partial<AppState>,
+    files?: BinaryFiles,
 ): Promise<void> {
     await client.canvases.save({
         id,
         elements: [...elements],
         appState: sanitizeExcalidrawAppState(appState),
+        files: files || {},
     });
     notifyCanvasUpdated();
     publishCanvasEvent();
@@ -114,6 +117,20 @@ export async function unshareCanvas(id: string, targetUsername: string): Promise
 
 export async function listAvailableUsers(): Promise<string[]> {
     return client.canvases.listUsers();
+}
+
+export async function uploadCanvasAsset(
+    canvasId: string,
+    fileId: string,
+    mimeType: string,
+    base64Data: string,
+): Promise<{ fileId: string; url: string; mimeType: string }> {
+    return client.canvases.uploadAsset({
+        canvasId,
+        fileId,
+        mimeType,
+        base64Data,
+    });
 }
 
 /** Keep only the app-state fields we persist, dropping transient editor state. */

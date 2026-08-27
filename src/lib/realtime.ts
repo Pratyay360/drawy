@@ -38,8 +38,6 @@ const useThrottleCallback = <Params extends unknown[], Return>(
     );
 };
 
-const supabase = createClient();
-
 const generateRandomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`;
 
 const generateRandomNumber = () => Math.floor(Math.random() * 100);
@@ -89,7 +87,7 @@ export const useRealtimeCursors = ({
                     name: username,
                 },
                 color: color,
-                timestamp: new Date().getTime(),
+                timestamp: Date.now(),
             };
 
             cursorPayload.current = payload;
@@ -106,6 +104,7 @@ export const useRealtimeCursors = ({
     const handleMouseMove = useThrottleCallback(callback, throttleMs);
 
     useEffect(() => {
+        const supabase = createClient();
         const channel = supabase.channel(roomName);
 
         channel
@@ -156,10 +155,9 @@ export const useRealtimeCursors = ({
                     channelRef.current = null;
                 }
             });
-    }, [roomName]);
+    }, [roomName, userId]);
 
     useEffect(() => {
-        // Add event listener for mousemove
         window.addEventListener("mousemove", handleMouseMove);
 
         // Cleanup on unmount

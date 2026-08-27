@@ -6,9 +6,6 @@ export function normalizeUsername(username: string): string {
 
 export function usernameError(username: string): string | null {
     const normalized = normalizeUsername(username);
-    if (normalized.length < 3 || normalized.length > 32) {
-        return "Username must be 3–32 characters.";
-    }
     if (!USERNAME_RE.test(normalized)) {
         return "Username may only contain letters, numbers, underscores, and dashes.";
     }
