@@ -26,8 +26,6 @@ export const signIn = createServerFn({ method: "POST" })
 	.validator(authInput)
 	.handler(async ({ data }) => {
 		const username = normalizeUsername(data.username);
-		// const invalidUsername = usernameError(username);
-		// if (invalidUsername) throw new Error(invalidUsername);
 
 		const { signInServer } = await import("./session.server");
 		return signInServer(username, data.password);
@@ -37,8 +35,6 @@ export const signUp = createServerFn({ method: "POST" })
 	.validator(authInput)
 	.handler(async ({ data }) => {
 		const username = normalizeUsername(data.username);
-		// const invalidUsername = usernameError(username);
-		// if (invalidUsername) throw new Error(invalidUsername);
 
 		const { signUpServer } = await import("./session.server");
 		return signUpServer(username, data.password);

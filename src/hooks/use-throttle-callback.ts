@@ -1,10 +1,5 @@
 import { useCallback, useRef } from "react";
 
-/**
- * Returns a throttled version of the callback that limits invocations
- * to at most once per `delay` ms. The last call within the window is
- * deferred so no arguments are dropped.
- */
 export function useThrottleCallback<Params extends unknown[], Return>(
 	callback: (...args: Params) => Return,
 	delay: number,

@@ -33,35 +33,39 @@ type PresenceCb = (count: number) => void;
 
 export class CanvasRealtime {
 	private client = getSupabaseBrowserClient();
-	private channel: RealtimeChannel;
+	private channel: RealtimeChannel | undefined;
 	private readonly canvasId: string;
 	private sceneCbs = new Set<SceneCb>();
 	private savedCbs = new Set<SavedCb>();
 	private presenceCbs = new Set<PresenceCb>();
-	private sceneTimer: ReturnType<typeof setTimeout>;
-	private pendingScene: ScenePayload;
+	private sceneTimer: ReturnType<typeof setTimeout> | null = null;
+	private pendingScene: ScenePayload | null = null;
 
 	constructor(canvasId: string) {
 		this.canvasId = canvasId;
 	}
 
 	connect() {
+		if (!this.client || this.channel) return;
+
 		const channel = this.client.channel(`drawy:canvas:${this.canvasId}`, {
 			config: {
 				broadcast: { self: false },
 				presence: { key: `client-${Math.random().toString(36).slice(2)}` },
 			},
 		});
+
 		channel.on("broadcast", { event: "scene" }, ({ payload }) => {
-			this.sceneCbs.map((fn) => fn(payload as ScenePayload));
+			// SAFETY: broadcast payload conforms to ScenePayload contract.
+			this.sceneCbs.forEach((fn) => fn(payload as ScenePayload));
 		});
 		channel.on("broadcast", { event: "saved" }, () => {
-			this.savedCbs.map((fn) => fn());
+			this.savedCbs.forEach((fn) => fn());
 		});
 		channel.on("presence", { event: "sync" }, () => {
 			const state = channel.presenceState();
 			const count = Object.keys(state).length;
-			this.presenceCbs.map((fn) => fn(count));
+			this.presenceCbs.forEach((fn) => fn(count));
 		});
 		channel.subscribe((status) => {
 			if (status === "SUBSCRIBED") {
@@ -73,6 +77,7 @@ export class CanvasRealtime {
 	}
 
 	broadcastScene(elements: readonly ExcalidrawElement[], files?: BinaryFiles) {
+		if (!this.channel) return;
 		this.pendingScene = {
 			elements,
 			files: files && Object.keys(files).length > 0 ? files : undefined,
@@ -82,7 +87,9 @@ export class CanvasRealtime {
 			this.sceneTimer = null;
 			const payload = this.pendingScene;
 			this.pendingScene = null;
-			this.channel.send({ type: "broadcast", event: "scene", payload });
+			if (payload && this.channel) {
+				void this.channel.send({ type: "broadcast", event: "scene", payload });
+			}
 		}, 250);
 	}
 
@@ -143,7 +150,7 @@ function ensureGlobalChannel(): RealtimeChannel | null {
 		config: { broadcast: { self: false } },
 	});
 	channel.on("broadcast", { event: "list-changed" }, () => {
-		globalListeners.map((fn) => fn());
+		globalListeners.forEach((fn) => fn());
 	});
 	channel.subscribe();
 	globalChannel = channel;
@@ -162,7 +169,6 @@ export function publishCanvasListChanged() {
 	}
 }
 
-/** Subscribe to canvas-list changes coming from other users. */
 export function subscribeCanvasListChanged(cb: () => void): () => void {
 	ensureGlobalChannel();
 	globalListeners.add(cb);

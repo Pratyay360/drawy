@@ -88,7 +88,7 @@ export const useRealtimeCursors = ({
 
 		channel
 			.on("presence", { event: "leave" }, ({ leftPresences }) => {
-				leftPresences.map((element) => {
+				leftPresences.forEach((element) => {
 					setCursors((prev) => {
 						if (prev[element.key]) {
 							delete prev[element.key];

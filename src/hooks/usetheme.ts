@@ -7,8 +7,6 @@ const STORAGE_KEY = "drawy-theme";
 const SERVER_THEME: Theme = "light";
 
 function getInitialTheme(): Theme {
-	// return SERVER_THEME;
-	// if (typeof window === "undefined") return SERVER_THEME;
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored === "light" || stored === "dark") {
