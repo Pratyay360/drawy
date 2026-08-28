@@ -32,7 +32,6 @@ function applyTheme(theme: Theme) {
 	root.style.colorScheme = theme;
 }
 
-
 let currentTheme: Theme;
 
 function getCurrentTheme(): Theme {
@@ -69,10 +68,6 @@ export function useTheme() {
 	const theme = useSyncExternalStore(
 		subscribe,
 		getCurrentTheme,
-		// The server has no localStorage/matchMedia, so it always renders
-		// SERVER_THEME. Returning the same value here keeps the hydration pass in
-		// agreement with the server HTML; React re-checks the client snapshot
-		// right after hydration and re-renders if the real theme differs.
 		() => SERVER_THEME,
 	);
 

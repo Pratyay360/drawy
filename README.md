@@ -1,3 +1,7 @@
+# introducing Drawy
+A realtime collaboration capable drawing app(powered by excalidraw) which is easy to deploy and built with tech stack you already know.
+
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/87baadb1-b688-415f-8faf-ee6084958e37/deploy-status)](https://app.netlify.com/projects/drawy-draw/deploys)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/integration/start/deploy?repository=https://github.com/pratyay360/drawy)
@@ -8,9 +12,7 @@
 
 ## nitro is easy to deploy so no issues [deploy adapter](https://nitro.build/deploy)
 
-## demonstrating crdt (Conflict free Replicated Data Types)
-
-### been using supabase realtime cz it's a nice BaaS with websocket support
+### been using supabase realtime because it's a nice BaaS with websocket support, With postgres and object storage all in one place and supabase is easy to integrate with Vercel and Netlify.
 
 with [excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
 [library suppport](https://libraries.excalidraw.com/?theme=light&sort=default)

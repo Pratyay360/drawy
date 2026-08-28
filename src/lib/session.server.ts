@@ -71,21 +71,21 @@ function validateCredentials(username: string, _password: string): void {
 	}
 }
 async function loadCurrentUser(): Promise<CurrentUser | null> {
-    const session = await getSession<SessionData>(getSessionConfig());
-    const username = session.data.username;
-    if (!username) return null;
+	const session = await getSession<SessionData>(getSessionConfig());
+	const username = session.data.username;
+	if (!username) return null;
 
-    const supabase = createSupabaseAdminClient();
-    const { data } = await supabase
-        .from("app_users")
-        .select("username")
-        .eq("username", username)
-        .maybeSingle();
-    if (!data) return null;
-    return { username: data.username };
+	const supabase = createSupabaseAdminClient();
+	const { data } = await supabase
+		.from("app_users")
+		.select("username")
+		.eq("username", username)
+		.maybeSingle();
+	if (!data) return null;
+	return { username: data.username };
 }
 export async function resolveCurrentUserServer(): Promise<CurrentUser | null> {
-    return loadCurrentUser();
+	return loadCurrentUser();
 }
 
 export async function signInServer(

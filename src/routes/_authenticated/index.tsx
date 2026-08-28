@@ -1,3 +1,4 @@
+import { Theme } from "@astryxdesign/core";
 import { AppShell } from "@astryxdesign/core/AppShell";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
@@ -19,6 +20,7 @@ import {
 	deleteCanvas,
 	listCanvases,
 } from "../../services/canvases";
+import { butterTheme } from "../../themes/butter/butterTheme";
 import { subscribeCanvasEvents } from "../../utils/realtime";
 
 export const Route = createFileRoute("/_authenticated/")({ component: Home });
@@ -101,93 +103,95 @@ function Home() {
 	}
 
 	return (
-		<AppShell contentPadding={4} sideNav={<Sidebar />}>
-			<VStack gap={5} maxWidth={960}>
-				<HStack justify="between" align="center">
-					<VStack gap={1}>
-						<Heading level={1}>Drawings</Heading>
-						<Text type="supporting">
-							{canvases.length === 0
-								? "Create your first drawing to get started."
-								: `${canvases.length} ${canvases.length === 1 ? "drawing" : "drawings"} · your canvases and drawings shared with you`}
-						</Text>
-					</VStack>
-					<Button
-						label="New canvas"
-						icon={<Icon icon={Plus} size="sm" />}
-						onClick={handleCreate}
-						isLoading={isCreating}
-					/>
-				</HStack>
+		<Theme theme={butterTheme}>
+			<AppShell contentPadding={4} sideNav={<Sidebar />}>
+				<VStack gap={5} maxWidth={960}>
+					<HStack justify="between" align="center">
+						<VStack gap={1}>
+							<Heading level={1}>Drawings</Heading>
+							<Text type="supporting">
+								{canvases.length === 0
+									? "Create your first drawing to get started."
+									: `${canvases.length} ${canvases.length === 1 ? "drawing" : "drawings"} · your canvases and drawings shared with you`}
+							</Text>
+						</VStack>
+						<Button
+							label="New canvas"
+							icon={<Icon icon={Plus} size="sm" />}
+							onClick={handleCreate}
+							isLoading={isCreating}
+						/>
+					</HStack>
 
-				{canvases.length > 0 ? (
-					<Grid columns={{ minWidth: 220, max: 3 }} gap={3}>
-						{canvases.map((canvas) => (
-							<Card
-								key={canvas.id}
-								padding={3}
-								onClick={() =>
-									navigate({
-										to: "/canvas/$id",
-										params: { id: canvas.id },
-									})
-								}
-							>
-								<VStack gap={2}>
-									<HStack justify="between" align="center" gap={2}>
-										<VStack gap={0} width="100%">
-											<HStack align="center" gap={1}>
-												<Text weight="medium" maxLines={1}>
-													{canvas.title}
+					{canvases.length > 0 ? (
+						<Grid columns={{ minWidth: 220, max: 3 }} gap={3}>
+							{canvases.map((canvas) => (
+								<Card
+									key={canvas.id}
+									padding={3}
+									onClick={() =>
+										navigate({
+											to: "/canvas/$id",
+											params: { id: canvas.id },
+										})
+									}
+								>
+									<VStack gap={2}>
+										<HStack justify="between" align="center" gap={2}>
+											<VStack gap={0} width="100%">
+												<HStack align="center" gap={1}>
+													<Text weight="medium" maxLines={1}>
+														{canvas.title}
+													</Text>
+													{!canvas.isOwner && (
+														<Token label={`Shared by ${canvas.owner}`} />
+													)}
+												</HStack>
+												<Text type="supporting">
+													{formatUpdatedAt(canvas.updatedAt)}
 												</Text>
-												{!canvas.isOwner && (
-													<Token label={`Shared by ${canvas.owner}`} />
-												)}
-											</HStack>
-											<Text type="supporting">
-												{formatUpdatedAt(canvas.updatedAt)}
-											</Text>
-										</VStack>
-										{canvas.isOwner &&
-											(deletingId === canvas.id ? (
-												<Icon icon={Loader2} size="sm" />
-											) : (
-												<IconButton
-													label="Delete drawing"
-													variant="ghost"
-													size="sm"
-													icon={<Icon icon={Trash2} size="sm" />}
-													onClick={(e) => handleDelete(canvas.id, e)}
-													tooltip="Delete drawing"
-												/>
-											))}
-									</HStack>
+											</VStack>
+											{canvas.isOwner &&
+												(deletingId === canvas.id ? (
+													<Icon icon={Loader2} size="sm" />
+												) : (
+													<IconButton
+														label="Delete drawing"
+														variant="ghost"
+														size="sm"
+														icon={<Icon icon={Trash2} size="sm" />}
+														onClick={(e) => handleDelete(canvas.id, e)}
+														tooltip="Delete drawing"
+													/>
+												))}
+										</HStack>
+									</VStack>
+								</Card>
+							))}
+						</Grid>
+					) : (
+						<Card variant="muted" padding={6}>
+							<Center>
+								<VStack gap={3} hAlign="center">
+									<Icon icon={PenTool} size="lg" />
+									<VStack gap={1} hAlign="center">
+										<Text weight="medium">No drawings yet</Text>
+										<Text type="supporting">
+											Start sketching — changes save automatically.
+										</Text>
+									</VStack>
+									<Button
+										label="Create your first drawing"
+										icon={<Icon icon={Plus} size="sm" />}
+										onClick={handleCreate}
+										isLoading={isCreating}
+									/>
 								</VStack>
-							</Card>
-						))}
-					</Grid>
-				) : (
-					<Card variant="muted" padding={6}>
-						<Center>
-							<VStack gap={3} hAlign="center">
-								<Icon icon={PenTool} size="lg" />
-								<VStack gap={1} hAlign="center">
-									<Text weight="medium">No drawings yet</Text>
-									<Text type="supporting">
-										Start sketching — changes save automatically.
-									</Text>
-								</VStack>
-								<Button
-									label="Create your first drawing"
-									icon={<Icon icon={Plus} size="sm" />}
-									onClick={handleCreate}
-									isLoading={isCreating}
-								/>
-							</VStack>
-						</Center>
-					</Card>
-				)}
-			</VStack>
-		</AppShell>
+							</Center>
+						</Card>
+					)}
+				</VStack>
+			</AppShell>
+		</Theme>
 	);
 }

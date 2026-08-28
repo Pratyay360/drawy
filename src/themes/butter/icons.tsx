@@ -1,5 +1,14 @@
-import type { IconRegistry } from "@astryxdesign/core/Icon";
+/**
+ * @file icons.tsx
+ * @input Uses lucide-react icon components, IconRegistry type
+ * @output Exports butterIconRegistry for the butter theme
+ * @position Icon configuration for the butter theme; consumed by index.ts
+ *
+ * Maps semantic icon names to Lucide icon components.
+ * These icons are bundled with the theme, not with @astryxdesign/core.
+ */
 
+import type { IconRegistry } from "@astryxdesign/core/Icon";
 import {
 	AlertTriangle,
 	ArrowDown,
@@ -30,6 +39,7 @@ import {
 	X,
 	XCircle,
 } from "lucide-react";
+import React from "react";
 
 const iconProps = {
 	size: "1em",
