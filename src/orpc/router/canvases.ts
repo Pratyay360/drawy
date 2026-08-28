@@ -289,28 +289,40 @@ export const rename = base
 	});
 
 const BUCKET_NAME = "canvas-assets";
-let bucketInitPromise: Promise<void>;
+let bucketInitPromise: Promise<void> | undefined;
 
 async function ensureStorageBucket(
 	supabase: ReturnType<typeof createSupabaseAdminClient>,
 ) {
-	if (bucketInitPromise) return bucketInitPromise;
-	bucketInitPromise = (async () => {
-		try {
-			const { data: buckets } = await supabase.storage.listBuckets();
-			const exists = buckets?.some((b) => b.name === BUCKET_NAME);
-			if (!exists) {
-				await supabase.storage.createBucket(BUCKET_NAME, {
+	if (!bucketInitPromise) {
+		bucketInitPromise = (async () => {
+			const { data: buckets, error: listError } =
+				await supabase.storage.listBuckets();
+			if (listError) throw listError;
+
+			const exists = buckets?.some((bucket) => bucket.name === BUCKET_NAME);
+			if (exists) return;
+
+			const { error: createError } = await supabase.storage.createBucket(
+				BUCKET_NAME,
+				{
 					public: true,
 					fileSizeLimit: 10485760,
-				});
-			}
-		} catch (err) {
-			console.error("Failed to ensure storage bucket:", err);
-			return bucketInitPromise;
-		}
-	})();
-	return bucketInitPromise;
+				},
+			);
+			if (createError) throw createError;
+		})();
+	}
+
+	try {
+		await bucketInitPromise;
+	} catch (error) {
+		// Permit a later request to retry a transient Storage failure. Returning
+		// bucketInitPromise here would make the promise resolve to itself and
+		// produce an unhandled 500 ("Chaining cycle detected for promise").
+		bucketInitPromise = undefined;
+		throw error;
+	}
 }
 
 export const uploadAsset = base
@@ -355,7 +367,14 @@ export const uploadAsset = base
 			});
 		}
 
-		await ensureStorageBucket(supabase);
+		try {
+			await ensureStorageBucket(supabase);
+		} catch (error) {
+			console.error("Failed to ensure canvas asset storage:", error);
+			throw new ORPCError("INTERNAL_SERVER_ERROR", {
+				message: "Canvas asset storage is temporarily unavailable.",
+			});
+		}
 
 		let cleanBase64 = input.base64Data;
 		const commaIdx = cleanBase64.indexOf(",");

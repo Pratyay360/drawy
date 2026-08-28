@@ -1,3 +1,4 @@
+import "#/polyfill";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { getContext } from "./integrations/tanstack-query/root-provider";
