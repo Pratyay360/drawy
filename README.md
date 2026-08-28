@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/87baadb1-b688-415f-8faf-ee6084958e37/deploy-status)](https://app.netlify.com/projects/drawy-draw/deploys)
+
 # demonstrating crdt (Conflict free Replicated Data Types)
 
 with [excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
