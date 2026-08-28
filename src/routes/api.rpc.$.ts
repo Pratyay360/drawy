@@ -3,7 +3,7 @@ import "#/polyfill";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import { createFileRoute } from "@tanstack/react-router";
-import { getCurrentUser } from "#/lib/session";
+import { resolveCurrentUserServer } from "#/lib/session.server";
 import router from "#/orpc/router";
 
 const handler = new RPCHandler(router, {
@@ -15,7 +15,9 @@ const handler = new RPCHandler(router, {
 });
 
 async function handle({ request }: { request: Request }) {
-	const user = await getCurrentUser();
+	// Resolve the session directly because this handler already runs on the
+	// server and has access to the request cookie context.
+	const user = await resolveCurrentUserServer();
 	if (!user) {
 		return new Response(JSON.stringify({ error: "Unauthorized" }), {
 			status: 401,

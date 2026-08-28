@@ -6,7 +6,7 @@ import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
 import { onError } from "@orpc/server";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { createFileRoute } from "@tanstack/react-router";
-import { getCurrentUser } from "#/lib/session";
+import { resolveCurrentUserServer } from "#/lib/session.server";
 import router from "#/orpc/router";
 import { TodoSchema } from "#/orpc/schema";
 
@@ -55,7 +55,10 @@ const handler = new OpenAPIHandler(router, {
 });
 
 async function handle({ request }: { request: Request }) {
-	const user = await getCurrentUser();
+	// This is already a server request handler. Calling the createServerFn
+	// wrapper here can attempt to dispatch a second server-function request
+	// without the original Netlify request context, causing an unhandled 500.
+	const user = await resolveCurrentUserServer();
 	if (!user) {
 		return new Response(JSON.stringify({ error: "Unauthorized" }), {
 			status: 401,
