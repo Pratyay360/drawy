@@ -19,12 +19,13 @@ With [Excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
 [library Suppport](https://libraries.excalidraw.com/?theme=light&sort=default)
 
 Using Supabase for both db and [sync](https://supabase.com/docs/guides/realtime)
-and Netlify for hosting ... you can use any hosting provider if you want to ..
+and Netlify for hosting ... you can use any hosting provider if you want to ...
 
-Host your own version for privacy and owning your own data also relying on the hosted instance is not required cz I am also on the free tier.
+Host your own version for privacy and owning your own data also relying on the
+hosted instance is not required cz (I am also on the free tier and can go off anytime on exhausting the limits).
 
 Refer to `.env.example` for the naming conventions of .env also you can use
-[mise](https://mise.jdx.dev/) for managing dev env ..
+[mise](https://mise.jdx.dev/) for managing dev enviournment variables ..
 
 tech stack 
 
