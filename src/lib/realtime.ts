@@ -1,0 +1,176 @@
+import {
+	REALTIME_SUBSCRIBE_STATES,
+	type RealtimeChannel,
+} from "@supabase/supabase-js";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { createClient } from "./supabase/client";
+
+const useThrottleCallback = <Params extends unknown[], Return>(
+	callback: (...args: Params) => Return,
+	delay: number,
+) => {
+	const lastCall = useRef(0);
+	const timeout = useRef<NodeJS.Timeout | null>(null);
+
+	return useCallback(
+		(...args: Params) => {
+			const now = Date.now();
+			const remainingTime = delay - (now - lastCall.current);
+
+			if (remainingTime <= 0) {
+				if (timeout.current) {
+					clearTimeout(timeout.current);
+					timeout.current = null;
+				}
+				lastCall.current = now;
+				callback(...args);
+			} else if (!timeout.current) {
+				timeout.current = setTimeout(() => {
+					lastCall.current = Date.now();
+					timeout.current = null;
+					callback(...args);
+				}, remainingTime);
+			}
+		},
+		[callback, delay],
+	);
+};
+
+const generateRandomColor = () =>
+	`hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`;
+
+const generateRandomNumber = () => Math.floor(Math.random() * 100);
+
+const EVENT_NAME = "realtime-cursor-move";
+
+type CursorEventPayload = {
+	position: {
+		x: number;
+		y: number;
+	};
+	user: {
+		id: number;
+		name: string;
+	};
+	color: string;
+	timestamp: number;
+};
+
+export const useRealtimeCursors = ({
+	roomName,
+	username,
+	throttleMs,
+}: {
+	roomName: string;
+	username: string;
+	throttleMs: number;
+}) => {
+	const [color] = useState(generateRandomColor());
+	const [userId] = useState(generateRandomNumber());
+	const [cursors, setCursors] = useState<Record<string, CursorEventPayload>>(
+		{},
+	);
+	const cursorPayload = useRef<CursorEventPayload | null>(null);
+
+	const channelRef = useRef<RealtimeChannel | null>(null);
+
+	const callback = useCallback(
+		(event: MouseEvent) => {
+			const { clientX, clientY } = event;
+
+			const payload: CursorEventPayload = {
+				position: {
+					x: clientX,
+					y: clientY,
+				},
+				user: {
+					id: userId,
+					name: username,
+				},
+				color: color,
+				timestamp: Date.now(),
+			};
+
+			cursorPayload.current = payload;
+
+			void channelRef.current?.send({
+				type: "broadcast",
+				event: EVENT_NAME,
+				payload: payload,
+			});
+		},
+		[color, userId, username],
+	);
+
+	const handleMouseMove = useThrottleCallback(callback, throttleMs);
+
+	useEffect(() => {
+		const supabase = createClient();
+		const channel = supabase.channel(roomName);
+
+		channel
+			.on("presence", { event: "leave" }, ({ leftPresences }) => {
+				leftPresences.forEach((element) => {
+					// Remove cursor when user leaves
+					setCursors((prev) => {
+						if (prev[element.key]) {
+							delete prev[element.key];
+						}
+
+						return { ...prev };
+					});
+				});
+			})
+			.on("presence", { event: "join" }, () => {
+				if (!cursorPayload.current) return;
+
+				// All cursors broadcast their position when a new cursor joins
+				void channelRef.current?.send({
+					type: "broadcast",
+					event: EVENT_NAME,
+					payload: cursorPayload.current,
+				});
+			})
+			.on(
+				"broadcast",
+				{ event: EVENT_NAME },
+				(data: { payload: CursorEventPayload }) => {
+					const { user } = data.payload;
+					// Don't render your own cursor
+					if (user.id === userId) return;
+
+					setCursors((prev) => {
+						if (prev[userId]) {
+							delete prev[userId];
+						}
+
+						return {
+							...prev,
+							[user.id]: data.payload,
+						};
+					});
+				},
+			)
+			.subscribe(async (status) => {
+				if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+					await channel.track({ key: userId });
+					channelRef.current = channel;
+				} else {
+					setCursors({});
+					channelRef.current = null;
+				}
+			});
+	}, [roomName, userId]);
+
+	useEffect(() => {
+		addEventListener("mousemove", handleMouseMove);
+
+		// Cleanup on unmount
+		return () => {
+			removeEventListener("mousemove", handleMouseMove);
+		};
+	}, [handleMouseMove]);
+
+	return { cursors };
+};

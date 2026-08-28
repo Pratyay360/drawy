@@ -1,0 +1,30 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+__unconfig*
+todos.json
+!.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# dotenv environment variable files
+.env.*
+!.env.example
+.agents/
+.freebuff/
+.agents/skills/
+.crush/
+.agents/skills/.cache/
+.cache/
+
+
+# Local Netlify folder
+.netlify
