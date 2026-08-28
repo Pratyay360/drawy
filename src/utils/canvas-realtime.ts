@@ -33,41 +33,36 @@ type PresenceCb = (count: number) => void;
 
 export class CanvasRealtime {
 	private client = getSupabaseBrowserClient();
-	private channel: RealtimeChannel | undefined;
+	private channel: RealtimeChannel;
 	private readonly canvasId: string;
 	private sceneCbs = new Set<SceneCb>();
 	private savedCbs = new Set<SavedCb>();
 	private presenceCbs = new Set<PresenceCb>();
-	private sceneTimer: ReturnType<typeof setTimeout> | null = null;
-	private pendingScene: ScenePayload | null = null;
+	private sceneTimer: ReturnType<typeof setTimeout>;
+	private pendingScene: ScenePayload;
 
 	constructor(canvasId: string) {
 		this.canvasId = canvasId;
 	}
 
 	connect() {
-		if (!this.client || this.channel) return;
-
 		const channel = this.client.channel(`drawy:canvas:${this.canvasId}`, {
 			config: {
 				broadcast: { self: false },
 				presence: { key: `client-${Math.random().toString(36).slice(2)}` },
 			},
 		});
-
 		channel.on("broadcast", { event: "scene" }, ({ payload }) => {
-			// SAFETY: broadcast payload conforms to ScenePayload contract.
-			this.sceneCbs.forEach((fn) => fn(payload as ScenePayload));
+			this.sceneCbs.map((fn) => fn(payload as ScenePayload));
 		});
 		channel.on("broadcast", { event: "saved" }, () => {
-			this.savedCbs.forEach((fn) => fn());
+			this.savedCbs.map((fn) => fn());
 		});
 		channel.on("presence", { event: "sync" }, () => {
 			const state = channel.presenceState();
 			const count = Object.keys(state).length;
-			this.presenceCbs.forEach((fn) => fn(count));
+			this.presenceCbs.map((fn) => fn(count));
 		});
-
 		channel.subscribe((status) => {
 			if (status === "SUBSCRIBED") {
 				void channel.track({ at: Date.now() });
@@ -78,7 +73,6 @@ export class CanvasRealtime {
 	}
 
 	broadcastScene(elements: readonly ExcalidrawElement[], files?: BinaryFiles) {
-		if (!this.channel) return;
 		this.pendingScene = {
 			elements,
 			files: files && Object.keys(files).length > 0 ? files : undefined,
@@ -88,9 +82,7 @@ export class CanvasRealtime {
 			this.sceneTimer = null;
 			const payload = this.pendingScene;
 			this.pendingScene = null;
-			if (payload && this.channel) {
-				void this.channel.send({ type: "broadcast", event: "scene", payload });
-			}
+			this.channel.send({ type: "broadcast", event: "scene", payload });
 		}, 250);
 	}
 
@@ -151,7 +143,7 @@ function ensureGlobalChannel(): RealtimeChannel | null {
 		config: { broadcast: { self: false } },
 	});
 	channel.on("broadcast", { event: "list-changed" }, () => {
-		globalListeners.forEach((fn) => fn());
+		globalListeners.map((fn) => fn());
 	});
 	channel.subscribe();
 	globalChannel = channel;

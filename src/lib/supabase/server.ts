@@ -16,7 +16,7 @@ export function createClient() {
 				);
 			},
 			setAll(cookies) {
-				cookies.forEach((cookie) => {
+				cookies.map((cookie) => {
 					setCookie(cookie.name, cookie.value);
 				});
 			},

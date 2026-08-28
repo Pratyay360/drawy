@@ -2,7 +2,6 @@ import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Layout, LayoutContent } from "@astryxdesign/core/Layout";
 import { Library } from "lucide-react";
-
 import { useUIStore } from "#/stores/ui";
 import { LibraryBrowser } from "./library-browser";
 

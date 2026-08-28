@@ -91,16 +91,14 @@ export function ShareCanvasModal() {
 			await unshareCanvas(canvasId, usernameToRemove);
 			onShareChange();
 		} catch (error: unknown) {
-			const message =
-				error instanceof Error ? error.message : "Failed to remove user.";
-			setShareErrorMsg(message);
+			throw new Error(error);
 		} finally {
 			setShareUnsharingUser(null);
 		}
 	}
 
 	function handleCopyLink() {
-		const url = `/canvas/${canvasId}`;
+		const url = `${window.location.origin}/canvas/${canvasId}`;
 		void navigator.clipboard.writeText(url);
 		setShareCopied(true);
 		setTimeout(() => setShareCopied(false), 2000);

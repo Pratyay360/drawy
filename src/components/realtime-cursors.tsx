@@ -2,9 +2,6 @@
 
 import { useRealtimeCursors } from "../hooks/realtime-cursor-react";
 import { Cursor } from "./cursor";
-
-const THROTTLE_MS = 40;
-
 export const RealtimeCursors = ({
 	roomName,
 	username,
@@ -15,7 +12,7 @@ export const RealtimeCursors = ({
 	const { cursors } = useRealtimeCursors({
 		roomName,
 		username,
-		throttleMs: THROTTLE_MS,
+		throttleMs: 30,
 	});
 
 	return (
@@ -25,7 +22,7 @@ export const RealtimeCursors = ({
 					key={id}
 					className="fixed transition-transform ease-in-out z-50"
 					style={{
-						transitionDuration: "20ms",
+						transitionDuration: "30ms",
 						top: 0,
 						left: 0,
 						transform: `translate(${cursors[id].position.x}px, ${cursors[id].position.y}px)`,

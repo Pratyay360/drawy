@@ -6,37 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useRealtimeCursorStore } from "#/stores/realtime-cursor";
 import { createClient } from "../lib/supabase/client";
-
-const useThrottleCallback = <Params extends unknown[], Return>(
-	callback: (...args: Params) => Return,
-	delay: number,
-) => {
-	const lastCall = useRef(0);
-	const timeout = useRef<NodeJS.Timeout | null>(null);
-
-	return useCallback(
-		(...args: Params) => {
-			const now = Date.now();
-			const remainingTime = delay - (now - lastCall.current);
-
-			if (remainingTime <= 0) {
-				if (timeout.current) {
-					clearTimeout(timeout.current);
-					timeout.current = null;
-				}
-				lastCall.current = now;
-				callback(...args);
-			} else if (!timeout.current) {
-				timeout.current = setTimeout(() => {
-					lastCall.current = Date.now();
-					timeout.current = null;
-					callback(...args);
-				}, remainingTime);
-			}
-		},
-		[callback, delay],
-	);
-};
+import { useThrottleCallback } from "./use-throttle-callback";
 
 const supabase = createClient();
 
@@ -118,7 +88,7 @@ export const useRealtimeCursors = ({
 
 		channel
 			.on("presence", { event: "leave" }, ({ leftPresences }) => {
-				leftPresences.forEach((element) => {
+				leftPresences.map((element) => {
 					setCursors((prev) => {
 						if (prev[element.key]) {
 							delete prev[element.key];
