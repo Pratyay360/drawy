@@ -1,5 +1,6 @@
-# introducing Drawy
-A realtime collaboration capable drawing app(powered by excalidraw) which is easy to deploy and built with tech stack you already know.
+# Introducing Drawy
+A real time collaboration capable drawing app(powered by Excalidraw) which is easy to deploy and host
+built with tech stack you already know.
 
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/87baadb1-b688-415f-8faf-ee6084958e37/deploy-status)](https://app.netlify.com/projects/drawy-draw/deploys)
@@ -8,27 +9,26 @@ A realtime collaboration capable drawing app(powered by excalidraw) which is eas
 
 [use now](https://drawy.pratyay.qzz.io)
 
-## if you want to run it host on your own supabase account, and running on netlify is purely optional, this app is built with [nitro](https://nitro.build/)
+## if you want to run it host on your own supabase account, and running on Netlify is purely optional, this app is built with [nitro](https://nitro.build/)
 
 ## nitro is easy to deploy so no issues [deploy adapter](https://nitro.build/deploy)
 
-### been using supabase realtime because it's a nice BaaS with websocket support, With postgres and object storage all in one place and supabase is easy to integrate with Vercel and Netlify.
+### Supabase realtime because it's a nice BaaS with websocket support + postgres and object storage all in one place and supabase is easy to integrate with Vercel and Netlify.
 
-with [excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
-[library suppport](https://libraries.excalidraw.com/?theme=light&sort=default)
+With [Excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
+[library Suppport](https://libraries.excalidraw.com/?theme=light&sort=default)
 
-using supabase for both db and [sync](https://supabase.com/docs/guides/realtime)
-and netlify for hosting .. you can use any hosting provider if you want to ..
+Using Supabase for both db and [sync](https://supabase.com/docs/guides/realtime)
+and Netlify for hosting ... you can use any hosting provider if you want to ..
 
-host your own version for privacy ..
+Host your own version for privacy and owning your own data also relying on the hosted instance is not required cz I am also on the free tier.
 
-refer to .env.example for .. the naming conventions of .env also you can use
+Refer to `.env.example` for the naming conventions of .env also you can use
 [mise](https://mise.jdx.dev/) for managing dev env ..
 
-tech stack ..
+tech stack 
 
-supabase(db, crdt sync)
-
-tanstack start(frontend)
-
-vite-plus + nub (for dependency management)
+1. Supabase(db, realtime sync)
+2. Tanstack start(frontend)
+3. vite-plus + nub (for dependency management)
+(nub cz it's something new )
