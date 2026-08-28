@@ -17,7 +17,6 @@ import {
 	unshareCanvas,
 } from "../services/canvases";
 
-/** Global share-canvas modal driven by the zustand UI store. */
 export function ShareCanvasModal() {
 	const isOpen = useUIStore((s) => s.shareModal.isOpen);
 	const canvasId = useUIStore((s) => s.shareModal.canvasId);
@@ -41,8 +40,6 @@ export function ShareCanvasModal() {
 	const onOpenChange = (open: boolean) => {
 		if (!open) closeShareCanvas();
 	};
-
-	// Notifying a mounted canvas to refresh its access list after a share change.
 	const onShareChange = () => {
 		globalThis.dispatchEvent(new Event("canvas-updated"));
 	};
@@ -133,7 +130,7 @@ export function ShareCanvasModal() {
 									<TextInput
 										label="Canvas link"
 										isLabelHidden
-										value={`/canvas/${canvasId}`}
+										value={`${window.location.origin}/canvas/${canvasId}`}
 										isReadOnly
 										width="100%"
 										size="sm"
@@ -179,7 +176,6 @@ export function ShareCanvasModal() {
 										/>
 									</HStack>
 
-									{/* Suggested users buttons if available */}
 									{unsharedAvailableUsers.length > 0 && (
 										<VStack gap={1}>
 											<Text type="supporting">Registered users:</Text>

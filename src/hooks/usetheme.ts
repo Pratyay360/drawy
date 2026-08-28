@@ -32,9 +32,7 @@ function applyTheme(theme: Theme) {
 	root.style.colorScheme = theme;
 }
 
-// Module-level store shared by every useTheme() consumer, so toggling the
-// theme from one place (e.g. the sidebar) re-renders all others (e.g. the
-// canvas) and keeps them in sync.
+
 let currentTheme: Theme;
 
 function getCurrentTheme(): Theme {

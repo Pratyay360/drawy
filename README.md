@@ -2,7 +2,15 @@
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/integration/start/deploy?repository=https://github.com/pratyay360/drawy)
 
-# demonstrating crdt (Conflict free Replicated Data Types)
+[use now](https://drawy.pratyay.qzz.io)
+
+## if you want to run it host on your own supabase account, and running on netlify is purely optional, this app is built with [nitro](https://nitro.build/)
+
+## nitro is easy to deploy so no issues [deploy adapter](https://nitro.build/deploy)
+
+## demonstrating crdt (Conflict free Replicated Data Types)
+
+### been using supabase realtime cz it's a nice BaaS with websocket support
 
 with [excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
 [library suppport](https://libraries.excalidraw.com/?theme=light&sort=default)
@@ -20,7 +28,5 @@ tech stack ..
 supabase(db, crdt sync)
 
 tanstack start(frontend)
-
-nitro as a deployment and backend
 
 vite-plus + nub (for dependency management)
