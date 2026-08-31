@@ -1,3 +1,4 @@
+import { Theme } from "@astryxdesign/core";
 import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
@@ -6,6 +7,8 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { GlobalDialogs } from "../components/global-dialogs";
+import { useTheme } from "../hooks/usetheme";
+import { butterTheme } from "../themes/butter/butterTheme";
 import "../styles.css";
 
 const themeScript = `(function(){try{var s=localStorage.getItem("drawy-theme");var t=s==="light"||s==="dark"?s:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");var r=document.documentElement;r.classList.toggle("dark",t==="dark");r.dataset.theme=t;r.style.colorScheme=t;}catch(e){}})();`;
@@ -66,6 +69,15 @@ function Devtools() {
 	return <DevtoolsComponent />;
 }
 
+function AppThemeProvider({ children }: { children: React.ReactNode }) {
+	const { theme } = useTheme();
+	return (
+		<Theme theme={butterTheme} mode={theme}>
+			{children}
+		</Theme>
+	);
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
@@ -74,8 +86,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
-				{children}
-				<GlobalDialogs />
+				<AppThemeProvider>
+					{children}
+					<GlobalDialogs />
+				</AppThemeProvider>
 				<Devtools />
 				<Scripts />
 			</body>
