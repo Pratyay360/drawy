@@ -1,7 +1,7 @@
 # Introducing Drawy
+
 A real time collaboration capable drawing app(powered by Excalidraw) which is easy to deploy and host
 built with tech stack you already know.
-
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/87baadb1-b688-415f-8faf-ee6084958e37/deploy-status)](https://app.netlify.com/projects/drawy-draw/deploys)
 
@@ -27,9 +27,9 @@ hosted instance is not required cz (I am also on the free tier and can go off an
 Refer to `.env.example` for the naming conventions of .env also you can use
 [mise](https://mise.jdx.dev/) for managing dev enviournment variables ..
 
-tech stack 
+tech stack
 
 1. Supabase(db, realtime sync)
 2. Tanstack start(frontend)
 3. vite-plus + nub (for dependency management)
-(nub cz it's something new )
+   (nub cz it's something new )
