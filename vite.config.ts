@@ -17,7 +17,7 @@ export default defineConfig({
         react(),
         tailwindcss(),
         nitro({
-            preset: "netlify",
+            preset: "vercel",
             rollupConfig: {
                 external: [/@excalidraw\/excalidraw/, /@excalidraw\/laser-pointer/],
                 output: {
