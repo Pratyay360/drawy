@@ -1,6 +1,6 @@
 export interface UpdateInfo {
-    version: string;
-    notes?: string;
+	version: string;
+	notes?: string;
 }
 
 /**
@@ -8,8 +8,10 @@ export interface UpdateInfo {
  * These stubs keep the (optional) update prompt wired up without
  * ever firing; a native/desktop build can implement them for real.
  */
-export function onUpdateAvailable(_callback: (info: UpdateInfo) => void): () => void {
-    return () => {};
+export function onUpdateAvailable(
+	_callback: (info: UpdateInfo) => void,
+): () => void {
+	return () => {};
 }
 
 export async function installUpdate(_version: string): Promise<void> {}

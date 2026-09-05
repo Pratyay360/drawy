@@ -2,7 +2,6 @@
 vp = "latest"
 nub = "latest"
 sops = "latest"
-supabase = "latest"
 biome = "latest"
 dotenv-linter = "latest"
 bun = "latest"
