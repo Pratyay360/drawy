@@ -3,7 +3,7 @@
 A real time collaboration capable drawing app(powered by Excalidraw) which is easy to deploy and host
 built with tech stack you already know.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPratyay360%2Fdrawy&project-name=drawy&repository-name=drawy)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPratyay360%2Fdrawy&env=VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY&envDescription=VITE_SUPABASE_URL&project-name=drawy&repository-name=drawy&demo-title=Drawy%20supabase%20demo&demo-description=demo%20for%20drawy%20supabase&demo-url=https%3A%2F%2Fdrawy.pratyay.qzz.io&skippable-integrations=1)
 
 [use now](https://drawy.pratyay.qzz.io)
 
