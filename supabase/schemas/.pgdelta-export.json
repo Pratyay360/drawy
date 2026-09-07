@@ -1,0 +1,37 @@
+{
+    "formatVersion": 1,
+    "redactSecrets": true,
+    "scope": "database",
+    "loadOrder": [
+        "public/default_privileges.sql",
+        "public/schema.sql",
+        "_cluster/extensions/hypopg.sql",
+        "_cluster/extensions/index_advisor.sql",
+        "_cluster/extensions/pgcrypto.sql",
+        "_cluster/extensions/uuid-ossp.sql",
+        "public/tables/app_users.sql",
+        "public/tables/canvas_shares.sql",
+        "public/tables/canvases.sql",
+        "public/functions/rls_auto_enable.sql",
+        "public/functions/set_updated_at.sql",
+        "_cluster/publications.sql",
+        "_cluster/event_triggers.sql"
+    ],
+    "profile": "supabase",
+    "defaultOwner": "postgres",
+    "files": [
+        "_cluster/event_triggers.sql",
+        "_cluster/extensions/hypopg.sql",
+        "_cluster/extensions/index_advisor.sql",
+        "_cluster/extensions/pgcrypto.sql",
+        "_cluster/extensions/uuid-ossp.sql",
+        "_cluster/publications.sql",
+        "public/default_privileges.sql",
+        "public/functions/rls_auto_enable.sql",
+        "public/functions/set_updated_at.sql",
+        "public/schema.sql",
+        "public/tables/app_users.sql",
+        "public/tables/canvas_shares.sql",
+        "public/tables/canvases.sql"
+    ]
+}

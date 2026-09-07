@@ -13,6 +13,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
+import { Route as ViewIdRouteImport } from './routes/view.$id'
 import { Route as AuthenticatedCanvasIdRouteImport } from './routes/_authenticated/canvas/$id'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 
@@ -35,6 +36,11 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ViewIdRoute = ViewIdRouteImport.update({
+  id: '/view/$id',
+  path: '/view/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedCanvasIdRoute = AuthenticatedCanvasIdRouteImport.update({
   id: '/canvas/$id',
   path: '/canvas/$id',
@@ -50,12 +56,14 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/view/$id': typeof ViewIdRoute
   '/canvas/$id': typeof AuthenticatedCanvasIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/view/$id': typeof ViewIdRoute
   '/': typeof AuthenticatedIndexRoute
   '/canvas/$id': typeof AuthenticatedCanvasIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -65,20 +73,23 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/view/$id': typeof ViewIdRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/canvas/$id': typeof AuthenticatedCanvasIdRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/api/$' | '/canvas/$id' | '/api/rpc/$'
+  fullPaths:
+    '/' | '/login' | '/api/$' | '/view/$id' | '/canvas/$id' | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/api/$' | '/' | '/canvas/$id' | '/api/rpc/$'
+  to: '/login' | '/api/$' | '/view/$id' | '/' | '/canvas/$id' | '/api/rpc/$'
   id:
     | '__root__'
     | '/_authenticated'
     | '/login'
     | '/api/$'
+    | '/view/$id'
     | '/_authenticated/'
     | '/_authenticated/canvas/$id'
     | '/api/rpc/$'
@@ -88,6 +99,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiSplatRoute: typeof ApiSplatRoute
+  ViewIdRoute: typeof ViewIdRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
 
@@ -119,6 +131,13 @@ declare module '@tanstack/react-router' {
       path: '/api/$'
       fullPath: '/api/$'
       preLoaderRoute: typeof ApiSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/view/$id': {
+      id: '/view/$id'
+      path: '/view/$id'
+      fullPath: '/view/$id'
+      preLoaderRoute: typeof ViewIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/canvas/$id': {
@@ -156,6 +175,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiSplatRoute: ApiSplatRoute,
+  ViewIdRoute: ViewIdRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }
 export const routeTree = rootRouteImport
