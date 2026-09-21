@@ -7,8 +7,10 @@ import { Text } from "@astryxdesign/core/Text";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useEffect } from "react";
+import { WebsiteCarbonBadge } from "react-websitecarbon-badge";
 import { getCurrentUser, logout } from "#/lib/session";
 import { useSidebarStore } from "#/stores/sidebar";
+import { useTheme } from "#/hooks/usetheme";
 
 export function SidebarFooter() {
     const router = useRouter();
@@ -18,6 +20,7 @@ export function SidebarFooter() {
     const signingOut = useSidebarStore((s) => s.signingOut);
     const setSigningOut = useSidebarStore((s) => s.setSigningOut);
     const { isCollapsed } = useSideNavCollapse();
+    const { mode } = useTheme();
 
     useEffect(() => {
         let cancelled = false;
@@ -78,7 +81,7 @@ export function SidebarFooter() {
     }
 
     return (
-        <VStack gap={1} padding={3}>
+        <VStack gap={2} padding={3}>
             <Text type="supporting" maxLines={1}>
                 {user.username}
             </Text>
@@ -91,6 +94,7 @@ export function SidebarFooter() {
                 onClick={handleSignOut}
                 width="100%"
             />
+            <WebsiteCarbonBadge dark={mode === "dark"} />
         </VStack>
     );
 }
