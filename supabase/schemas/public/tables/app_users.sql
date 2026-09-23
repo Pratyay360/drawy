@@ -8,4 +8,10 @@ CREATE TABLE "public"."app_users" (
 ALTER TABLE "public"."app_users"
   ENABLE ROW LEVEL SECURITY;
 
+CREATE POLICY "Deny client access" ON "public"."app_users"
+  FOR ALL
+  TO "anon", "authenticated"
+  USING (false)
+  WITH CHECK (false);
+
 GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON TABLE "public"."app_users" TO "postgres", "service_role";

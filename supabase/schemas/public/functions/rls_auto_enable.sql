@@ -28,4 +28,6 @@ BEGIN
 END;
 $function$;
 
-GRANT EXECUTE ON FUNCTION "public"."rls_auto_enable"() TO PUBLIC, "anon", "authenticated", "postgres", "service_role";
+GRANT EXECUTE ON FUNCTION "public"."rls_auto_enable"() TO "postgres", "service_role";
+
+REVOKE ALL ON FUNCTION "public"."rls_auto_enable"() FROM PUBLIC;

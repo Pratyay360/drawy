@@ -8,36 +8,38 @@ import { Loader2 } from "lucide-react";
 import { type ComponentType, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/view/$id")({
-    component: PublicCanvasRoute,
+	component: PublicCanvasRoute,
 });
 
 function LoadingShell() {
-    return (
-        <AppShell contentPadding={0}>
-            <Center height="100%">
-                <VStack gap={2} hAlign="center">
-                    <Icon icon={Loader2} size="lg" />
-                    <Text type="supporting">Loading viewer...</Text>
-                </VStack>
-            </Center>
-        </AppShell>
-    );
+	return (
+		<AppShell contentPadding={0}>
+			<Center height="100%">
+				<VStack gap={2} hAlign="center">
+					<Icon icon={Loader2} size="lg" />
+					<Text type="supporting">Loading viewer...</Text>
+				</VStack>
+			</Center>
+		</AppShell>
+	);
 }
 
 function PublicCanvasRoute() {
-    const { id } = Route.useParams();
-    const [Viewer, setViewer] = useState<ComponentType<{ id: string }> | null>(null);
+	const { id } = Route.useParams();
+	const [Viewer, setViewer] = useState<ComponentType<{ id: string }> | null>(
+		null,
+	);
 
-    useEffect(() => {
-        let cancelled = false;
-        void import("../components/canvas-viewer").then((module) => {
-            if (!cancelled) setViewer(() => module.CanvasViewer);
-        });
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+	useEffect(() => {
+		let cancelled = false;
+		void import("../components/canvas-viewer").then((module) => {
+			if (!cancelled) setViewer(() => module.CanvasViewer);
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
-    if (!Viewer) return <LoadingShell />;
-    return <Viewer id={id} />;
+	if (!Viewer) return <LoadingShell />;
+	return <Viewer id={id} />;
 }

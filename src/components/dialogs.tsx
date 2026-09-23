@@ -4,12 +4,12 @@ import { UpdatePrompt } from "./update-prompt";
 import { VersionHistoryModal } from "./version-history-modal";
 
 export function Dialogs() {
-    return (
-        <>
-            <LibraryBrowserModal />
-            <ShareCanvasModal />
-            <VersionHistoryModal />
-            <UpdatePrompt />
-        </>
-    );
+	return (
+		<>
+			<LibraryBrowserModal />
+			<ShareCanvasModal />
+			<VersionHistoryModal />
+			<UpdatePrompt />
+		</>
+	);
 }
