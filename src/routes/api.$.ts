@@ -7,13 +7,15 @@ import { onError } from "@orpc/server";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { createFileRoute } from "@tanstack/react-router";
 import { getCurrentUser } from "#/lib/session";
+import { isClientDisconnect } from "#/orpc/is-client-disconnect";
 import router from "#/orpc/router";
 import { TodoSchema } from "#/orpc/schema";
 
 const handler = new OpenAPIHandler(router, {
 	interceptors: [
 		onError((error) => {
-			console.error(error);
+			// Client navigated away / cancelled mid-request — not a server bug.
+			if (!isClientDisconnect(error)) console.error(error);
 		}),
 	],
 	plugins: [

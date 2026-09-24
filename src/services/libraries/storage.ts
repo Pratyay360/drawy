@@ -7,6 +7,7 @@ import {
 import type { SavedLibrary } from "./types";
 
 export async function getSavedLibraries(): Promise<SavedLibrary[]> {
+	if (typeof window === "undefined") return [];
 	try {
 		const data = localStorage.getItem(SAVED_LIBRARIES_KEY);
 		if (!data) return [];
@@ -41,6 +42,7 @@ export async function saveLibraryContent(
 	itemNames: string[],
 	items: readonly LibraryItem[],
 ): Promise<void> {
+	if (typeof window === "undefined") return;
 	// if (typeof window === "undefined") return;
 	const saved = await getSavedLibraries();
 	const next = saved.map((lib) =>
@@ -58,6 +60,7 @@ export async function saveLibraryContent(
 }
 
 export async function removeLibraryFromConfig(id: string): Promise<void> {
+	if (typeof window === "undefined") return;
 	const saved = await getSavedLibraries();
 	localStorage.setItem(
 		SAVED_LIBRARIES_KEY,
@@ -68,6 +71,7 @@ export async function removeLibraryFromConfig(id: string): Promise<void> {
 
 /** The user's full in-editor library (downloaded + hand-added items), persisted. */
 export async function getUserLibrary(): Promise<LibraryItem[]> {
+	if (typeof window === "undefined") return [];
 	const data = localStorage.getItem(USER_LIBRARY_KEY);
 	const parsed = data ? JSON.parse(data) : [];
 	return Array.isArray(parsed) ? parsed : [];
@@ -76,6 +80,7 @@ export async function getUserLibrary(): Promise<LibraryItem[]> {
 export async function setUserLibrary(
 	items: readonly LibraryItem[],
 ): Promise<void> {
+	if (typeof window === "undefined") return;
 	localStorage.setItem(USER_LIBRARY_KEY, JSON.stringify(items));
 }
 

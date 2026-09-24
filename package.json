@@ -6,7 +6,7 @@
 		"#/*": "./src/*"
 	},
 	"scripts": {
-		"dev": "vp dev --port 3000",
+		"dev": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vp dev --port 3000",
 		"generate-routes": "tsr generate",
 		"build": "vp build",
 		"preview": "vp preview"

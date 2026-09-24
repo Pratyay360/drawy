@@ -12,6 +12,23 @@ export function getRouter() {
 		scrollRestoration: true,
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
+		notFoundMode: "root",
+		defaultNotFoundComponent: () => (
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					justifyContent: "center",
+					minHeight: "50vh",
+					gap: 12,
+					fontFamily: "system-ui, sans-serif",
+				}}
+			>
+				<h1>404 — Page not found</h1>
+				<a href="/">Go home</a>
+			</div>
+		),
 		Wrap: ({ children }) => (
 			<QueryClientProvider client={context.queryClient}>
 				{children}

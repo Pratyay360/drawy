@@ -39,6 +39,7 @@ export const create = base
 		const { data, error } = await supabase
 			.from("canvases")
 			.insert({
+				id: crypto.randomUUID(),
 				user_id: username,
 				title,
 				elements: [],

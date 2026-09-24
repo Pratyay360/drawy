@@ -21,9 +21,10 @@ function getEffectiveMode(
 ): ColorMode {
 	if (themeRegistry[name]?.darkOnly) return "dark";
 	if (preference === "system") {
-		const prefersDark = matchMedia
-			? matchMedia("(prefers-color-scheme: dark)").matches
-			: false;
+		const prefersDark =
+			typeof matchMedia !== "undefined"
+				? matchMedia("(prefers-color-scheme: dark)").matches
+				: false;
 		return prefersDark ? "dark" : "light";
 	}
 	return preference;
@@ -39,6 +40,7 @@ function applyDocumentState(name: ThemeName, mode: ColorMode) {
 }
 
 function readStoredName(): ThemeName {
+	if (typeof window === "undefined") return SERVER_THEME;
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored === "light" || stored === "dark") return SERVER_THEME; // legacy value — ignore
@@ -50,6 +52,7 @@ function readStoredName(): ThemeName {
 }
 
 function readStoredMode(): ModePreference {
+	if (typeof window === "undefined") return "system";
 	try {
 		const stored = localStorage.getItem(`${STORAGE_KEY}-mode`);
 		if (stored === "light" || stored === "dark" || stored === "system") {
@@ -75,6 +78,7 @@ let initialized = false;
 
 function ensureInitialized() {
 	if (initialized) return;
+	if (typeof window === "undefined") return;
 	initialized = true;
 	state = {
 		name: readStoredName(),
@@ -101,6 +105,7 @@ function subscribe(listener: () => void) {
 }
 
 function persist() {
+	if (typeof window === "undefined") return;
 	try {
 		localStorage.setItem(STORAGE_KEY, state.name);
 		localStorage.setItem(`${STORAGE_KEY}-mode`, state.modePreference);
