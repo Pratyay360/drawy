@@ -12,10 +12,10 @@ import {
 interface UseCanvasHandlersOptions {
 	id: string;
 	filesRef: React.RefObject<BinaryFiles>;
-	excalidrawAPI: import("@excalidraw/excalidraw/types").ExcalidrawImperativeAPI;
+	excalidrawAPI: import("@excalidraw/excalidraw/types").ExcalidrawImperativeAPI | null;
 	isSavingRef: React.RefObject<boolean>;
 	realtimeRef: React.RefObject<
-		import("../../utils/canvas-realtime").CanvasRealtime
+		import("../../utils/canvas-realtime").CanvasRealtime | null
 	>;
 	applyingRemoteRef: React.RefObject<boolean>;
 	lastLocalEditRef: React.RefObject<number>;

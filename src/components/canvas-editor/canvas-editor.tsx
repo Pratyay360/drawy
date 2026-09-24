@@ -354,7 +354,7 @@ export function CanvasEditor({
 								</Suspense>
 								{lifecycle.excalidrawModule ? (
 									<lifecycle.excalidrawModule.Excalidraw
-										excalidrawAPI={lifecycle.setExcalidrawAPI}
+										onExcalidrawAPI={lifecycle.setExcalidrawAPI}
 										theme={mode}
 										isCollaborating
 										onPointerUpdate={() => {}}

@@ -64,8 +64,8 @@ export class CanvasRealtime {
 		});
 		channel.on("presence", { event: "sync" }, () => {
 			const state = channel.presenceState();
-			const _count = Object.keys(state).length;
-			this.presenceCbs.forEach((count) => count);
+			const count = Object.keys(state).length;
+			this.presenceCbs.forEach((cb) => cb(count));
 		});
 		channel.subscribe((status) => {
 			if (status === "SUBSCRIBED") {
