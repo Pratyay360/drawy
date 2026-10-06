@@ -31,15 +31,17 @@ const getORPCClient = createIsomorphicFn()
 						),
 					15000,
 				);
-			const initOptions = init as (RequestInit & { signal?: AbortSignal }) | undefined;
-			const abortSignal = initOptions?.signal;
-			if (abortSignal) {
-				abortSignal.addEventListener(
-					"abort",
-					() => controller.abort(abortSignal.reason),
-					{ once: true },
-				);
-			}
+				const initOptions = init as
+					| (RequestInit & { signal?: AbortSignal })
+					| undefined;
+				const abortSignal = initOptions?.signal;
+				if (abortSignal) {
+					abortSignal.addEventListener(
+						"abort",
+						() => controller.abort(abortSignal.reason),
+						{ once: true },
+					);
+				}
 				return fetch(input, { ...init, signal: controller.signal }).finally(
 					() => clearTimeout(timeout),
 				);

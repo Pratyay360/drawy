@@ -16,5 +16,5 @@ dbgenerate = { run = "supabase db generate" }
 build = { run = "vp build" }
 lint = { run = "biome lint" }
 format = { run = "biome format . --write" }
-encrypt = { run = "sops -e -i .env && mv .env .env.example" }
-decrypt = { run = "mv .env.example .env && sops -d -i .env " }
+encrypt = { run = "sops -e .env > .env.example" }
+decrypt = { run = "sops --input-type dotenv --output-type dotenv -d .env.example > .env" }

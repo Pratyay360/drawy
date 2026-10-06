@@ -134,6 +134,66 @@ export function CanvasEditor({
 		});
 	}, [lifecycle.excalidrawAPI]);
 
+	// --- #addLibrary hash callback (excalidraw.com "Add to library" redirect) ---
+	useEffect(() => {
+		const api = lifecycle.excalidrawAPI;
+		if (!api) return;
+
+		const hash = window.location.hash.slice(1);
+		if (!hash.includes("addLibrary=")) return;
+
+		const params = new URLSearchParams(hash);
+		const libraryUrl = params.get("addLibrary");
+		// Strip the hash so a refresh doesn't re-import the library
+		window.history.replaceState(
+			null,
+			"",
+			window.location.pathname + window.location.search,
+		);
+		if (!libraryUrl) return;
+
+		// Only import from excalidraw.com domains (covers libraries.excalidraw.com)
+		let parsedUrl: URL;
+		try {
+			parsedUrl = new URL(libraryUrl);
+		} catch {
+			return;
+		}
+		const host = parsedUrl.hostname;
+		if (
+			parsedUrl.protocol !== "https:" ||
+			!(host === "excalidraw.com" || host.endsWith(".excalidraw.com"))
+		) {
+			return;
+		}
+
+		void (async () => {
+			try {
+				const res = await fetch(libraryUrl);
+				if (!res.ok) return;
+				const data: unknown = await res.json();
+				// excalidrawlib files store items under `library`; older/plain
+				// exports may use `libraryItems` or be a bare array. Each form is
+				// a valid LibraryItems_anyVersion that updateLibrary can normalize.
+				const libraryItems = Array.isArray(data)
+					? data
+					: ((data as { library?: unknown[] })?.library ??
+						(data as { libraryItems?: unknown[] })?.libraryItems ??
+						[]);
+				if (libraryItems.length === 0) return;
+				await api.updateLibrary({
+					libraryItems: libraryItems as Parameters<
+						typeof api.updateLibrary
+					>[0]["libraryItems"],
+					merge: true,
+					openLibraryMenu: true,
+				});
+			} catch {
+				// Import is best-effort; ignore network/parse failures
+			}
+		})();
+	}, [lifecycle.excalidrawAPI]);
+
 	// --- Title editing ---
 	const isEditingTitle = useCanvasStore((s) => s.isEditingTitle);
 	const titleInput = useCanvasStore((s) => s.titleInput);
@@ -354,7 +414,7 @@ export function CanvasEditor({
 								</Suspense>
 								{lifecycle.excalidrawModule ? (
 									<lifecycle.excalidrawModule.Excalidraw
-										onExcalidrawAPI={lifecycle.setExcalidrawAPI}
+										excalidrawAPI={lifecycle.setExcalidrawAPI}
 										theme={mode}
 										isCollaborating
 										onPointerUpdate={() => {}}
