@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as ViewIdRouteImport } from './routes/view.$id'
@@ -24,6 +25,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
@@ -55,6 +61,7 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/api/$': typeof ApiSplatRoute
   '/view/$id': typeof ViewIdRoute
   '/canvas/$id': typeof AuthenticatedCanvasIdRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/api/$': typeof ApiSplatRoute
   '/view/$id': typeof ViewIdRoute
   '/': typeof AuthenticatedIndexRoute
@@ -72,6 +80,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/api/$': typeof ApiSplatRoute
   '/view/$id': typeof ViewIdRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -81,13 +90,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/api/$' | '/view/$id' | '/canvas/$id' | '/api/rpc/$'
+    | '/'
+    | '/login'
+    | '/privacy'
+    | '/api/$'
+    | '/view/$id'
+    | '/canvas/$id'
+    | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/api/$' | '/view/$id' | '/' | '/canvas/$id' | '/api/rpc/$'
+  to:
+    | '/login'
+    | '/privacy'
+    | '/api/$'
+    | '/view/$id'
+    | '/'
+    | '/canvas/$id'
+    | '/api/rpc/$'
   id:
     | '__root__'
     | '/_authenticated'
     | '/login'
+    | '/privacy'
     | '/api/$'
     | '/view/$id'
     | '/_authenticated/'
@@ -98,6 +121,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
   ApiSplatRoute: typeof ApiSplatRoute
   ViewIdRoute: typeof ViewIdRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
@@ -117,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -174,6 +205,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   ApiSplatRoute: ApiSplatRoute,
   ViewIdRoute: ViewIdRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,

@@ -1,13 +1,15 @@
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { IconButton } from "@astryxdesign/core/IconButton";
+import { Link } from "@astryxdesign/core/Link";
 import { useSideNavCollapse } from "@astryxdesign/core/SideNav";
-import { VStack } from "@astryxdesign/core/Stack";
+import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { useNavigate, useRouter } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { LogOut, Mail } from "lucide-react";
 import { useEffect } from "react";
 import { WebsiteCarbonBadge } from "react-websitecarbon-badge";
+import { CONTACT_URL } from "#/components/site-footer";
 import { useTheme } from "#/hooks/usetheme";
 import { getCurrentUser, logout } from "#/lib/session";
 import { useSidebarStore } from "#/stores/sidebar";
@@ -94,6 +96,21 @@ export function SidebarFooter() {
 				onClick={handleSignOut}
 				width="100%"
 			/>
+			<Button
+				label="Contact us"
+				variant="ghost"
+				size="sm"
+				icon={<Icon icon={Mail} size="sm" />}
+				href={CONTACT_URL}
+				target="_blank"
+				rel="noopener noreferrer"
+				width="100%"
+			/>
+			<HStack hAlign="center">
+				<Link href="/privacy" isStandalone size="sm">
+					Privacy Policy
+				</Link>
+			</HStack>
 			<WebsiteCarbonBadge dark={mode === "dark"} />
 		</VStack>
 	);

@@ -3,7 +3,7 @@ import { Card } from "@astryxdesign/core/Card";
 import { Center } from "@astryxdesign/core/Center";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Icon } from "@astryxdesign/core/Icon";
-import { VStack } from "@astryxdesign/core/Stack";
+import { StackItem, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-router";
 import { LockKeyhole, PenTool, User } from "lucide-react";
 import { useState } from "react";
+import { SiteFooter } from "#/components/site-footer";
 import { getCurrentUser, signIn, signUp } from "#/lib/session";
 import { normalizeUsername, usernameError } from "#/lib/username";
 
@@ -82,71 +83,78 @@ function LoginPage() {
 	}
 
 	return (
-		<Center height="100vh" padding={4}>
-			<Card width={380} padding={6}>
-				<VStack gap={5}>
-					<VStack gap={1} hAlign="center">
-						<Icon icon={PenTool} size="lg" />
-						<Heading level={1}>Drawy</Heading>
-						<Text type="supporting">
-							{mode === "signin"
-								? "Sign in to access your drawings"
-								: "Create your Drawy account"}
-						</Text>
-					</VStack>
+		<VStack gap={0} height="100vh">
+			<StackItem size="fill">
+				<Center height="100%" padding={4} width="100%">
+					<Card width={380} padding={6}>
+						<VStack gap={5}>
+							<VStack gap={1} hAlign="center">
+								<Icon icon={PenTool} size="lg" />
+								<Heading level={1}>Drawy</Heading>
+								<Text type="supporting">
+									{mode === "signin"
+										? "Sign in to access your drawings"
+										: "Create your Drawy account"}
+								</Text>
+							</VStack>
 
-					<VStack gap={3}>
-						<TextInput
-							label="Username"
-							value={username}
-							onChange={(value) => {
-								setUsername(value);
-								setUsernameTouched(true);
-							}}
-							onBlur={() => setUsernameTouched(true)}
-							onEnter={handleSubmit}
-							hasAutoFocus
-							placeholder="your_username"
-							startIcon={<Icon icon={User} size="sm" />}
-							isRequired
-							status={
-								showUsernameError
-									? { type: "error", message: usernameInvalid }
-									: undefined
-							}
-						/>
-						<TextInput
-							label="Password"
-							type="password"
-							value={password}
-							onChange={setPassword}
-							onEnter={handleSubmit}
-							placeholder="••••••••"
-							startIcon={<Icon icon={LockKeyhole} size="sm" />}
-							isRequired
-							status={error ? { type: "error", message: error } : undefined}
-						/>
-					</VStack>
+							<VStack gap={3}>
+								<TextInput
+									label="Username"
+									value={username}
+									onChange={(value) => {
+										setUsername(value);
+										setUsernameTouched(true);
+									}}
+									onBlur={() => setUsernameTouched(true)}
+									onEnter={handleSubmit}
+									hasAutoFocus
+									placeholder="your_username"
+									startIcon={<Icon icon={User} size="sm" />}
+									isRequired
+									status={
+										showUsernameError
+											? { type: "error", message: usernameInvalid }
+											: undefined
+									}
+								/>
+								<TextInput
+									label="Password"
+									type="password"
+									value={password}
+									onChange={setPassword}
+									onEnter={handleSubmit}
+									placeholder="••••••••"
+									startIcon={<Icon icon={LockKeyhole} size="sm" />}
+									isRequired
+									status={error ? { type: "error", message: error } : undefined}
+								/>
+							</VStack>
 
-					<Button
-						label={mode === "signin" ? "Sign in" : "Create an account"}
-						onClick={handleSubmit}
-						isLoading={busy}
-						width="100%"
-					/>
-					<Button
-						label={
-							mode === "signin"
-								? "New here? Create an account"
-								: "Already have an account? Sign in"
-						}
-						variant="ghost"
-						onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}
-						isDisabled={busy}
-						width="100%"
-					/>
-				</VStack>
-			</Card>
-		</Center>
+							<Button
+								label={mode === "signin" ? "Sign in" : "Create an account"}
+								onClick={handleSubmit}
+								isLoading={busy}
+								width="100%"
+							/>
+							<Button
+								label={
+									mode === "signin"
+										? "New here? Create an account"
+										: "Already have an account? Sign in"
+								}
+								variant="ghost"
+								onClick={() =>
+									switchMode(mode === "signin" ? "signup" : "signin")
+								}
+								isDisabled={busy}
+								width="100%"
+							/>
+						</VStack>
+					</Card>
+				</Center>
+			</StackItem>
+			<SiteFooter />
+		</VStack>
 	);
 }
