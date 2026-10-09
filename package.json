@@ -72,7 +72,8 @@
 	"overrides": {
 		"vite": "npm:@voidzero-dev/vite-plus-core@0.2.9",
 		"react": "19.3.0",
-		"react-dom": "19.3.0"
+		"react-dom": "19.3.0",
+		"rou3": "^1.0.0"
 	},
 	"devEngines": {
 		"packageManager": {
