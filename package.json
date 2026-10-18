@@ -26,6 +26,7 @@
 		"@orpc/server": "^1.15.5",
 		"@orpc/tanstack-query": "^1.15.5",
 		"@orpc/zod": "^1.15.5",
+		"@sentry/tanstackstart-react": "^11.8.0",
 		"@stylexjs/stylex": "^0.19.1",
 		"@supabase/ssr": "^0.12.7",
 		"@supabase/supabase-js": "^2.117.3",

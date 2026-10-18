@@ -13,7 +13,8 @@ _.file = { path = ".env" }
 [tasks]
 dbsetup = { run = "supabase db push" }
 dbgenerate = { run = "supabase db generate" }
-build = { run = "vp build" }
+preview = { run = "bun run preview" }
+build = { run = "bun run build" }
 lint = { run = "biome lint" }
 format = { run = "biome format . --write" }
 encrypt = { run = "sops -e .env > .env.example" }
