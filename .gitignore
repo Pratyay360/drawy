@@ -32,3 +32,6 @@ index.html
 
 # Turborepo
 .turbo
+
+# Sentry Config File
+.env.sentry-build-plugin
