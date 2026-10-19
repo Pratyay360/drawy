@@ -1,3 +1,4 @@
+import { sentryTanstackStart } from "@sentry/tanstackstart-react/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
@@ -15,6 +16,11 @@ export default defineConfig({
 	},
 	plugins: [
 		tanstackStart(),
+		sentryTanstackStart({
+			org: "self-v0w",
+			project: "drawysupabase",
+			authToken: process.env.SENTRY_AUTH_TOKEN,
+		}),
 		react(),
 		tailwindcss(),
 		nitro({

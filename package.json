@@ -6,9 +6,10 @@
 		"#/*": "./src/*"
 	},
 	"scripts": {
-		"dev": "vp dev",
+		"dev": "NODE_OPTIONS='--import ./instrument.server.mjs' vp dev",
 		"generate-routes": "tsr generate",
-		"build": "vp build",
+		"build": "vp build && cp instrument.server.mjs .netlify/functions-internal/server/instrument.server.mjs 2>/dev/null || true",
+		"start": "node --import ./.netlify/functions-internal/server/instrument.server.mjs .netlify/functions-internal/server/server.mjs",
 		"preview": "vp preview"
 	},
 	"dependencies": {
@@ -66,6 +67,7 @@
 		"@vitejs/plugin-react": "^6.1.2",
 		"astrix": "^0.0.0",
 		"babel-plugin-react-compiler": "^1.0.0",
+		"turbo": "^2.11.9",
 		"typescript": "^7.0.2",
 		"vite": "npm:@voidzero-dev/vite-plus-core@0.2.9",
 		"vite-plus": "0.3.0"
