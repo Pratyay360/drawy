@@ -1,5 +1,4 @@
 import { sentryTanstackStart } from "@sentry/tanstackstart-react/vite";
-import { sentryVitePlugin } from "@sentry/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
@@ -20,27 +19,22 @@ export default defineConfig({
 
     plugins: [
         tanstackStart(),
+        react(),
+        tailwindcss(),
+        nitro({
+            preset: "netlify",
+            // Emit server-bundle source maps so Sentry can un-minify server stack traces.
+            sourcemap: true,
+            rollupConfig: {
+                external: [/@excalidraw\/excalidraw/, /@excalidraw\/laser-pointer/]
+            },
+        }),
+        // Keep Sentry last so its build-time plugins see the final output.
+        // It also enables hidden source maps and deletes them after upload.
         sentryTanstackStart({
             org: "self-v0w",
             project: "drawysupabase",
             authToken: process.env.SENTRY_AUTH_TOKEN,
         }),
-        react(),
-        tailwindcss(),
-        nitro({
-            preset: "netlify",
-            rollupConfig: {
-                external: [/@excalidraw\/excalidraw/, /@excalidraw\/laser-pointer/]
-            },
-        }),
-        sentryVitePlugin({
-            org: "self-v0w",
-            project: "drawysupabase",
-            
-        }),
     ],
-
-    build: {
-        sourcemap: true,
-    },
 });
