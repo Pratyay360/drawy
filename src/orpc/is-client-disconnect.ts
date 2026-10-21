@@ -5,17 +5,17 @@
  * to fix, so callers should skip logging these.
  */
 export function isClientDisconnect(error: unknown): boolean {
-	const candidates: unknown[] = [error];
-	if (typeof error === "object" && error !== null && "cause" in error) {
-		candidates.push((error as { cause?: unknown }).cause);
-	}
-	return candidates.some((candidate) => {
-		if (typeof candidate !== "object" || candidate === null) return false;
-		const record = candidate as Record<string, unknown>;
-		return (
-			record.code === "ECONNRESET" ||
-			record.name === "AbortError" ||
-			record.message === "aborted"
-		);
-	});
+    const candidates: unknown[] = [error];
+    if (typeof error === "object" && error !== null && "cause" in error) {
+        candidates.push((error as { cause?: unknown }).cause);
+    }
+    return candidates.some((candidate) => {
+        if (typeof candidate !== "object" || candidate === null) return false;
+        const record = candidate as Record<string, unknown>;
+        return (
+            record.code === "ECONNRESET" ||
+            record.name === "AbortError" ||
+            record.message === "aborted"
+        );
+    });
 }

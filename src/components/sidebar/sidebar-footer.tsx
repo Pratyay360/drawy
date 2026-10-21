@@ -106,9 +106,21 @@ export function SidebarFooter() {
 				rel="noopener noreferrer"
 				width="100%"
 			/>
-			<HStack hAlign="center">
+			<HStack hAlign="center" gap={2} wrap="wrap">
+				<Link href="/help" isStandalone size="sm">
+					Help
+				</Link>
+				<Link href="/about" isStandalone size="sm">
+					About
+				</Link>
 				<Link href="/privacy" isStandalone size="sm">
-					Privacy Policy
+					Privacy
+				</Link>
+				<Link href="/terms" isStandalone size="sm">
+					Terms
+				</Link>
+				<Link href="/cookies" isStandalone size="sm">
+					Cookies
 				</Link>
 			</HStack>
 			<WebsiteCarbonBadge dark={mode === "dark"} />

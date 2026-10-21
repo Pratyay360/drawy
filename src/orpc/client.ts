@@ -9,46 +9,41 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import router from "#/orpc/router";
 
 const getORPCClient = createIsomorphicFn()
-	.server(() =>
-		createRouterClient(router, {
-			context: () => ({
-				request: { headers: getRequestHeaders() },
-			}),
-		}),
-	)
-	.client((): RouterClient<typeof router> => {
-		const link = new RPCLink({
-			url: `${location.origin}/api/rpc`,
-			fetch: (input, init) => {
-				const controller = new AbortController();
-				const timeout = setTimeout(
-					() =>
-						controller.abort(
-							new DOMException(
-								"Request timed out — slow network",
-								"AbortError",
-							),
-						),
-					15000,
-				);
-				const initOptions = init as
-					| (RequestInit & { signal?: AbortSignal })
-					| undefined;
-				const abortSignal = initOptions?.signal;
-				if (abortSignal) {
-					abortSignal.addEventListener(
-						"abort",
-						() => controller.abort(abortSignal.reason),
-						{ once: true },
-					);
-				}
-				return fetch(input, { ...init, signal: controller.signal }).finally(
-					() => clearTimeout(timeout),
-				);
-			},
-		});
-		return createORPCClient(link);
-	});
+    .server(() =>
+        createRouterClient(router, {
+            context: () => ({
+                request: { headers: getRequestHeaders() },
+            }),
+        }),
+    )
+    .client((): RouterClient<typeof router> => {
+        const link = new RPCLink({
+            url: `${location.origin}/api/rpc`,
+            fetch: (input, init) => {
+                const controller = new AbortController();
+                const timeout = setTimeout(
+                    () =>
+                        controller.abort(
+                            new DOMException("Request timed out — slow network", "AbortError"),
+                        ),
+                    15000,
+                );
+                const initOptions = init as (RequestInit & { signal?: AbortSignal }) | undefined;
+                const abortSignal = initOptions?.signal;
+                if (abortSignal) {
+                    abortSignal.addEventListener(
+                        "abort",
+                        () => controller.abort(abortSignal.reason),
+                        { once: true },
+                    );
+                }
+                return fetch(input, { ...init, signal: controller.signal }).finally(() =>
+                    clearTimeout(timeout),
+                );
+            },
+        });
+        return createORPCClient(link);
+    });
 
 export const client: RouterClient<typeof router> = getORPCClient();
 
