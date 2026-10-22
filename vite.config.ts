@@ -17,67 +17,67 @@ import { nitro } from "nitro/vite";
  * entry evaluate the whole Excalidraw bundle on boot and every request 500'd.
  */
 function excalidrawServerStub(): Plugin {
-  const stubId = "\0drawy:excalidraw-server-stub";
-  const entries = new Set(["@excalidraw/excalidraw", "@excalidraw/excalidraw/index"]);
+    const stubId = "\0drawy:excalidraw-server-stub";
+    const entries = new Set(["@excalidraw/excalidraw", "@excalidraw/excalidraw/index"]);
 
-  return {
-    name: "drawy:excalidraw-server-stub",
-    enforce: "pre",
-    applyToEnvironment: (environment) => environment.name === "ssr",
-    resolveId(source) {
-      return entries.has(source) ? stubId : null;
-    },
-    load(id) {
-      return id === stubId ? "export default {};" : null;
-    },
-  };
+    return {
+        name: "drawy:excalidraw-server-stub",
+        enforce: "pre",
+        applyToEnvironment: (environment) => environment.name === "ssr",
+        resolveId(source) {
+            return entries.has(source) ? stubId : null;
+        },
+        load(id) {
+            return id === stubId ? "export default {};" : null;
+        },
+    };
 }
 
 export default defineConfig({
-  server: {
-    allowedHosts: true,
-  },
-
-  environments: {
-    ssr: {
-      build: {
-        // "hidden" writes the source maps but omits the //# sourceMappingURL
-        // comment. Sentry still uploads them, and Wrangler does not try to
-        // re-upload maps that the Sentry plugin already deleted.
-        sourcemap: "hidden",
-      },
+    server: {
+        allowedHosts: true,
     },
-  },
 
-  plugins: [
-    excalidrawServerStub(),
-    // The Cloudflare plugin owns the "ssr" environment: it runs the Worker in
-    // workerd and bundles every dependency into it. It rejects
-    // `ssr.resolve.external`, so Excalidraw can no longer be externalised the
-    // way it was for the old Netlify preset.
-    // 
-    // ssr: cloudflare({
-    //   viteEnvironment: {
-    //     name: "ssr"
-    //   }
-    // }),
-    nitro({
-      preset: "cloudflare_module",
-      // Emit server-bundle source maps so Sentry can un-minify server stack traces.
-      sourcemap: true,
-      features: {
-        websocket: true,
-      },
-    }),
-    tanstackStart(),
-    react(),
-    tailwindcss(),
-    // Keep Sentry last so its build-time plugins see the final output.
-    // It also enables hidden source maps and deletes them after upload.
-    sentryTanstackStart({
-      org: "self-v0w",
-      project: "drawysupabase",
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-    }),
-  ],
+    environments: {
+        ssr: {
+            build: {
+                // "hidden" writes the source maps but omits the //# sourceMappingURL
+                // comment. Sentry still uploads them, and Wrangler does not try to
+                // re-upload maps that the Sentry plugin already deleted.
+                sourcemap: "hidden",
+            },
+        },
+    },
+
+    plugins: [
+        excalidrawServerStub(),
+        // The Cloudflare plugin owns the "ssr" environment: it runs the Worker in
+        // workerd and bundles every dependency into it. It rejects
+        // `ssr.resolve.external`, so Excalidraw can no longer be externalised the
+        // way it was for the old Netlify preset.
+        //
+        // ssr: cloudflare({
+        //   viteEnvironment: {
+        //     name: "ssr"
+        //   }
+        // }),
+        nitro({
+            preset: "cloudflare_module",
+            // Emit server-bundle source maps so Sentry can un-minify server stack traces.
+            sourcemap: true,
+            features: {
+                websocket: true,
+            },
+        }),
+        tanstackStart(),
+        react(),
+        tailwindcss(),
+        // Keep Sentry last so its build-time plugins see the final output.
+        // It also enables hidden source maps and deletes them after upload.
+        sentryTanstackStart({
+            org: "self-v0w",
+            project: "drawysupabase",
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+        }),
+    ],
 });

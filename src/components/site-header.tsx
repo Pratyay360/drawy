@@ -8,10 +8,10 @@ import { PenTool } from "lucide-react";
 
 /** Public destinations surfaced in the top navigation. */
 const NAV_ITEMS = [
-	{ label: "Docs", href: "/docs" },
-	{ label: "About", href: "/about" },
-	{ label: "Help", href: "/help" },
-	{ label: "Changelog", href: "/changelog" },
+    { label: "Docs", href: "/docs" },
+    { label: "About", href: "/about" },
+    { label: "Help", href: "/help" },
+    { label: "Changelog", href: "/changelog" },
 ] as const;
 
 /**
@@ -19,44 +19,34 @@ const NAV_ITEMS = [
  * the legal pages). The signed-in workspace uses its own sidebar instead.
  */
 export function SiteHeader() {
-	const pathname = useRouterState({
-		select: (state) => state.location.pathname,
-	});
+    const pathname = useRouterState({
+        select: (state) => state.location.pathname,
+    });
 
-	return (
-		<TopNav
-			label="Main"
-			heading={
-				<TopNavHeading
-					heading="Drawy"
-					headingHref="/"
-					logo={<NavIcon icon={<Icon icon={PenTool} size="sm" />} />}
-				/>
-			}
-			startContent={NAV_ITEMS.map((item) => (
-				<TopNavItem
-					key={item.href}
-					label={item.label}
-					href={item.href}
-					isSelected={pathname === item.href}
-				/>
-			))}
-			endContent={
-				<HStack align="center" gap={2}>
-					<Button
-						label="Contact"
-						href="/contact"
-						size="sm"
-						variant="secondary"
-					/>
-					<Button
-						label="Open Drawy"
-						href="/login"
-						size="sm"
-						variant="primary"
-					/>
-				</HStack>
-			}
-		/>
-	);
+    return (
+        <TopNav
+            label="Main"
+            heading={
+                <TopNavHeading
+                    heading="Drawy"
+                    headingHref="/"
+                    logo={<NavIcon icon={<Icon icon={PenTool} size="sm" />} />}
+                />
+            }
+            startContent={NAV_ITEMS.map((item) => (
+                <TopNavItem
+                    key={item.href}
+                    label={item.label}
+                    href={item.href}
+                    isSelected={pathname === item.href}
+                />
+            ))}
+            endContent={
+                <HStack align="center" gap={2}>
+                    <Button label="Contact" href="/contact" size="sm" variant="secondary" />
+                    <Button label="Open Drawy" href="/login" size="sm" variant="primary" />
+                </HStack>
+            }
+        />
+    );
 }

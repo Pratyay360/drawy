@@ -6,12 +6,12 @@ import { SiteFooter } from "#/components/site-footer";
 import { SiteHeader } from "#/components/site-header";
 
 interface PublicPageProps {
-	children: ReactNode;
-	/**
-	 * Maximum content width in pixels. Prose reads best around 800, while
-	 * card grids want the full 960.
-	 */
-	maxWidth?: number;
+    children: ReactNode;
+    /**
+     * Maximum content width in pixels. Prose reads best around 800, while
+     * card grids want the full 960.
+     */
+    maxWidth?: number;
 }
 
 /**
@@ -20,14 +20,14 @@ interface PublicPageProps {
  * same frame.
  */
 export function PublicPage({ children, maxWidth = 800 }: PublicPageProps) {
-	return (
-		<AppShell height="auto" contentPadding={0} topNav={<SiteHeader />}>
-			<Center axis="horizontal" padding={4} width="100%">
-				<VStack gap={6} maxWidth={maxWidth}>
-					{children}
-				</VStack>
-			</Center>
-			<SiteFooter />
-		</AppShell>
-	);
+    return (
+        <AppShell height="auto" contentPadding={0} topNav={<SiteHeader />}>
+            <Center axis="horizontal" padding={4} width="100%">
+                <VStack gap={6} maxWidth={maxWidth}>
+                    {children}
+                </VStack>
+            </Center>
+            <SiteFooter />
+        </AppShell>
+    );
 }

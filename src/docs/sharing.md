@@ -39,11 +39,11 @@ the canvas is shared with can restore a version.
 
 ## Permissions
 
-| Role | View | Edit | Share | Delete |
-| --- | --- | --- | --- | --- |
-| Owner | Yes | Yes | Yes | Yes |
-| Collaborator | Yes | Yes | No | No |
-| Public viewer | Yes | No | No | No |
+| Role          | View | Edit | Share | Delete |
+| ------------- | ---- | ---- | ----- | ------ |
+| Owner         | Yes  | Yes  | Yes   | Yes    |
+| Collaborator  | Yes  | Yes  | No    | No     |
+| Public viewer | Yes  | No   | No    | No     |
 
 ## Revoking access
 

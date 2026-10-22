@@ -9,12 +9,12 @@ editing, and no separate websocket service to deploy.
 Both editions share the same UI and feature set. Pick based on what you already
 run:
 
-| | Supabase edition | [PartyKit edition](../drawyparty) |
-| --- | --- | --- |
-| Realtime | Supabase Realtime broadcast + presence | PartyKit (Cloudflare Durable Objects) |
-| Storage | Supabase Postgres (managed) | Your own Postgres via Drizzle |
-| Services to deploy | One web app | Web app + PartyKit worker |
-| Schema changes | SQL migrations in `supabase/migrations/` | Drizzle schema + generated migrations |
+|                    | Supabase edition                         | [PartyKit edition](../drawyparty)     |
+| ------------------ | ---------------------------------------- | ------------------------------------- |
+| Realtime           | Supabase Realtime broadcast + presence   | PartyKit (Cloudflare Durable Objects) |
+| Storage            | Supabase Postgres (managed)              | Your own Postgres via Drizzle         |
+| Services to deploy | One web app                              | Web app + PartyKit worker             |
+| Schema changes     | SQL migrations in `supabase/migrations/` | Drizzle schema + generated migrations |
 
 ## How it fits together
 
@@ -61,16 +61,16 @@ Browser (Excalidraw)
 variables. With the matching age key, `mise run decrypt` unwraps it into `.env`.
 Without the key, write `.env` yourself with the variables below.
 
-| Variable | Required | Used for |
-| --- | --- | --- |
-| `SESSION_SECRET` | yes | Key for the AES-256-GCM sealed session cookie |
-| `SUPABASE_URL` | yes | Project URL (server) |
-| `SUPABASE_SECRET_KEY` | yes | Server key; bypasses RLS, never ship it to the browser |
-| `SUPABASE_PUBLISHABLE_KEY` | no | Server-side fallback when no secret key is configured |
-| `VITE_SUPABASE_URL` | yes | Same project URL, exposed to the client bundle |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | yes | Same public key, exposed to the client bundle |
-| `VITE_SITE_URL` | no | Canonical URL for sitemap/robots (defaults to `https://drawy.pratyay.online`) |
-| `SENTRY_AUTH_TOKEN` | no | Uploads source maps; builds still work without it |
+| Variable                        | Required | Used for                                                                      |
+| ------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `SESSION_SECRET`                | yes      | Key for the AES-256-GCM sealed session cookie                                 |
+| `SUPABASE_URL`                  | yes      | Project URL (server)                                                          |
+| `SUPABASE_SECRET_KEY`           | yes      | Server key; bypasses RLS, never ship it to the browser                        |
+| `SUPABASE_PUBLISHABLE_KEY`      | no       | Server-side fallback when no secret key is configured                         |
+| `VITE_SUPABASE_URL`             | yes      | Same project URL, exposed to the client bundle                                |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | yes      | Same public key, exposed to the client bundle                                 |
+| `VITE_SITE_URL`                 | no       | Canonical URL for sitemap/robots (defaults to `https://drawy.pratyay.online`) |
+| `SENTRY_AUTH_TOKEN`             | no       | Uploads source maps; builds still work without it                             |
 
 `VITE_*` variables are the only ones Vite inlines into client code (`envPrefix`
 in `vite.config.ts`). Keep the secret key out of anything prefixed `VITE_`.
@@ -96,13 +96,13 @@ then `mise run dbsetup` to push the migrations to it.
 
 Migrations are plain SQL in `supabase/migrations/`, applied in order:
 
-| Migration | What it does |
-| --- | --- |
-| `0001_init.sql` | `canvases` table, `updated_at` trigger, RLS policies |
-| `0002_app_auth.sql` | Drops Supabase Auth in favor of app-owned `app_users`; moves `user_id` to text |
-| `0003_canvas_sharing.sql` | `shared_with`, `canvas_shares` |
-| `0004_version_history.sql` | `canvas_versions`, public links (`is_public`) |
-| `0005_canvas_id_default.sql` | Restores `gen_random_uuid()` on `canvases.id` |
+| Migration                    | What it does                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `0001_init.sql`              | `canvases` table, `updated_at` trigger, RLS policies                           |
+| `0002_app_auth.sql`          | Drops Supabase Auth in favor of app-owned `app_users`; moves `user_id` to text |
+| `0003_canvas_sharing.sql`    | `shared_with`, `canvas_shares`                                                 |
+| `0004_version_history.sql`   | `canvas_versions`, public links (`is_public`)                                  |
+| `0005_canvas_id_default.sql` | Restores `gen_random_uuid()` on `canvases.id`                                  |
 
 ```bash
 supabase migration new <name>   # write a new migration
@@ -111,12 +111,12 @@ mise run dbsetup                # apply everything that is pending
 
 ## Scripts
 
-| Command | What it does |
-| --- | --- |
-| `bun run dev` | Dev server on port 3000 with HMR |
-| `bun run build` | Production build |
-| `bun run preview` | Serve the production build |
-| `bun run start` | Same as preview |
+| Command                   | What it does                        |
+| ------------------------- | ----------------------------------- |
+| `bun run dev`             | Dev server on port 3000 with HMR    |
+| `bun run build`           | Production build                    |
+| `bun run preview`         | Serve the production build          |
+| `bun run start`           | Same as preview                     |
 | `bun run generate-routes` | Regenerate the TanStack Router tree |
 
 Lint and formatting are mise tasks — `package.json` has no `lint` script:
