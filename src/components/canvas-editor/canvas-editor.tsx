@@ -175,8 +175,10 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const content = (await response.json()) as ExcalidrawLibraryFile;
                 const libraryId =
-                    parsedUrl.pathname.split("/").pop()?.replace(/\.excalidrawlib$/i, "") ||
-                    "imported";
+                    parsedUrl.pathname
+                        .split("/")
+                        .pop()
+                        ?.replace(/\.excalidrawlib$/i, "") || "imported";
                 const items = await toLibraryItems(content, libraryId);
                 if (items.length === 0) {
                     console.warn("addLibrary callback: no items found in", contentUrl);

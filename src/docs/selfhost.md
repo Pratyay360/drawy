@@ -19,15 +19,15 @@ bun install
 
 ## 2. Configure the environment
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `SESSION_SECRET` | yes | Seals the session cookie — generate with `openssl rand -hex 32` |
-| `SUPABASE_URL` | yes | Project URL, used on the server |
-| `SUPABASE_SECRET_KEY` | yes | Server key; bypasses RLS, never expose it to the browser |
-| `VITE_SUPABASE_URL` | yes | Project URL for the browser bundle |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | yes | Public key for the browser bundle |
-| `VITE_SITE_URL` | no | Canonical app URL; defaults to `https://drawy.pratyay.online` |
-| `SENTRY_AUTH_TOKEN` | no | Uploads source maps during the build |
+| Variable                        | Required | Purpose                                                         |
+| ------------------------------- | -------- | --------------------------------------------------------------- |
+| `SESSION_SECRET`                | yes      | Seals the session cookie — generate with `openssl rand -hex 32` |
+| `SUPABASE_URL`                  | yes      | Project URL, used on the server                                 |
+| `SUPABASE_SECRET_KEY`           | yes      | Server key; bypasses RLS, never expose it to the browser        |
+| `VITE_SUPABASE_URL`             | yes      | Project URL for the browser bundle                              |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | yes      | Public key for the browser bundle                               |
+| `VITE_SITE_URL`                 | no       | Canonical app URL; defaults to `https://drawy.pratyay.online`   |
+| `SENTRY_AUTH_TOKEN`             | no       | Uploads source maps during the build                            |
 
 The repo's `.env.example` is encrypted with sops. With the age key,
 `mise run decrypt` turns it into `.env`; otherwise write `.env` yourself.
