@@ -13,6 +13,6 @@
   "workers_dev": true,
   "preview_urls": false,
   "observability": {
-    "enabled": true,
-  },
+    "enabled": true
+  }
 }
