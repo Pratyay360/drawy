@@ -166,11 +166,14 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
                         : "Failed to load canvas — check network and retry",
                 );
             } finally {
-                // if (seq !== fetchSeqRef.current) return;
-                if (isInitialMount) {
-                    setLoading(false);
-                } else {
-                    setIsChangingCanvas(false);
+                // A stale request must not touch the loading state, but a
+                // `return` here would swallow the error of the try block.
+                if (seq === fetchSeqRef.current) {
+                    if (isInitialMount) {
+                        setLoading(false);
+                    } else {
+                        setIsChangingCanvas(false);
+                    }
                 }
             }
         },

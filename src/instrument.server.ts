@@ -7,7 +7,7 @@ import * as Sentry from "@sentry/tanstackstart-react";
 const isWorkersRuntime =
 	(typeof globalThis.navigator?.userAgent === "string" &&
 		globalThis.navigator.userAgent.includes("Cloudflare")) ||
-	typeof globalThis.caches?.default !== "undefined";
+	(typeof globalThis.caches !== "undefined" && "default" in globalThis.caches);
 
 if (!isWorkersRuntime) {
 	Sentry.init({

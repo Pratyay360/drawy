@@ -1,9 +1,7 @@
 if (typeof window === "undefined") {
-    Object.defineProperty(globalThis, "window", {
-        value: globalThis,
-        writable: true,
-        configurable: true,
-    });
+    // `window` is deliberately not faked here. TanStack Start decides whether
+    // it runs on the server with `typeof window === "undefined"`, and a fake
+    // window makes every server function look like a browser call.
     if (!("document" in globalThis)) {
         const createElement = () => ({
             getContext: () => ({
@@ -76,25 +74,8 @@ if (typeof window === "undefined") {
             configurable: true,
         });
     }
-    if (!("location" in globalThis)) {
-        Object.defineProperty(globalThis, "location", {
-            value: {
-                origin: "http://localhost",
-                protocol: "http:",
-                host: "localhost",
-                hostname: "localhost",
-                port: "",
-                pathname: "/",
-                search: "",
-                hash: "",
-                href: "http://localhost/",
-            },
-            writable: true,
-            configurable: true,
-        });
-    }
     if (!("EXCALIDRAW_EXPORT_SOURCE" in globalThis)) {
-        (globalThis as any).EXCALIDRAW_EXPORT_SOURCE = "http://localhost";
+        (globalThis as any).EXCALIDRAW_EXPORT_SOURCE = (globalThis as any).location?.origin;
     }
     if (!("devicePixelRatio" in globalThis)) {
         (globalThis as any).devicePixelRatio = 1;

@@ -29,7 +29,14 @@ import { useCanvasStore } from "#/stores/canvas";
 import { useUIStore } from "#/stores/ui";
 import { useTheme } from "../../hooks/usetheme";
 import { updateCanvasTitle } from "../../services/canvases";
-import { onLibraryItemsInstalled, setUserLibrary } from "../../services/libraries";
+import {
+    type ExcalidrawLibraryFile,
+    getLibraryAssetUrl,
+    installLibraryItems,
+    onLibraryItemsInstalled,
+    setUserLibrary,
+    toLibraryItems,
+} from "../../services/libraries";
 import { LibraryPanelTab } from "../library-panel-tab";
 import { Sidebar } from "../sidebar";
 import { useCanvasHandlers } from "./use-canvas-handlers";
@@ -128,22 +135,28 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
 
     // --- #addLibrary hash callback (excalidraw.com "Add to library" redirect) ---
     useEffect(() => {
-        const api = lifecycle.excalidrawAPI;
-        if (!api) return;
+        if (!lifecycle.excalidrawAPI) return;
 
-        const hash = window.location.hash.slice(1);
-        if (!hash.includes("addLibrary=")) return;
+        const rawHash = globalThis.location.hash.replace(/^#/, "");
+        if (!rawHash.includes("addLibrary")) return;
 
-        const params = new URLSearchParams(hash);
-        const libraryUrl = params.get("addLibrary");
-        // Strip the hash so a refresh doesn't re-import the library
-        window.history.replaceState(null, "", window.location.pathname + window.location.search);
-        if (!libraryUrl) return;
+        const params = new URLSearchParams(rawHash);
+        const rawLibraryUrl = params.get("addLibrary");
+        if (!rawLibraryUrl) return;
 
-        // Only import from excalidraw.com domains (covers libraries.excalidraw.com)
+        // Clear the hash immediately so a refresh doesn't re-import.
+        globalThis.history.replaceState(
+            null,
+            "",
+            globalThis.location.pathname + globalThis.location.search,
+        );
+
+        // Only import from excalidraw.com domains (covers libraries.excalidraw.com).
+        // Relative paths resolve against libraries.excalidraw.com, matching
+        // getLibraryAssetUrl's semantics.
         let parsedUrl: URL;
         try {
-            parsedUrl = new URL(libraryUrl);
+            parsedUrl = new URL(rawLibraryUrl, "https://libraries.excalidraw.com/libraries/");
         } catch {
             return;
         }
@@ -157,27 +170,21 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
 
         void (async () => {
             try {
-                const res = await fetch(libraryUrl);
-                if (!res.ok) return;
-                const data: unknown = await res.json();
-                // excalidrawlib files store items under `library`; older/plain
-                // exports may use `libraryItems` or be a bare array. Each form is
-                // a valid LibraryItems_anyVersion that updateLibrary can normalize.
-                const libraryItems = Array.isArray(data)
-                    ? data
-                    : ((data as { library?: unknown[] })?.library ??
-                      (data as { libraryItems?: unknown[] })?.libraryItems ??
-                      []);
-                if (libraryItems.length === 0) return;
-                await api.updateLibrary({
-                    libraryItems: libraryItems as Parameters<
-                        typeof api.updateLibrary
-                    >[0]["libraryItems"],
-                    merge: true,
-                    openLibraryMenu: true,
-                });
-            } catch {
-                // Import is best-effort; ignore network/parse failures
+                const contentUrl = getLibraryAssetUrl(parsedUrl.href);
+                const response = await fetch(contentUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const content = (await response.json()) as ExcalidrawLibraryFile;
+                const libraryId =
+                    parsedUrl.pathname.split("/").pop()?.replace(/\.excalidrawlib$/i, "") ||
+                    "imported";
+                const items = await toLibraryItems(content, libraryId);
+                if (items.length === 0) {
+                    console.warn("addLibrary callback: no items found in", contentUrl);
+                    return;
+                }
+                await installLibraryItems(items);
+            } catch (error) {
+                console.error("Failed to import library from addLibrary callback:", error);
             }
         })();
     }, [lifecycle.excalidrawAPI]);

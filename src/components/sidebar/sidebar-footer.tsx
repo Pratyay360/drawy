@@ -7,7 +7,7 @@ import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { LogOut, Mail } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { WebsiteCarbonBadge } from "react-websitecarbon-badge";
 import { CONTACT_URL } from "#/components/site-footer";
 import { useTheme } from "#/hooks/usetheme";
@@ -23,6 +23,14 @@ export function SidebarFooter() {
 	const setSigningOut = useSidebarStore((s) => s.setSigningOut);
 	const { isCollapsed } = useSideNavCollapse();
 	const { mode } = useTheme();
+
+	// The carbon badge needs a page URL and styled-components cannot render it
+	// on the server, so it only appears once the page is interactive.
+	const [carbonUrl, setCarbonUrl] = useState<string | null>(null);
+
+	useEffect(() => {
+		setCarbonUrl(window.location.href);
+	}, []);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -123,7 +131,7 @@ export function SidebarFooter() {
 					Cookies
 				</Link>
 			</HStack>
-			<WebsiteCarbonBadge dark={mode === "dark"} />
+			{carbonUrl && <WebsiteCarbonBadge dark={mode === "dark"} url={carbonUrl} />}
 		</VStack>
 	);
 }
