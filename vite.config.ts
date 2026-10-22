@@ -2,8 +2,36 @@ import { sentryTanstackStart } from "@sentry/tanstackstart-react/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import { nitro } from "nitro/vite";
+
+/**
+ * Excalidraw reads `window` and `document` at module scope, so evaluating it in
+ * the Worker throws `ReferenceError: window is not defined`. Every runtime
+ * import of it is a client-only dynamic import inside an effect, so the SSR
+ * environment gets an empty stub instead.
+ *
+ * This is not only about bundle size: Nitro hoists the shared `unenv`
+ * polyfills (`globalthis`, `performance`) into the Excalidraw library chunk, and
+ * every SSR chunk imports those polyfills. That static import made the server
+ * entry evaluate the whole Excalidraw bundle on boot and every request 500'd.
+ */
+function excalidrawServerStub(): Plugin {
+  const stubId = "\0drawy:excalidraw-server-stub";
+  const entries = new Set(["@excalidraw/excalidraw", "@excalidraw/excalidraw/index"]);
+
+  return {
+    name: "drawy:excalidraw-server-stub",
+    enforce: "pre",
+    applyToEnvironment: (environment) => environment.name === "ssr",
+    resolveId(source) {
+      return entries.has(source) ? stubId : null;
+    },
+    load(id) {
+      return id === stubId ? "export default {};" : null;
+    },
+  };
+}
 
 export default defineConfig({
   server: {
@@ -22,6 +50,7 @@ export default defineConfig({
   },
 
   plugins: [
+    excalidrawServerStub(),
     // The Cloudflare plugin owns the "ssr" environment: it runs the Worker in
     // workerd and bundles every dependency into it. It rejects
     // `ssr.resolve.external`, so Excalidraw can no longer be externalised the
