@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+/*@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Sarina&family=JetBrains+Mono:wght@400;500&display=swap");*/
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tailwind inline theme — mapped to Butter/Astryx tokens so utilities like
+   bg-background, text-foreground, border-border reflect the Butter palette.
+   Butter's light/dark variants are handled via light-dark() + color-scheme,
+   so these mappings automatically follow the current mode. */
+@theme inline {
+    --font-sans: var(--font-family-body);
+    --font-heading: var(--font-family-heading);
+    --font-mono: var(--font-family-code);
+
+    --color-background: var(--color-background-body);
+    --color-foreground: var(--color-text-primary);
+    --color-card: var(--color-background-card);
+    --color-card-foreground: var(--color-text-primary);
+    --color-popover: var(--color-background-popover);
+    --color-popover-foreground: var(--color-text-primary);
+    --color-primary: var(--color-accent);
+    --color-primary-foreground: var(--color-on-accent);
+    --color-secondary: var(--color-background-muted);
+    --color-secondary-foreground: var(--color-text-primary);
+    --color-muted: var(--color-background-muted);
+    --color-muted-foreground: var(--color-text-secondary);
+    --color-accent: var(--color-accent);
+    --color-accent-foreground: var(--color-on-accent);
+    --color-destructive: var(--color-error);
+    --color-border: var(--color-border);
+    --color-input: var(--color-border);
+    --color-ring: var(--color-accent);
+
+    --color-sidebar: var(--color-background-surface);
+    --color-sidebar-foreground: var(--color-text-primary);
+    --color-sidebar-primary: var(--color-accent);
+    --color-sidebar-primary-foreground: var(--color-on-accent);
+    --color-sidebar-accent: var(--color-background-muted);
+    --color-sidebar-accent-foreground: var(--color-text-primary);
+    --color-sidebar-border: var(--color-border);
+    --color-sidebar-ring: var(--color-accent);
+
+    --color-chart-1: var(--color-accent);
+    --color-chart-2: var(--color-success);
+    --color-chart-3: var(--color-warning);
+    --color-chart-4: var(--color-error);
+    --color-chart-5: var(--color-text-secondary);
+
+    --radius-sm: calc(var(--radius-element) * 0.6);
+    --radius-md: calc(var(--radius-element) * 0.8);
+    --radius-lg: var(--radius-element);
+    --radius-xl: calc(var(--radius-element) * 1.4);
+    --radius-2xl: calc(var(--radius-element) * 1.8);
+    --radius-3xl: calc(var(--radius-element) * 2.2);
+    --radius-4xl: calc(var(--radius-element) * 2.6);
+}
+
+@layer base {
+    * {
+        border-color: var(--color-border);
+        outline-color: color-mix(in oklab, var(--color-accent) 50%, transparent);
+    }
+
+    html {
+        font-family: var(--font-family-body);
+    }
+
+    body {
+        background-color: var(--color-background-body);
+        color: var(--color-text-primary);
+    }
+}

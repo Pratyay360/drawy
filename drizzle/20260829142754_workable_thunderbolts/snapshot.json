@@ -1,0 +1,180 @@
+{
+    "version": "8",
+    "dialect": "postgres",
+    "id": "9c53a2a4-a35e-4660-9c51-e685deb6b5d5",
+    "prevIds": ["00000000-0000-0000-0000-000000000000"],
+    "ddl": [
+        {
+            "isRlsEnabled": false,
+            "name": "app_users",
+            "entityType": "tables",
+            "schema": "public"
+        },
+        {
+            "isRlsEnabled": false,
+            "name": "canvases",
+            "entityType": "tables",
+            "schema": "public"
+        },
+        {
+            "type": "text",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": null,
+            "generated": null,
+            "identity": null,
+            "name": "username",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "app_users"
+        },
+        {
+            "type": "text",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": null,
+            "generated": null,
+            "identity": null,
+            "name": "password_hash",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "app_users"
+        },
+        {
+            "type": "timestamp with time zone",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": "now()",
+            "generated": null,
+            "identity": null,
+            "name": "created_at",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "app_users"
+        },
+        {
+            "type": "uuid",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": "gen_random_uuid()",
+            "generated": null,
+            "identity": null,
+            "name": "id",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "type": "text",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": null,
+            "generated": null,
+            "identity": null,
+            "name": "user_id",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "type": "text",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": "'Untitled'",
+            "generated": null,
+            "identity": null,
+            "name": "title",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "type": "jsonb",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": "'\"[]\"'",
+            "generated": null,
+            "identity": null,
+            "name": "elements",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "type": "jsonb",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": "'\"{}\"'",
+            "generated": null,
+            "identity": null,
+            "name": "app_state",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "type": "timestamp with time zone",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": "now()",
+            "generated": null,
+            "identity": null,
+            "name": "created_at",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "type": "timestamp with time zone",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 0,
+            "default": "now()",
+            "generated": null,
+            "identity": null,
+            "name": "updated_at",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "type": "text",
+            "typeSchema": null,
+            "notNull": true,
+            "dimensions": 1,
+            "default": "'{}'",
+            "generated": null,
+            "identity": null,
+            "name": "shared_with",
+            "entityType": "columns",
+            "schema": "public",
+            "table": "canvases"
+        },
+        {
+            "columns": ["username"],
+            "nameExplicit": false,
+            "name": "app_users_pkey",
+            "schema": "public",
+            "table": "app_users",
+            "entityType": "pks"
+        },
+        {
+            "columns": ["id"],
+            "nameExplicit": false,
+            "name": "canvases_pkey",
+            "schema": "public",
+            "table": "canvases",
+            "entityType": "pks"
+        }
+    ],
+    "renames": []
+}

@@ -1,0 +1,9 @@
+{
+    "$schema": "https://www.partykit.io/schema.json",
+    "name": "drawy",
+    "main": "./src/party/server.ts",
+    "compatibilityDate": "2026-08-29",
+    "parties": {
+        "rooms": "./src/party/rooms.ts"
+    }
+}

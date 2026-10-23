@@ -1,0 +1,22 @@
+[tools]
+vp = "latest"
+nub = "latest"
+sops = "latest"
+bun = "latest"
+wrangler = { version = "latest", allow_builds = ["esbuild", "sharp", "workerd"] }
+
+[env]
+SOPS_AGE_RECIPIENTS = "age1a9p2k3u40mvdntpad4ga7akvnnqqwm6eskfr2yxkgq3u9lp7jfns2wgqty, age155th0ptdjf3gkp7pmzqcepe9kec9n3w32l87czf29fda4a2gj49ql0pg8a"
+_.file = { path = ".env" }
+
+[tasks]
+build = { run = "vp build" }
+lint = { run = "bunx oxlint" }
+format = { run = "bunx oxfmt ." }
+encrypt = { run = "sops -e -i .env && mv .env .env.example" }
+decrypt = { run = "mv .env.example .env && sops -d -i .env " }
+dev = { run = "bun run dev" }
+preview = { run = "bun run preview" }
+deploy = { run = "bun run deploy" }
+"deploy:dry-run" = { run = "bun run deploy:dry-run" }
+"party:deploy" = { run = "bun run party:deploy" }

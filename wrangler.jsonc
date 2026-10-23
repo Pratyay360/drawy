@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "drawyparty",
+  // Nitro's "cloudflare_module" preset emits the worker into .output/server.
+  // Run `bun run build` before deploying, otherwise these paths are missing.
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2026-10-22",
+  // Nitro's cloudflare preset needs the Node.js compat layer (node:process,
+  // node:crypto, ...) for the server bundle.
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    // The client bundle that Nitro writes to .output/public. The binding name
+    // has to stay "ASSETS": the generated worker reads env.ASSETS.fetch(...)
+    // for public files.
+    "directory": ".output/public",
+    "binding": "ASSETS",
+  },
+  "previews": {
+    "vars": {
+      "VITE_PARTYKIT_URL": "drawy.pratyay360.partykit.dev",
+    },
+  },
+  // Nitro emits the server as ES modules that import each other with relative
+  // paths (./_libs/..., ./_ssr/...). Uploading them unbundled keeps those
+  // imports intact, and the ESModule rule stops Wrangler from parsing them as
+  // CommonJS.
+  "no_bundle": true,
+  "rules": [{ "type": "ESModule", "globs": ["**/*.mjs"] }],
+  "observability": { "enabled": true },
+}
