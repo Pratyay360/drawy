@@ -1,7 +1,7 @@
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { BinaryFiles } from "@excalidraw/excalidraw/types";
 import PartySocket from "partysocket";
-import YPartyKitProvider from "y-partykit/provider";
+import YProvider from "y-partyserver/provider";
 import * as Y from "yjs";
 import { SINGLETON_ROOM_ID } from "../party/rooms";
 
@@ -41,7 +41,7 @@ type PresenceCb = (count: number) => void;
 export class CanvasRealtime {
     private socket: PartySocket | undefined;
     private ydoc: Y.Doc | undefined;
-    private provider: YPartyKitProvider | undefined;
+    private provider: YProvider | undefined;
     private presenceSocket: PartySocket | undefined;
     private sceneCbs = new Set<SceneCb>();
     private savedCbs = new Set<SavedCb>();
@@ -80,7 +80,7 @@ export class CanvasRealtime {
         this.socket = socket;
 
         const ydoc = new Y.Doc();
-        const provider = new YPartyKitProvider(host, this.canvasId, ydoc, {
+        const provider = new YProvider(host, this.canvasId, ydoc, {
             party: "main",
             params: { kind: "presence" },
         });
