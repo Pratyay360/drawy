@@ -23,20 +23,18 @@ drawings. This page walks through all three.
 
 - MISE the version manager
 - A PostgreSQL database — Neon, Supabase or any
-- A PartyKit project on Cloudflare
-- Any host that can run the Nitro build; the Netlify preset is already wired up
+- A PartyKit project (realtime).
+- Any serverless platform like vercel, netlify, cloudflare worker.
 
 ## 1. Install
 
 ```bash
-git clone https://github.com/Pratyay360/drawyparty.git
-cd drawyparty
-bun install
+git clone https://github.com/Pratyay360/drawy.git
+cd drawy
+mise deps
 ```
 
-[mise](https://mise.jdx.dev/) is optional. `mise install` pulls in the pinned
-bun and sops from `mise.toml`, and `mise run <task>` gives you the same
-commands the maintainers use.
+[mise](https://mise.jdx.dev/) is optional. `mise install` pulls in the pinned dependencies from `mise.toml`, and `mise run <task>` gives you the same commands the maintainers use.
 
 ## 2. Configure the environment
 
@@ -47,22 +45,16 @@ commands the maintainers use.
 | `SESSION_SECRET`    | yes      | Signs the session cookie — generate one with `openssl rand -hex 32`         |
 | `VITE_PARTYKIT_URL` | yes      | Host of the PartyKit deployment, e.g. `drawy.username.partykit.dev`         |
 | `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`          |
-| `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build                                        |
+| `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build (optional)                             |
 | `PARTYKIT_SECRET`   | no       | Only used by the PartyKit deploy template; the app never reads it           |
 
 
-The repository's `.env.example` is encrypted with sops. With the matching age
-key, `mise run decrypt` unwraps it into `.env`; otherwise write `.env` yourself.
-
-The app picks its database driver from the host in `DATABASE_URL`: a Neon host
-is reached over Neon's HTTP API, so no TCP connection to port 5432 stays open
-and serverless hosts are happy. Any other Postgres — Supabase, your own
-server — is reached over plain TCP.
+The repository's `.env.example` can be used as a reference. 
 
 ## 3. Create the tables
 
 ```bash
-bun run db:push
+bun run db:generate
 ```
 
 This applies `src/lib/db/schema.ts` to `DATABASE_URL` and creates `app_users`,
