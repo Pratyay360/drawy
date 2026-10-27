@@ -1,17 +1,28 @@
 ---
 title: Self-hosting Drawy Party
-description: Run your own instance — the TanStack Start app, the PartyKit worker and Postgres.
+description: >-
+  Run your own instance — the TanStack Start app, the PartyKit worker and
+  Postgres.
+date: '1111-11-11T11:11:00Z'
+draft: false
+tags:
+  - self
+  - hosting
+  - self hosting
+  - drawy
+  - partykit
+  - cloudflare workers
+isCJKLanguage: false
+headless: false
 order: 5
 ---
-
-Drawy Party is three pieces: the TanStack Start app rendered by Nitro, the
-PartyKit worker that relays realtime edits, and Postgres, which holds the
+Drawy has three components, frontend, backend and data store which holds the  
 drawings. This page walks through all three.
 
 ## What you need
 
-- Bun 1.4 or newer
-- A PostgreSQL database — Neon, Supabase or your own server
+- MISE the version manager
+- A PostgreSQL database — Neon, Supabase or any
 - A PartyKit project on Cloudflare
 - Any host that can run the Nitro build; the Netlify preset is already wired up
 
@@ -29,14 +40,16 @@ commands the maintainers use.
 
 ## 2. Configure the environment
 
+
 | Variable            | Required | Purpose                                                                     |
 | ------------------- | -------- | --------------------------------------------------------------------------- |
 | `DATABASE_URL`      | yes      | Postgres connection string; prefer a pooled URL if your provider offers one |
 | `SESSION_SECRET`    | yes      | Signs the session cookie — generate one with `openssl rand -hex 32`         |
 | `VITE_PARTYKIT_URL` | yes      | Host of the PartyKit deployment, e.g. `drawy.username.partykit.dev`         |
-| `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`         |
+| `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`          |
 | `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build                                        |
 | `PARTYKIT_SECRET`   | no       | Only used by the PartyKit deploy template; the app never reads it           |
+
 
 The repository's `.env.example` is encrypted with sops. With the matching age
 key, `mise run decrypt` unwraps it into `.env`; otherwise write `.env` yourself.
@@ -125,13 +138,13 @@ realtime host and `VITE_SITE_URL` for the canonical URL that the sitemap and
 ## Operational notes
 
 - Your reverse proxy must forward WebSocket upgrades on `/parties`; the browser
-  connects there directly for realtime sync.
+connects there directly for realtime sync.
 - Image uploads go to imgcdn.dev from `src/lib/s3.ts`. Replace that function if
-  you would rather keep objects on your own storage.
+you would rather keep objects on your own storage.
 - The session cookie is only marked `Secure` when `NODE_ENV=production`, so
-  serve the app over HTTPS.
+serve the app over HTTPS.
 - Lint and format are mise tasks: `mise run lint` (oxlint) and `mise run format`
-  (oxfmt).
+(oxfmt).
 
 ## Related
 
