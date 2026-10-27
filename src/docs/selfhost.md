@@ -55,13 +55,15 @@ The repository's `.env.example` can be used as a reference.
 
 ```bash
 bun run db:generate
+bun run db:migrate
+bun run db:push
 ```
 
 This applies `src/lib/db/schema.ts` to `DATABASE_URL` and creates `app_users`,
 `canvases` and `canvas_versions`. If you prefer versioned migrations, run
 `bun run db:generate` and then `bun run db:migrate`.
 
-## 4. Deploy the realtime worker
+## 4. Deploy the partykit worker
 
 ```bash
 bun run party:deploy
@@ -73,14 +75,13 @@ The command prints the deployment host; use it for `VITE_PARTYKIT_URL`.
 The worker relays Yjs updates but stores nothing — the browser saves each
 canvas to Postgres, which stays the source of truth.
 
-To host the realtime worker in your own Cloudflare account instead of
-PartyKit Cloud, add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` to your
+To host the realtime worker in your own Cloudflare account instead of PartyKit Cloud, add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` to your
 shell and run `bunx partykit deploy --domain parties.example.com`.
 
 ## 5. Run locally
 
 ```bash
-bun run dev     # app on http://localhost:3000
+bun run dev
 ```
 
 In development the Vite server proxies `/parties` to `VITE_PARTYKIT_URL`, so
@@ -129,8 +130,8 @@ realtime host and `VITE_SITE_URL` for the canonical URL that the sitemap and
 
 ## Operational notes
 
-- Your reverse proxy must forward WebSocket upgrades on `/parties`; the browser
-connects there directly for realtime sync.
+- Your reverse proxy must forward WebSocket upgrades on `/parties`; the browser  
+connects there directly for real time sync.
 - Image uploads go to imgcdn.dev from `src/lib/s3.ts`. Replace that function if
 you would rather keep objects on your own storage.
 - The session cookie is only marked `Secure` when `NODE_ENV=production`, so
