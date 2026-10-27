@@ -44,9 +44,6 @@ bun install
 | `SENTRY_AUTH_TOKEN`             | no       | Uploads source maps during the build                            |
 
 
-The repo's `.env.example` is encrypted with sops. With the age key,
-`mise run decrypt` turns it into `.env`; otherwise write `.env` yourself.
-
 Only `VITE_*` variables reach the client bundle, so keep the secret key out of
 anything with that prefix.
 
