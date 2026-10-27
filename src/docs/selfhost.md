@@ -1,3 +1,11 @@
+---
+title: Self-hosting Drawy with Supabase backend
+description: Self-hosting Drawy with Supabase backend instead of partykit.
+date: '1111-11-11T11:11:00Z'
+draft: false
+isCJKLanguage: false
+headless: false
+---
 # Self-hosting Drawy with Supabase
 
 Drawy needs one Supabase project for Postgres, Realtime and Storage, plus a host
@@ -19,6 +27,7 @@ bun install
 
 ## 2. Configure the environment
 
+
 | Variable                        | Required | Purpose                                                         |
 | ------------------------------- | -------- | --------------------------------------------------------------- |
 | `SESSION_SECRET`                | yes      | Seals the session cookie — generate with `openssl rand -hex 32` |
@@ -28,6 +37,7 @@ bun install
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | yes      | Public key for the browser bundle                               |
 | `VITE_SITE_URL`                 | no       | Canonical app URL; defaults to `https://drawy.pratyay.online`   |
 | `SENTRY_AUTH_TOKEN`             | no       | Uploads source maps during the build                            |
+
 
 The repo's `.env.example` is encrypted with sops. With the age key,
 `mise run decrypt` turns it into `.env`; otherwise write `.env` yourself.
@@ -69,9 +79,9 @@ deploy, then set every environment variable in the hosting dashboard.
 ## Notes
 
 - Realtime is enabled by default on Supabase projects; the app uses broadcast
-  and presence channels, so leaving it on is required.
+and presence channels, so leaving it on is required.
 - Auth is app-owned (`app_users` table), so Supabase Auth sign-ups and email
-  templates are unused.
+templates are unused.
 - Images are uploaded to a public `canvas-assets` bucket with a 10 MB limit, and
-  the app creates the bucket on first upload.
+the app creates the bucket on first upload.
 - Lint and format are mise tasks: `mise run lint` and `mise run format`.
