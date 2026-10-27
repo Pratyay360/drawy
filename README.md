@@ -1,36 +1,36 @@
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/stars/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="GitHub Stars" src="https://www.shieldcn.dev/github/stars/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/stars/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="GitHub Stars" src="https://www.shieldcn.dev/github/stars/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
 
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/forks/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="GitHub Forks" src="https://www.shieldcn.dev/github/forks/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/forks/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="GitHub Forks" src="https://www.shieldcn.dev/github/forks/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/watchers/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Watchers" src="https://www.shieldcn.dev/github/watchers/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/watchers/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Watchers" src="https://www.shieldcn.dev/github/watchers/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/branches/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Branches" src="https://www.shieldcn.dev/github/branches/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/branches/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Branches" src="https://www.shieldcn.dev/github/branches/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/contributors/pratyay360/drawy-party.svg?theme=emerald&amp;size=sm&amp;mode=dark"><img alt="Contributors" src="https://www.shieldcn.dev/github/contributors/pratyay360/drawy-party.svg?theme=emerald&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/contributors/pratyay360/drawy.svg?theme=emerald&amp;size=sm&amp;mode=dark"><img alt="Contributors" src="https://www.shieldcn.dev/github/contributors/pratyay360/drawy.svg?theme=emerald&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/last-commit/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Last commit" src="https://www.shieldcn.dev/github/last-commit/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/last-commit/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Last commit" src="https://www.shieldcn.dev/github/last-commit/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/commits/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Commits" src="https://www.shieldcn.dev/github/commits/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/commits/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Commits" src="https://www.shieldcn.dev/github/commits/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/open-issues/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Open issues" src="https://www.shieldcn.dev/github/open-issues/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/open-issues/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Open issues" src="https://www.shieldcn.dev/github/open-issues/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/closed-issues/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Closed issues" src="https://www.shieldcn.dev/github/closed-issues/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=light"/></picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/closed-issues/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Closed issues" src="https://www.shieldcn.dev/github/closed-issues/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=light"/></picture>
 <!--</picture>-->
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/open-prs/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Open PRs" src="https://www.shieldcn.dev/github/open-prs/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"></picture>
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/closed-prs/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Closed PRs" src="https://www.shieldcn.dev/github/closed-prs/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=light"></picture>
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/merged-prs/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Merged PRs" src="https://www.shieldcn.dev/github/merged-prs/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=light"></picture>
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/release/pratyay360/drawy-party.svg?size=sm&amp;mode=dark"><img alt="Release" src="https://www.shieldcn.dev/github/release/pratyay360/drawy-party.svg?size=sm&amp;mode=light"></picture>
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/ci/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="CI" src="https://www.shieldcn.dev/github/ci/pratyay360/drawy-party.svg?variant=secondary&amp;size=sm&amp;mode=light"></picture>
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/license/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="License" src="https://www.shieldcn.dev/github/license/pratyay360/drawy-party.svg?variant=ghost&amp;size=sm&amp;mode=light"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/open-prs/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Open PRs" src="https://www.shieldcn.dev/github/open-prs/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/closed-prs/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Closed PRs" src="https://www.shieldcn.dev/github/closed-prs/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=light"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/merged-prs/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="Merged PRs" src="https://www.shieldcn.dev/github/merged-prs/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=light"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/release/pratyay360/drawy.svg?size=sm&amp;mode=dark"><img alt="Release" src="https://www.shieldcn.dev/github/release/pratyay360/drawy.svg?size=sm&amp;mode=light"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/ci/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="CI" src="https://www.shieldcn.dev/github/ci/pratyay360/drawy.svg?variant=secondary&amp;size=sm&amp;mode=light"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/license/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=dark"><img alt="License" src="https://www.shieldcn.dev/github/license/pratyay360/drawy.svg?variant=ghost&amp;size=sm&amp;mode=light"></picture>
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/badge/Private-package-red.svg?variant=secondary&amp;size=sm&amp;mode=dark"><img alt="Private package" src="https://www.shieldcn.dev/badge/Private-package-red.svg?variant=secondary&amp;size=sm&amp;mode=light"></picture>
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/badge/Package_mgr-Bun-000000.svg?logo=bun&amp;variant=branded&amp;size=sm&amp;mode=dark"><img alt="Package mgr · Bun" src="https://www.shieldcn.dev/badge/Package_mgr-Bun-000000.svg?logo=bun&amp;variant=branded&amp;size=sm&amp;mode=light"></picture>
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/badge/Language-TypeScript-3178C6.svg?logo=typescript&amp;variant=branded&amp;size=sm&amp;mode=dark"><img alt="Language · TypeScript" src="https://www.shieldcn.dev/badge/Language-TypeScript-3178C6.svg?logo=typescript&amp;variant=branded&amp;size=sm&amp;mode=light"></picture>
@@ -49,12 +49,12 @@
 
 ---
 
-# Introducing Drawy-party (partykit + postgres version of the drawy app)
+# Introducing Drawy (partykit + postgres version of the drawy app)
 
 A real time collaboration capable drawing app(powered by Excalidraw) which is easy to deploy and self host built with the tech stack you already know.
 A easily selfhostable collaborative whiteboard powered by Excalidraw, PartyKit, and Postgres.
 Got tired of the single board limitation in excalidraw and wanted something I could actually deploy myself. Though the official Excalidraw Docker image is easy to run,
-but it doesn't provide a collaboration without a paid membership Drawy-Party adds a persistent, collaborative backend using PartyKit and postgres while
+but it doesn't provide a collaboration without a paid membership Drawy adds a persistent, collaborative backend using PartyKit and postgres while
 keeping Excalidraw as the whiteboard experience. Also, there are several similar alternatives like this, but tbh who wants to spin 2 3
 containers when everything can be compressed into one. Any one can deploy it on Vercel / Netlify like serverless platform..
 The goal is simple: deploy it anywhere, create virtually unlimited boards, and collaborate in real time.
@@ -64,7 +64,7 @@ built with the tech stack you already know.
 
 [![drawy party demo](https://img.youtube.com/vi/CLnAY4AO0yY/hqdefault.jpg)](http://www.youtube.com/watch?v=CLnAY4AO0yY "drawy + partykit")
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPratyay360%2Fdrawy-party&env=VITE_PARTYKIT_URL,PARTYKIT_SECRET,DATABASE_URL,SESSION_SECRET&project-name=drawy-party&repository-name=drawy-party)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPratyay360%2Fdrawy&env=VITE_PARTYKIT_URL,PARTYKIT_SECRET,DATABASE_URL,SESSION_SECRET&project-name=drawy&repository-name=drawy)
 
 [use now](https://drawyparty.pratyay.qzz.io)
 
@@ -114,7 +114,7 @@ Refer to `.env.example` for the naming conventions of .env also you can use
 
 tech stack
 
-1. PARTYSERVER ([partyserver](https://github.com/cloudflare/partykit/tree/main/packages/partyserver), the PartyKit successor) + [partysocket](https://github.com/cloudflare/partykit)
+1. cloudflare workers 
 2. POSTGREs ([postgresql](https://www.postgresql.org/)) [for free db connection refer to this article](https://github.com/alexeyfv/awesome-free-postgres)
 3. Tanstack start(frontend)
 4. vite-plus + nub (for dependency management)
