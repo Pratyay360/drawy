@@ -3,6 +3,11 @@ title: Self-hosting Drawy with Supabase backend
 description: Self-hosting Drawy with Supabase backend instead of partykit.
 date: '1111-11-11T11:11:00Z'
 draft: false
+tags:
+  - selfhost
+  - opensource
+  - drawy
+  - supabase
 isCJKLanguage: false
 headless: false
 ---
