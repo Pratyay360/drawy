@@ -1,7 +1,7 @@
 ---
 title: Self-hosting Drawy Party
 description: >-
-  Run your own instance — the TanStack Start app, the PartyKit worker and
+  Run your own instance — the TanStack Start app, the realtime worker and
   Postgres.
 date: '1111-11-11T11:11:00Z'
 draft: false
@@ -10,7 +10,7 @@ tags:
   - hosting
   - self hosting
   - drawy
-  - partykit
+  - partyserver
   - cloudflare workers
 isCJKLanguage: false
 headless: false
@@ -23,7 +23,8 @@ drawings. This page walks through all three.
 
 - MISE the version manager
 - A PostgreSQL database — Neon, Supabase or any
-- A PartyKit project (realtime).
+- A Cloudflare account — the realtime Durable Objects live in the same Worker
+  as the app, so `wrangler deploy` publishes everything.
 - Any serverless platform like vercel, netlify, cloudflare worker.
 
 ## 1. Install
@@ -43,10 +44,9 @@ mise deps
 | ------------------- | -------- | --------------------------------------------------------------------------- |
 | `DATABASE_URL`      | yes      | Postgres connection string; prefer a pooled URL if your provider offers one |
 | `SESSION_SECRET`    | yes      | Signs the session cookie — generate one with `openssl rand -hex 32`         |
-| `VITE_PARTYKIT_URL` | yes      | Host of the PartyKit deployment, e.g. `drawy.username.partykit.dev`         |
+| `VITE_PARTYKIT_URL` | no       | Realtime host; leave unset to use the app's own origin (same worker), e.g. `drawyparty.username.workers.dev` |
 | `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`          |
 | `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build (optional)                             |
-| `PARTYKIT_SECRET`   | no       | Only used by the PartyKit deploy template; the app never reads it           |
 
 
 The repository's `.env.example` can be used as a reference. 
@@ -63,20 +63,16 @@ This applies `src/lib/db/schema.ts` to `DATABASE_URL` and creates `app_users`,
 `canvases` and `canvas_versions`. If you prefer versioned migrations, run
 `bun run db:generate` and then `bun run db:migrate`.
 
-## 4. Deploy the partykit worker
+## 4. Realtime ships with the app
 
-```bash
-bun run party:deploy
-```
-
-`partykit.json` already points at `src/party/server.ts` and the `rooms` party.
-The command prints the deployment host; use it for `VITE_PARTYKIT_URL`.
+There is no separate realtime deployment: `src/party/index.ts` is the worker
+entry and routes `/parties/*` to two Durable Objects declared in
+`wrangler.jsonc` — `Main` (the editor rooms, `/parties/main/:room`) and `Rooms`
+(the occupancy singleton, `/parties/rooms/:room`). `bun run deploy` publishes
+both together.
 
 The worker relays Yjs updates but stores nothing — the browser saves each
 canvas to Postgres, which stays the source of truth.
-
-To host the realtime worker in your own Cloudflare account instead of PartyKit Cloud, add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` to your
-shell and run `bunx partykit deploy --domain parties.example.com`.
 
 ## 5. Run locally
 
@@ -89,10 +85,10 @@ you can develop against an already-deployed worker. To run the worker locally
 as well:
 
 ```bash
-bun run party:dev   # worker on http://localhost:1999
+bun run cf:dev   # built worker on http://localhost:8787 (app + rooms)
 ```
 
-Then set `VITE_PARTYKIT_URL=http://localhost:1999` and restart `bun run dev`.
+Then set `VITE_PARTYKIT_URL=http://localhost:8787` and restart `bun run dev`.
 
 ## 6. Deploy the app to Cloudflare Workers
 
@@ -106,10 +102,13 @@ bun run deploy         # builds and uploads to Cloudflare
 ```
 
 `wrangler.jsonc` in the repository root is the worker configuration: the
-worker name, the compatibility date and flags, and the `ASSETS` binding the
-generated server reads its public files from. Nitro mirrors that file into
-`.output/server/wrangler.json` and points Wrangler at it, so the root file
-stays the place to change things.
+worker name, the compatibility date and flags, the `ASSETS` binding the
+generated server reads its public files from, and the `Main` / `Rooms`
+Durable Object bindings the realtime rooms run in. Nitro's generated
+`.output/server/wrangler.json` redirect is switched off (`cloudflare:
+{ deployConfig: false }` in `vite.config.ts`) so this root file stays the one
+place to change things — its `main` points at `src/party/index.ts`, which
+wraps the Nitro bundle.
 
 Secrets live in the worker, not in the repository:
 
@@ -125,8 +124,9 @@ Neon over its HTTP API and signs sessions with the same secret as your local
 
 Variables prefixed with `VITE_` are inlined into the bundle at build time, so
 they have to be set before `bun run build`: `VITE_PARTYKIT_URL` for the
-realtime host and `VITE_SITE_URL` for the canonical URL that the sitemap and
-`robots.txt` advertise.
+realtime host (unset means same-origin, since the rooms live in this worker)
+and `VITE_SITE_URL` for the canonical URL that the sitemap and `robots.txt`
+advertise.
 
 ## Operational notes
 

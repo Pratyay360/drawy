@@ -3,12 +3,14 @@ import type { BinaryFiles } from "@excalidraw/excalidraw/types";
 import PartySocket from "partysocket";
 import YProvider from "y-partyserver/provider";
 import * as Y from "yjs";
-import { SINGLETON_ROOM_ID } from "../party/rooms";
+import { SINGLETON_ROOM_ID } from "../party/room-id";
 
-const PARTYKIT_HOST = import.meta.env.VITE_PARTYKIT_URL!;
+const PARTYKIT_HOST = import.meta.env.VITE_PARTYKIT_URL;
 
 function getPartykitHost(): string | undefined {
-    return PARTYKIT_HOST ?? (typeof window !== "undefined" ? window.location.host : undefined);
+    // Unset (or empty) means the rooms live in this same worker, so fall back
+    // to the app's own origin instead of disabling realtime.
+    return PARTYKIT_HOST || (typeof window !== "undefined" ? window.location.host : undefined);
 }
 
 function pickPresenceColor(): string {

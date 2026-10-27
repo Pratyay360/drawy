@@ -68,7 +68,7 @@ built with the tech stack you already know.
 
 [use now](https://drawyparty.pratyay.qzz.io)
 
-## if you want to run it host on your own partykit account and bring your own PostgreSQL db with pg pool support preferably and running on Netlify is purely optional, this app is built with [nitro](https://nitro.build/)
+## if you want to run it host on your own cloudflare account and bring your own PostgreSQL db with pg pool support preferably and running on Netlify is purely optional, this app is built with [nitro](https://nitro.build/)
 
 ## nitro is easy to deploy so no issues [deploy adapter](https://nitro.build/deploy)
 
@@ -87,18 +87,23 @@ bun run deploy             # build + wrangler deploy
 ```
 
 The worker is served from `https://<name>.<your-subdomain>.workers.dev`.
-Variables prefixed with `VITE_` (`VITE_PARTYKIT_URL`, `VITE_SITE_URL`) are
-inlined at build time, so set them before building. The realtime worker is
-deployed separately with `bun run party:deploy`.
+Variables prefixed with `VITE_` (`VITE_SITE_URL`, optionally
+`VITE_PARTYKIT_URL`) are inlined at build time, so set them before building.
+`VITE_PARTYKIT_URL` can stay unset: the realtime rooms ride along in the same
+worker (`/parties/main`, `/parties/rooms`), so clients talk to the app's own
+origin and one `bun run deploy` publishes the app and the collaboration
+backend together.
 
-## partykit for real time collab because it's free + nice
+## partyserver for real time collab because it's free + nice
 
 With [Excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
 [library Suppport](https://libraries.excalidraw.com/?theme=light&sort=default)
 
-Using partykit and [sync](https://docs.partykit.io/)
-and Netlify for hosting ... you can use any hosting provider if you want to ...
-if facing issues while hosting partykit, you can run it in your own cloudflare account.
+Using [partyserver](https://github.com/cloudflare/partykit/tree/main/packages/partyserver)
+(PartyKit's successor) and [sync](https://docs.partykit.io/)
+... you can use any hosting provider if you want to ...
+the rooms run as Durable Objects in your own Cloudflare account, so there is no
+third-party realtime platform in between you and Cloudflare.
 
 Host your own version, for privacy and owning your own data also relying on the
 hosted instance is not recommended cz (I am also on the free tier and can go off anytime on
@@ -109,7 +114,7 @@ Refer to `.env.example` for the naming conventions of .env also you can use
 
 tech stack
 
-1. PARTYKIT ([partykit](https://github.com/partykit/partykit))
+1. PARTYSERVER ([partyserver](https://github.com/cloudflare/partykit/tree/main/packages/partyserver), the PartyKit successor) + [partysocket](https://github.com/cloudflare/partykit)
 2. POSTGREs ([postgresql](https://www.postgresql.org/)) [for free db connection refer to this article](https://github.com/alexeyfv/awesome-free-postgres)
 3. Tanstack start(frontend)
 4. vite-plus + nub (for dependency management)

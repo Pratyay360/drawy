@@ -19,4 +19,3 @@ dev = { run = "bun run dev" }
 preview = { run = "bun run preview" }
 deploy = { run = "bun run deploy" }
 "deploy:dry-run" = { run = "bun run deploy:dry-run" }
-"party:deploy" = { run = "bun run party:deploy" }

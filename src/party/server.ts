@@ -1,10 +1,12 @@
 import * as decoding from "lib0/decoding";
 import * as encoding from "lib0/encoding";
-import type * as Party from "partykit/server";
+import { getServerByName, Server } from "partyserver";
+import type { Connection, ConnectionContext } from "partyserver";
 import * as awarenessProtocol from "y-protocols/awareness";
 import * as syncProtocol from "y-protocols/sync";
 import * as Y from "yjs";
-import { SINGLETON_ROOM_ID } from "./rooms";
+import { SINGLETON_ROOM_ID } from "./room-id";
+import type { RoomsEnv } from "./rooms";
 
 const messageSync = 0;
 const messageAwareness = 1;
@@ -12,6 +14,10 @@ const messageQueryAwareness = 3;
 const BATCH_SENTINEL = "y-pk-batch";
 
 type IncomingMessage = string | ArrayBuffer | ArrayBufferView;
+
+export type Env = RoomsEnv & {
+    Main: DurableObjectNamespace<EditorServer>;
+};
 
 function isBlobLike(value: unknown): value is Blob {
     return typeof Blob !== "undefined" && value instanceof Blob;
@@ -111,26 +117,24 @@ interface Client {
     receive: (message: IncomingMessage) => Promise<boolean>;
 }
 
-export default class EditorServer implements Party.Server {
+export class EditorServer extends Server<Env> {
     doc: Y.Doc | null = null;
     awareness: awarenessProtocol.Awareness | null = null;
 
-    private clients = new Map<Party.Connection, Client>();
+    private clients = new Map<Connection, Client>();
     private legacyStorageCleaned = false;
 
-    constructor(public room: Party.Room) {}
-
-    getConnectionTags(_connection: Party.Connection, context: Party.ConnectionContext) {
+    getConnectionTags(_connection: Connection, context: ConnectionContext) {
         const kind = new URL(context.request.url).searchParams.get("kind");
         return kind ? [kind] : [];
     }
 
-    async onConnect(conn: Party.Connection) {
-        // Normalize binary frames to ArrayBuffer. PartyKit's local dev
-        // runtime (undici WebSocket) defaults binaryType to "blob", which
-        // delivers binary frames as Blob — a Blob has no .buffer, so the
-        // old toBytes produced an empty Uint8Array that decoded as
-        // "Unexpected end of array". Setting arraybuffer fixes dev/prod parity.
+    async onConnect(conn: Connection) {
+        // Normalize binary frames to ArrayBuffer. Some runtimes default
+        // binaryType to "blob", which delivers binary frames as Blob — a Blob
+        // has no .buffer, so the old toBytes produced an empty Uint8Array that
+        // decoded as "Unexpected end of array". Setting arraybuffer fixes
+        // dev/prod parity.
         try {
             // Connection extends WebSocket; binaryType may be absent on
             // some runtimes, so guard with an optional cast.
@@ -175,7 +179,7 @@ export default class EditorServer implements Party.Server {
         } catch {}
     }
 
-    async onMessage(message: IncomingMessage, sender: Party.Connection) {
+    async onMessage(sender: Connection, message: IncomingMessage) {
         const client = this.clients.get(sender);
         if (client && (await client.receive(message))) {
             return;
@@ -189,23 +193,21 @@ export default class EditorServer implements Party.Server {
             return;
         }
         if (
-            data.type === "scene" ||
-            data.type === "saved" ||
-            data.event === "realtime-cursor-move"
+            data.type === "scene" || data.type === "saved" || data.event === "realtime-cursor-move"
         ) {
             this.broadcastToTag("scene", message, sender.id);
         }
     }
 
-    onClose(conn: Party.Connection) {
+    onClose(conn: Connection) {
         this.removeClient(conn);
     }
 
-    onError(conn: Party.Connection, _error: Error) {
+    onError(conn: Connection, _error: Error) {
         this.removeClient(conn);
     }
 
-    private removeClient(conn: Party.Connection) {
+    private removeClient(conn: Connection) {
         const client = this.clients.get(conn);
         if (!client) return;
         this.clients.delete(conn);
@@ -223,15 +225,16 @@ export default class EditorServer implements Party.Server {
      * canvases the user is not editing can still show live presence. */
     private async reportOccupancy() {
         try {
-            const rooms = this.room.context.parties["rooms"];
-            if (!rooms) return;
-            await rooms.get(SINGLETON_ROOM_ID).fetch("/", {
-                method: "POST",
-                body: JSON.stringify({
-                    room: this.room.id,
-                    count: Array.from(this.room.getConnections("presence")).length,
+            const rooms = await getServerByName(this.env.Rooms, SINGLETON_ROOM_ID);
+            await rooms.fetch(
+                new Request("https://occupancy.local/", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        room: this.name,
+                        count: Array.from(this.getConnections("presence")).length,
+                    }),
                 }),
-            });
+            );
         } catch {
             // Reporting occupancy is best effort; a failure here is not worth
             // interrupting the session for.
@@ -239,7 +242,7 @@ export default class EditorServer implements Party.Server {
     }
 
     private broadcastToTag(tag: string, message: string | Uint8Array, excludeId?: string) {
-        for (const conn of this.room.getConnections(tag)) {
+        for (const conn of this.getConnections(tag)) {
             if (conn.id === excludeId) continue;
             try {
                 conn.send(message);
@@ -256,8 +259,8 @@ export default class EditorServer implements Party.Server {
         if (this.legacyStorageCleaned) return;
         this.legacyStorageCleaned = true;
         try {
-            const entries = await this.room.storage.list({ limit: 1 });
-            if (entries.size > 0) await this.room.storage.deleteAll();
+            const entries = await this.ctx.storage.list({ limit: 1 });
+            if (entries.size > 0) await this.ctx.storage.deleteAll();
         } catch {}
     }
 
@@ -271,14 +274,10 @@ export default class EditorServer implements Party.Server {
         awareness.on(
             "update",
             (
-                {
-                    added,
-                    updated,
-                    removed,
-                }: { added: number[]; updated: number[]; removed: number[] },
+                { added, updated, removed }: { added: number[]; updated: number[]; removed: number[] },
                 origin: unknown,
             ) => {
-                const sender = origin as Party.Connection | null;
+                const sender = origin as Connection | null;
                 const changed = [...added, ...updated, ...removed];
                 if (sender !== null) {
                     const client = this.clients.get(sender);
@@ -306,14 +305,14 @@ export default class EditorServer implements Party.Server {
             encoding.writeVarUint(encoder, messageSync);
             syncProtocol.writeUpdate(encoder, update);
             const bytes = encoding.toUint8Array(encoder);
-            this.broadcastToTag("presence", bytes, (origin as Party.Connection | null)?.id);
+            this.broadcastToTag("presence", bytes, (origin as Connection | null)?.id);
         });
 
         this.doc = doc;
         this.awareness = awareness;
     }
 
-    private handleYjsMessage(conn: Party.Connection, bytes: Uint8Array) {
+    private handleYjsMessage(conn: Connection, bytes: Uint8Array) {
         const doc = this.doc;
         const awareness = this.awareness;
         if (!doc || !awareness) return;

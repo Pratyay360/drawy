@@ -1,15 +1,34 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "drawyparty",
-  // Nitro's "cloudflare_module" preset emits the worker into .output/server.
-  // Run `bun run build` before deploying, otherwise these paths are missing.
-  "main": ".output/server/index.mjs",
+  // One worker for the whole app: the entry routes /parties/* to the
+  // PartyServer Durable Objects and delegates everything else to the Nitro
+  // bundle. Nitro's "cloudflare_module" preset emits that bundle into
+  // .output/server, so run `bun run build` before deploying or running
+  // `wrangler dev` — otherwise the entry's import is missing.
+  "main": "src/party/index.ts",
   "compatibility_date": "2026-10-22",
   // Nitro's cloudflare preset needs the Node.js compat layer (node:process,
   // node:crypto, ...) for the server bundle.
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": false,
+  // Realtime rooms. Binding names kebab-case to the party paths clients
+  // already use: Main -> /parties/main/:room, Rooms -> /parties/rooms/:room.
+  "durable_objects": {
+    "bindings": [
+      { "name": "Main", "class_name": "EditorServer" },
+      { "name": "Rooms", "class_name": "OccupancyServer" }
+    ]
+  },
+  // wrangler does not create Durable Object migrations for you: add a new
+  // entry whenever a server class is added, renamed or removed.
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["EditorServer", "OccupancyServer"]
+    }
+  ],
   "assets": {
     // The client bundle that Nitro writes to .output/public. The binding name
     // has to stay "ASSETS": the generated worker reads env.ASSETS.fetch(...)
@@ -17,16 +36,5 @@
     "directory": ".output/public",
     "binding": "ASSETS",
   },
-  "previews": {
-    "vars": {
-      "VITE_PARTYKIT_URL": "drawy.pratyay360.partykit.dev",
-    },
-  },
-  // Nitro emits the server as ES modules that import each other with relative
-  // paths (./_libs/..., ./_ssr/...). Uploading them unbundled keeps those
-  // imports intact, and the ESModule rule stops Wrangler from parsing them as
-  // CommonJS.
-  "no_bundle": true,
-  "rules": [{ "type": "ESModule", "globs": ["**/*.mjs"] }],
   "observability": { "enabled": true },
 }

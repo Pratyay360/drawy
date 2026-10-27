@@ -13,8 +13,6 @@
     "deploy": "bun run build && wrangler deploy",
     "deploy:dry-run": "bun run build && wrangler deploy --dry-run",
     "cf:dev": "wrangler dev",
-    "party:dev": "partykit dev",
-    "party:deploy": "partykit deploy",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate"
@@ -79,7 +77,6 @@
     "@vitejs/plugin-react": "^6.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.11",
-    "partykit": "^0.0.115",
     "postgres": "^3.4.9",
     "turbo": "^2.11.10",
     "typescript": "^7.0.2",

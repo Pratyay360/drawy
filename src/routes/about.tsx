@@ -94,7 +94,7 @@ const STACK = [
     "Excalidraw for the canvas and editor",
     "TanStack Start and Router for the app shell and routing",
     "oRPC for the typed API between client and server",
-    "PartyKit for realtime presence and Yjs sync",
+    "PartyServer for realtime presence and Yjs sync",
     "Postgres for canvas storage, through Drizzle ORM",
     "Astryx for the component library and theming",
 ];
@@ -107,7 +107,8 @@ function AboutPage() {
                 <Text as="p" type="large">
                     Drawy is a collaborative drawing workspace. You get the full Excalidraw editor,
                     plus the collaboration features it leaves out — live cursors, shared canvases
-                    and version history — running on Cloudflare&apos;s PartyKit.
+                    and version history — running on Cloudflare Durable Objects via
+                    PartyServer.
                 </Text>
                 <Text as="p">
                     Everything is saved as you draw, so you can close the tab and pick up exactly

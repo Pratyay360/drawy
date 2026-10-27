@@ -16,7 +16,6 @@ todos.json
 !.vscode/extensions.json
 
 .vercel
-.partykit
 # Local secrets for `wrangler dev`
 .dev.vars
 # dotenv environment variable files
@@ -35,3 +34,4 @@ todos.json
 
 # Sentry Config File
 .env.sentry-build-plugin
+.commandcode/

@@ -13,11 +13,15 @@ export default defineConfig({
   server: {
     allowedHosts: true,
     proxy: (() => {
-      const target = process.env.VITE_PARTYKIT_URL!;
-      // const normalized = target.includes("://") ? target : `http://${target}`;
+      const configured = process.env.VITE_SITE_URL!;
+      const target = configured
+        ? /^https?:\/\//.test(configured)
+          ? configured
+          : `http://${configured}`
+        : "http://localhost:8787";
       return {
         "/parties": {
-          target: target,
+          target,
           ws: true,
           changeOrigin: true,
         },
@@ -34,7 +38,7 @@ export default defineConfig({
     tailwindcss(),
     nitro({
       preset: "cloudflare_module",
-      // Emit server-bundle source maps so Sentry can un-minify server stack traces.
+      cloudflare: { deployConfig: false },
       sourcemap: true,
       features: {
         websocket: true,
