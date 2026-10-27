@@ -11,7 +11,7 @@ tags:
 isCJKLanguage: false
 headless: false
 ---
-# Self-hosting Drawy with Supabase
+### Self-hosting Drawy with Supabase
 
 Drawy needs one Supabase project for Postgres, Realtime and Storage, plus a host
 for the TanStack Start app.
