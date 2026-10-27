@@ -1,18 +1,26 @@
 ---
 title: Libraries
-description: Reuse shapes across canvases by saving libraries from the public Excalidraw catalog.
+description: >-
+  Reuse shapes across canvases by saving libraries from the public Excalidraw
+  catalog.
+date: '1111-11-11T11:11:00Z'
+draft: false
+tags:
+  - library
+  - excalidraw
+  - cloudflare
+isCJKLanguage: false
+headless: false
 order: 3
 ---
+A library is a reusable set of shapes icons, diagram pieces, UI mockups that you can drop onto any canvas. 
 
-A library is a reusable set of shapes — icons, diagram pieces, UI mockups —
-that you can drop onto any canvas. Drawy uses Excalidraw's library format, so
-anything written for Excalidraw works here too.
+Drawy uses Excalidraw's library format, so anything written for Excalidraw works here too.
 
 ## Browse the catalog
 
 Select **Libraries** in the sidebar. The browser loads the public catalog from
-[libraries.excalidraw.com](https://libraries.excalidraw.com). Search by name,
-open a library to preview its items, and choose **Save** to keep it. Saved
+[libraries.excalidraw.com](https://libraries.excalidraw.com). Search by name, open a library to preview its items, and choose **Save** to keep it. Saved
 libraries show their item count in the same place.
 
 ## Saved libraries
@@ -24,7 +32,7 @@ same browser:
 - **Refresh** re-downloads the items if the upstream library changed.
 - **Browse** reopens that library's items.
 - **Remove** deletes the saved copy. Items you already added to your library
-  stay in the editor until you remove them there.
+stay in the editor until you remove them there.
 
 Saved libraries and library items live in your browser's local storage. They are
 not tied to your account and do not sync to another browser or device.
