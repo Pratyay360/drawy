@@ -34,13 +34,13 @@
     "@orpc/server": "^1.16.1",
     "@orpc/tanstack-query": "^1.16.1",
     "@orpc/zod": "^1.16.1",
-    "@sentry/tanstackstart-react": "^11.9.0",
-    "@sentry/vite-plugin": "^11.9.0",
+    "@sentry/tanstackstart-react": "^11.10.0",
+    "@sentry/vite-plugin": "^11.10.0",
     "@stylexjs/stylex": "^0.19.1",
     "@tailwindcss/vite": "^4.3.3",
-    "@tanstack/react-devtools": "^0.10.13",
-    "@tanstack/react-query": "^5.104.5",
-    "@tanstack/react-query-devtools": "^5.104.5",
+    "@tanstack/react-devtools": "^0.10.14",
+    "@tanstack/react-query": "^5.105.0",
+    "@tanstack/react-query-devtools": "^5.105.0",
     "@tanstack/react-router": "^1.170.46",
     "@tanstack/react-router-devtools": "^1.167.2",
     "@tanstack/react-router-ssr-query": "^1.167.3",
@@ -49,7 +49,7 @@
     "@tanstack/store": "^0.11.2",
     "drizzle-orm": "^0.45.4",
     "lib0": "^0.2.119",
-    "lucide-react": "^1.61.0",
+    "lucide-react": "^1.66.0",
     "nitro": "3.0.260610-beta",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -63,12 +63,12 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260702.1",
-    "@oxlint/plugins": "^1.89.0",
+    "@oxlint/plugins": "^1.90.0",
     "@rolldown/plugin-babel": "^0.2.4",
-    "@tanstack/devtools-event-client": "^0.5.0",
-    "@tanstack/devtools-vite": "^0.8.5",
+    "@tanstack/devtools-event-client": "^0.5.1",
+    "@tanstack/devtools-vite": "^0.8.6",
     "@tanstack/router-cli": "^1.167.46",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
@@ -79,7 +79,7 @@
     "typescript": "^7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
     "vite-plus": "0.3.0",
-    "wrangler": "^4.152.0"
+    "wrangler": "^4.156.0"
   },
   "overrides": {
     "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0"
@@ -102,6 +102,8 @@
   },
   "trustedDependencies": [
     "@astryxdesign/cli",
-    "@astryxdesign/core"
+    "@astryxdesign/core",
+    "esbuild",
+    "workerd"
   ]
 }
