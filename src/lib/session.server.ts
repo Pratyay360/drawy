@@ -1,4 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHmac } from "node:crypto";
+import { env } from "cloudflare:workers";
 import * as Sentry from "@sentry/tanstackstart-react";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import { eq } from "drizzle-orm";
@@ -19,7 +20,7 @@ const PASSWORD_KEY_LENGTH = 64;
 const PASSWORD_SALT_LENGTH = 16;
 
 function getSessionSecret(): string {
-    const password = process.env.SESSION_SECRET;
+    const password = env.SESSION_SECRET ?? process.env.SESSION_SECRET;
     if (!password) throw new Error("SESSION_SECRET is not set");
     return password;
 }

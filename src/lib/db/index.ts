@@ -1,7 +1,5 @@
 import { env } from "cloudflare:workers";
-import { neon } from "@neondatabase/serverless";
-import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
-import { drizzle as drizzleTcp } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import * as schema from "./schema";
@@ -45,23 +43,6 @@ export async function withRetry<T>(query: () => Promise<T>, attempts = 4): Promi
 
 const url = env.HYPERDRIVE?.connectionString ?? process.env.DATABASE_URL!;
 
-const usesNeon = /\.neon\.(tech|build)$/.test(new URL(url).hostname);
-
-function createNeonClient() {
-  const rawClient = neon(url, { disableWarningInBrowsers: true });
-  const rawQuery = rawClient.query;
-
-  const client = Object.assign(
-    (strings: TemplateStringsArray, ...values: unknown[]) => rawClient(strings, ...values),
-    rawClient,
-  );
-
-  client.query = ((queryText: string, values?: unknown[], options?: unknown) =>
-    withRetry(() => rawQuery(queryText, values, options))) as unknown as typeof client.query;
-
-  return client;
-}
-
 function createPostgresClient() {
   return postgres(url, {
     max: 2,
@@ -71,8 +52,6 @@ function createPostgresClient() {
   });
 }
 
-const client = usesNeon
-  ? drizzleHttp(createNeonClient(), { schema })
-  : drizzleTcp(createPostgresClient(), { schema });
+const client = drizzle(createPostgresClient(), { schema });
 
-export const db = client as unknown as ReturnType<typeof drizzleTcp<typeof schema>>;
+export const db = client as ReturnType<typeof drizzle<typeof schema>>;
