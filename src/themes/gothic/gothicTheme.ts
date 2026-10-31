@@ -1,12 +1,12 @@
 /**
- * Gothic Theme — dark only
+ * Gothic Theme: dark only
  *
  * A dark-only theme with deep blue-gray tones and a distressed display
  * heading. Inspired by ink, manuscript, and noir typography.
  *
  * Core palette: #E8F1F6, #96A0AB, #495056, #24292D, #101314
  * Categorical colors follow a pastel-on-dark pattern (light backgrounds
- * with dark text) — same in any system color preference.
+ * with dark text): same in any system color preference.
  *
  * Uses Manufacturing Consent for headings and Fustat for body text.
  */
@@ -15,7 +15,7 @@ import { defineSyntaxTheme, defineTheme } from "@astryxdesign/core/theme";
 import { gothicIconRegistry } from "./icons";
 
 /**
- * Gothic syntax palette — atmospheric tones drawn from the gothic
+ * Gothic syntax palette: atmospheric tones drawn from the gothic
  * categorical palette: deep purples (cathedral), blood crimson (tags),
  * aged gold (numbers), forest moss (strings), midnight indigo (functions).
  *
@@ -45,7 +45,7 @@ export const gothicTheme = defineTheme({
     name: "gothic",
 
     typography: {
-        // base 16 / ratio 1.25 — larger scale so the (optically small) blackletter
+        // base 16 / ratio 1.25: larger scale so the (optically small) blackletter
         // display sizes read large enough to carry the theme.
         scale: { base: 16, ratio: 1.25 },
         body: {
@@ -53,7 +53,7 @@ export const gothicTheme = defineTheme({
             fallbacks:
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         },
-        // Headings (h1-h6) use Fustat to match the body — Manufacturing Consent
+        // Headings (h1-h6) use Fustat to match the body: Manufacturing Consent
         // is reserved for display sizes only (see component overrides below).
         heading: {
             family: "Fustat",
@@ -67,16 +67,14 @@ export const gothicTheme = defineTheme({
         },
     },
 
-    // Slower, theatrical motion — gothic doesn't rush.
+    // Slower, theatrical motion: gothic doesn't rush.
     motion: { fast: 150, medium: 350, slow: 800, ratio: 0.75 },
 
     syntax: gothicSyntax,
 
     tokens: {
-        // =========================================================================
-        // Colors — gothic dark palette (single values, dark-only)
+        // Colors: gothic dark palette (single values, dark-only)
         // Core: #E8F1F6, #96A0AB, #495056, #24292D, #101314
-        // =========================================================================
 
         // Core semantic
         "--color-accent": "#E8F1F6",
@@ -112,7 +110,7 @@ export const gothicTheme = defineTheme({
         "--color-background-popover": "#24292D",
         "--color-background-inverted": "#E8F1F6",
 
-        // Status / Sentiment — dusty pastels matching the categorical
+        // Status / Sentiment: dusty pastels matching the categorical
         // pattern. Used for status surfaces, destructive button bg, etc.
         "--color-success": "#b3c79a", // sage moss
         "--color-success-muted": "#b3c79a",
@@ -130,12 +128,10 @@ export const gothicTheme = defineTheme({
         "--color-shadow": "#0000004D",
         "--color-tint-hover": "white",
 
-        // =========================================================================
-        // Categorical — dusty pastel-on-dark pattern
-        // Hand-tuned dusty pastels (T75 with reduced chroma) — confident
-        // but never bright. Neutral is a dark slate with white text — the
+        // Categorical: dusty pastel-on-dark pattern
+        // Hand-tuned dusty pastels (T75 with reduced chroma): confident
+        // but never bright. Neutral is a dark slate with white text: the
         // "no-color" variant earns its hierarchy by matching the page mood.
-        // =========================================================================
 
         // Blue (periwinkle midnight)
         "--color-background-blue": "#a3b5d6",
@@ -149,7 +145,7 @@ export const gothicTheme = defineTheme({
         "--color-icon-cyan": "#2a5e75",
         "--color-text-cyan": "#204858",
 
-        // Gray (dark slate — special: dark bg + light text)
+        // Gray (dark slate, special: dark bg + light text)
         "--color-background-gray": "#3d4248",
         "--color-border-gray": "#5d646b",
         "--color-icon-gray": "#E8F1F6",
@@ -197,12 +193,10 @@ export const gothicTheme = defineTheme({
         "--color-icon-yellow": "#876515",
         "--color-text-yellow": "#6c5010",
 
-        // =========================================================================
-        // Radius — subtle rounding (original gothic)
+        // Radius: subtle rounding (original gothic)
         //   --radius-none and --radius-full are always fixed and must never be
-        //   scaled by a theme (see defineTheme's radius config docs) — 0 and
+        //   scaled by a theme (see defineTheme's radius config docs): 0 and
         //   9999px respectively, matching @astryxdesign/core's own defaults.
-        // =========================================================================
         "--radius-none": "0px",
         "--radius-inner": "0.25rem",
         "--radius-element": "0.5rem",
@@ -210,9 +204,7 @@ export const gothicTheme = defineTheme({
         "--radius-page": "1.5rem",
         "--radius-full": "9999px",
 
-        // =========================================================================
-        // Shadows — restrained, atmospheric
-        // =========================================================================
+        // Shadows: restrained, atmospheric
         "--shadow-low": "0 2px 4px #00000033, 0 4px 8px #00000040",
         "--shadow-med": "0 2px 4px #00000033, 0 4px 12px #00000040",
         "--shadow-high": "0 4px 6px #00000040, 0 12px 24px #0000004D",
@@ -225,7 +217,7 @@ export const gothicTheme = defineTheme({
 
     components: {
         button: {
-            // Primary inherits default — light pill with dark text via
+            // Primary inherits default: light pill with dark text via
             // --color-accent / --color-on-accent (matches the cream badge).
             // Secondary uses the dark-slate "neutral" badge treatment.
             "variant:secondary": {
@@ -309,7 +301,7 @@ export const gothicTheme = defineTheme({
                 padding: "var(--spacing-3)",
                 borderRadius: "var(--radius-container)",
             },
-            // Categorical variants — flip --color-text-primary so child
+            // Categorical variants: flip --color-text-primary so child
             // XDSText labels stay readable against the dusty pastel bg.
             "variant:blue": {
                 "--color-text-primary": "var(--color-text-blue)",
@@ -365,7 +357,7 @@ export const gothicTheme = defineTheme({
             },
         },
 
-        // Display sizes use Manufacturing Consent — the signature gothic
+        // Display sizes use Manufacturing Consent: the signature gothic
         // display font, reserved for hero/marketing-scale text only.
         text: {
             "type:display-1": {
@@ -387,14 +379,14 @@ export const gothicTheme = defineTheme({
 });
 
 /**
- * Raw tonal palettes — every color at every tone step (0–100 in 5s).
+ * Raw tonal palettes: every color at every tone step (0–100 in 5s).
  * Use these for custom components or data visualization.
  *
  * Categorical hues (blue, green, etc.) follow gothic gem-tone hues.
  * Neutral mirrors the original gothic blue-gray palette (H≈210).
  */
 export const gothicPalettes = {
-    // Neutral — H=210 C=4 (cool blue-gray, original gothic)
+    // Neutral: H=210 C=4 (cool blue-gray, original gothic)
     neutral: {
         hue: 210,
         chroma: 4,
@@ -420,7 +412,7 @@ export const gothicPalettes = {
         95: "#E8F1F6",
         100: "#ffffff",
     },
-    // Blue — H=255 C=20 (midnight indigo)
+    // Blue: H=255 C=20 (midnight indigo)
     blue: {
         hue: 255,
         chroma: 20,
@@ -446,7 +438,7 @@ export const gothicPalettes = {
         95: "#e8ecf6",
         100: "#ffffff",
     },
-    // Cyan — H=200 C=25 (cathedral mist)
+    // Cyan: H=200 C=25 (cathedral mist)
     cyan: {
         hue: 200,
         chroma: 25,
@@ -472,7 +464,7 @@ export const gothicPalettes = {
         95: "#e3eef3",
         100: "#ffffff",
     },
-    // Green — H=140 C=18 (forest moss)
+    // Green: H=140 C=18 (forest moss)
     green: {
         hue: 140,
         chroma: 18,
@@ -498,7 +490,7 @@ export const gothicPalettes = {
         95: "#eaf3df",
         100: "#ffffff",
     },
-    // Orange — H=40 C=35 (rust copper)
+    // Orange: H=40 C=35 (rust copper)
     orange: {
         hue: 40,
         chroma: 35,
@@ -524,7 +516,7 @@ export const gothicPalettes = {
         95: "#f9eee5",
         100: "#ffffff",
     },
-    // Pink — H=345 C=22 (rose madder)
+    // Pink: H=345 C=22 (rose madder)
     pink: {
         hue: 345,
         chroma: 22,
@@ -550,7 +542,7 @@ export const gothicPalettes = {
         95: "#f5e3eb",
         100: "#ffffff",
     },
-    // Purple — H=290 C=30 (cathedral plum)
+    // Purple: H=290 C=30 (cathedral plum)
     purple: {
         hue: 290,
         chroma: 30,
@@ -576,7 +568,7 @@ export const gothicPalettes = {
         95: "#f0e6f4",
         100: "#ffffff",
     },
-    // Red — H=15 C=12 (dusty rose) — gothic uses a desaturated rose
+    // Red: H=15 C=12 (dusty rose); gothic uses a desaturated rose
     // family rather than vibrant crimson; #c6a6a2 sits near T80.
     red: {
         hue: 15,
@@ -603,7 +595,7 @@ export const gothicPalettes = {
         95: "#ebd0ca",
         100: "#ffffff",
     },
-    // Teal — H=170 C=20 (verdigris)
+    // Teal: H=170 C=20 (verdigris)
     teal: {
         hue: 170,
         chroma: 20,
@@ -629,7 +621,7 @@ export const gothicPalettes = {
         95: "#e1efe9",
         100: "#ffffff",
     },
-    // Yellow — H=80 C=40 (aged gold)
+    // Yellow: H=80 C=40 (aged gold)
     yellow: {
         hue: 80,
         chroma: 40,

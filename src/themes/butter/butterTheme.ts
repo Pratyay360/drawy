@@ -20,7 +20,7 @@
 import { defineSyntaxTheme, defineTheme } from "@astryxdesign/core/theme";
 import { butterIconRegistry } from "./icons";
 
-/** Butter syntax palette — T25 / T80 of each color's ramp. */
+/** Butter syntax palette: T25 / T80 of each color's ramp. */
 const butterSyntax = defineSyntaxTheme({
     name: "xds-butter",
     tokens: {
@@ -68,9 +68,7 @@ export const butterTheme = defineTheme({
     syntax: butterSyntax,
 
     tokens: {
-        // =========================================================================
-        // Core semantic — accent is the exact brand #225BFF
-        // =========================================================================
+        // Core semantic: accent is the exact brand #225BFF
         "--color-accent": ["#225BFF", "#FDEE8C"],
         "--color-accent-muted": ["#225BFF33", "#FDEE8C40"],
         "--color-neutral": ["#1d1c110F", "#f3f2e21A"],
@@ -81,7 +79,7 @@ export const butterTheme = defineTheme({
         "--color-overlay-pressed": ["#1d1c111A", "#f3f2e21A"],
         "--color-background-muted": ["#f3f2e2", "#3A2A1F"],
 
-        // Text — warm neutral
+        // Text: warm neutral
         "--color-text-primary": ["#1d1c11", "#f3f2e2"],
         "--color-text-secondary": ["#605f52", "#adac9e"],
         "--color-text-disabled": ["#adac9e", "#605f52"],
@@ -105,7 +103,7 @@ export const butterTheme = defineTheme({
         "--color-background-popover": ["#FFFFFF", "#3A2A1F"],
         "--color-background-inverted": ["#1d1c11", "#FDFBE4"],
 
-        // Status semantics — T25 light / T80 dark from each status palette.
+        // Status semantics: T25 light / T80 dark from each status palette.
         "--color-error": ["#771210", "#ffb4a6"],
         "--color-error-muted": ["#77121033", "#ffb4a640"],
         "--color-warning": ["#543700", "#f7be00"],
@@ -113,7 +111,7 @@ export const butterTheme = defineTheme({
         "--color-success": ["#004700", "#99d94b"],
         "--color-success-muted": ["#00470033", "#99d94b40"],
 
-        // Border — softer taupe card outline (emphasized) in light mode.
+        // Border: softer taupe card outline (emphasized) in light mode.
         "--color-border": ["#e5e3d4", "#f3f2e21A"],
         "--color-border-emphasized": ["#C7C4B2", "#939184"],
 
@@ -125,16 +123,14 @@ export const butterTheme = defineTheme({
         // Typography override
         "--text-supporting-size": "12px",
 
-        // Element sizes — slightly taller defaults so the new input padding
+        // Element sizes: slightly taller defaults so the new input padding
         // (--spacing-2 block) has room to breathe.
         "--size-element-sm": "32px",
         "--size-element-md": "40px",
         "--size-element-lg": "48px",
 
-        // =========================================================================
-        // Categorical — same values in light and dark mode (curated dark mode
+        // Categorical: same values in light and dark mode (curated dark mode
         // keeps the same pastel backgrounds + dark text as light mode).
-        // =========================================================================
 
         // Blue
         "--color-background-blue": ["#dbe1ff", "#dbe1ff"],
@@ -196,14 +192,12 @@ export const butterTheme = defineTheme({
         "--color-icon-yellow": ["#413e00", "#413e00"],
         "--color-text-yellow": ["#413e00", "#413e00"],
 
-        // =========================================================================
         // Radius
-        //   --radius-element drives buttons, badges, inputs — 8px per design
-        //   --radius-container drives cards, banners, popovers — 12px per design
+        //   --radius-element drives buttons, badges, inputs: 8px per design
+        //   --radius-container drives cards, banners, popovers: 12px per design
         //   --radius-none and --radius-full are always fixed and must never be
-        //   scaled by a theme (see defineTheme's radius config docs) — 0 and
+        //   scaled by a theme (see defineTheme's radius config docs): 0 and
         //   9999px respectively, matching @astryxdesign/core's own defaults.
-        // =========================================================================
         "--radius-none": "0px",
         "--radius-inner": "0.375rem",
         "--radius-element": "0.5rem", // 8px
@@ -211,9 +205,7 @@ export const butterTheme = defineTheme({
         "--radius-page": "1.5rem",
         "--radius-full": "9999px",
 
-        // =========================================================================
-        // Shadows — warm neutral tint
-        // =========================================================================
+        // Shadows: warm neutral tint
         "--shadow-low": "0 2px 4px #1d1c110D, 0 4px 8px #1d1c111A",
         "--shadow-med": "0 2px 4px #1d1c110D, 0 4px 12px #1d1c111A",
         "--shadow-high": "0 4px 6px #1d1c111A, 0 12px 24px #1d1c1126",
@@ -241,7 +233,7 @@ export const butterTheme = defineTheme({
             base: {
                 color: "light-dark(#6E92FF, #FDEE8CCC)",
             },
-            // Selected item: full brand blue, no pill background — rely on weight +
+            // Selected item: full brand blue, no pill background: rely on weight +
             // color for emphasis. Hover/active keep the neutral overlay.
             selected: {
                 color: "light-dark(#225BFF, #FDEE8C)",
@@ -292,7 +284,7 @@ export const butterTheme = defineTheme({
                 paddingBlock: "0",
                 paddingInline: "var(--spacing-3)",
             },
-            // Vivid semantic badges — pinned to the brand colors from the spec.
+            // Vivid semantic badges: pinned to the brand colors from the spec.
             // Info uses the Blue palette source (NOT the brand accent #225BFF).
             "variant:info": {
                 backgroundColor: "#4883fd",
@@ -317,7 +309,7 @@ export const butterTheme = defineTheme({
         },
 
         // Banner backgrounds match the semantic badge fills.
-        // Banner status colors — override the muted tokens locally so the
+        // Banner status colors: override the muted tokens locally so the
         // header (which reads --color-*-muted via StyleX) renders vivid fills
         // matching the badge palette. Scoped to the banner root, doesn't leak.
         banner: {
@@ -420,7 +412,7 @@ export const butterTheme = defineTheme({
             },
         },
 
-        // Progress bar — white track in light, warm brown in dark. Vivid
+        // Progress bar: white track in light, warm brown in dark. Vivid
         // semantic fills match the banner colors (Success / Warning / Error).
         "progressbar-track": {
             base: {
@@ -439,7 +431,7 @@ export const butterTheme = defineTheme({
             },
         },
 
-        // Field status bubble — match the corresponding banner colors so the
+        // Field status bubble: match the corresponding banner colors so the
         // helper text below an input reads as the same "this is a warning /
         // error / success" surface as the standalone banner.
         "field-status": {
@@ -457,7 +449,7 @@ export const butterTheme = defineTheme({
             },
         },
 
-        // Inputs — softer border than default, more vertical breathing room.
+        // Inputs: softer border than default, more vertical breathing room.
         // Status modifiers also remap the semantic tokens locally so the
         // status icon + border read as the same vivid hue as the banner
         // (icons inherit from --color-{success,warning,error}).
@@ -552,7 +544,7 @@ export const butterTheme = defineTheme({
             "status:error": { "--color-error": "#fc473b" },
         },
 
-        // Display sizes use Sarina — the signature buttery display
+        // Display sizes use Sarina: the signature buttery display
         // cursive, reserved for hero/marketing-scale text only.
         // Headings (h1–h6) and body still use Outfit (configured above
         // under typography.heading / typography.body). Same pattern
@@ -574,7 +566,7 @@ export const butterTheme = defineTheme({
 });
 
 /**
- * Raw tonal palettes — generated from design-spec source hexes via the
+ * Raw tonal palettes: generated from design-spec source hexes via the
  * same CIELab algorithm `ThemePalettePreview` uses for the displayed
  * strip, so the rendered ramp and the consumed token values are 1:1.
  *

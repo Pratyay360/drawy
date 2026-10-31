@@ -49,12 +49,12 @@
 
 ---
 
-# Introducing Drawy (partykit + postgres version of the drawy app)
+# Introducing Drawy (durable objects + postgres version of the drawy app)
 
 A real time collaboration capable drawing app(powered by Excalidraw) which is easy to deploy and self host built with the tech stack you already know.
-A easily selfhostable collaborative whiteboard powered by Excalidraw, PartyKit, and Postgres.
+A easily selfhostable collaborative whiteboard powered by Excalidraw, Cloudflare Durable Objects, and Postgres.
 Got tired of the single board limitation in excalidraw and wanted something I could actually deploy myself. Though the official Excalidraw Docker image is easy to run,
-but it doesn't provide a collaboration without a paid membership Drawy adds a persistent, collaborative backend using PartyKit and postgres while
+but it doesn't provide a collaboration without a paid membership Drawy adds a persistent, collaborative backend using Cloudflare Durable Objects and postgres while
 keeping Excalidraw as the whiteboard experience. Also, there are several similar alternatives like this, but tbh who wants to spin 2 3
 containers when everything can be compressed into one. Any one can deploy it on Vercel / Netlify like serverless platform..
 The goal is simple: deploy it anywhere, create virtually unlimited boards, and collaborate in real time.
@@ -94,13 +94,14 @@ worker (`/parties/main`, `/parties/rooms`), so clients talk to the app's own
 origin and one `bun run deploy` publishes the app and the collaboration
 backend together.
 
-## partyserver for real time collab because it's free + nice
+## cloudflare durable objects for real time collab because it's free + nice
 
 With [Excalidraw canvas](https://npmx.dev/package/@excalidraw/excalidraw) with
 [library Suppport](https://libraries.excalidraw.com/?theme=light&sort=default)
 
-Using [partyserver](https://github.com/cloudflare/partykit/tree/main/packages/partyserver)
-(PartyKit's successor) and [sync](https://docs.partykit.io/)
+Using plain [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/):
+the realtime rooms are two Durable Object classes in this repo's own worker
+(WebSockets + Yjs sync, no third-party realtime library or platform)
 ... you can use any hosting provider if you want to ...
 the rooms run as Durable Objects in your own Cloudflare account, so there is no
 third-party realtime platform in between you and Cloudflare.

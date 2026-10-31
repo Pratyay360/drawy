@@ -18,7 +18,7 @@ type CursorState = {
 /**
  * Publishes the local pointer position through Yjs awareness and mirrors the
  * other connected users' cursors into the realtime cursor store. Peers
- * without a cursor field (connected, not yet moved) are simply not shown —
+ * without a cursor field (connected, not yet moved) are simply not shown;
  * presence counts come from `CanvasRealtime.onPresence`.
  */
 export const useRealtimeCursors = ({

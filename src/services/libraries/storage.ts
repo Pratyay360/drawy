@@ -36,7 +36,6 @@ export async function saveLibraryContent(
     itemNames: string[],
     items: readonly LibraryItem[],
 ): Promise<void> {
-    // if (typeof window === "undefined") return;
     const saved = await getSavedLibraries();
     const next = saved.map((lib) =>
         lib.id === id

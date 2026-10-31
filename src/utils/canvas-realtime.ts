@@ -1,16 +1,16 @@
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { BinaryFiles } from "@excalidraw/excalidraw/types";
-import PartySocket from "partysocket";
-import YProvider from "y-partyserver/provider";
 import * as Y from "yjs";
 import { SINGLETON_ROOM_ID } from "../party/room-id";
+import { buildRoomUrl, RealtimeSocket } from "./realtime-socket";
+import { YDocProvider } from "./y-doc-provider";
 
-const PARTYKIT_HOST = import.meta.env.VITE_PARTYKIT_URL;
+const REALTIME_HOST = import.meta.env.VITE_PARTYKIT_URL;
 
-function getPartykitHost(): string | undefined {
+function getRealtimeHost(): string | undefined {
     // Unset (or empty) means the rooms live in this same worker, so fall back
     // to the app's own origin instead of disabling realtime.
-    return PARTYKIT_HOST || (typeof window !== "undefined" ? window.location.host : undefined);
+    return REALTIME_HOST || (typeof window !== "undefined" ? window.location.host : undefined);
 }
 
 function pickPresenceColor(): string {
@@ -41,10 +41,10 @@ type SavedCb = () => void;
 type PresenceCb = (count: number) => void;
 
 export class CanvasRealtime {
-    private socket: PartySocket | undefined;
+    private socket: RealtimeSocket | undefined;
     private ydoc: Y.Doc | undefined;
-    private provider: YProvider | undefined;
-    private presenceSocket: PartySocket | undefined;
+    private provider: YDocProvider | undefined;
+    private presenceSocket: RealtimeSocket | undefined;
     private sceneCbs = new Set<SceneCb>();
     private savedCbs = new Set<SavedCb>();
     private presenceCbs = new Set<PresenceCb>();
@@ -61,17 +61,18 @@ export class CanvasRealtime {
 
     connect() {
         if (this.socket) return;
-        const host = getPartykitHost();
+        const host = getRealtimeHost();
         if (!host) {
-            //   console.warn("[canvas-realtime] PARTYKIT_HOST not configured — realtime disabled");
             return;
         }
-        const socket = new PartySocket({
-            host,
-            party: "main",
-            room: this.canvasId,
-            query: { kind: "scene" },
-        });
+        const socket = new RealtimeSocket(
+            buildRoomUrl({
+                host,
+                party: "main",
+                room: this.canvasId,
+                query: { kind: "scene" },
+            }),
+        );
         socket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -82,10 +83,15 @@ export class CanvasRealtime {
         this.socket = socket;
 
         const ydoc = new Y.Doc();
-        const provider = new YProvider(host, this.canvasId, ydoc, {
-            party: "main",
-            params: { kind: "presence" },
-        });
+        const provider = new YDocProvider(
+            buildRoomUrl({
+                host,
+                party: "main",
+                room: this.canvasId,
+                query: { kind: "presence" },
+            }),
+            ydoc,
+        );
         const awareness = provider.awareness;
         awareness.setLocalStateField("user", {
             name: this.username,
@@ -110,11 +116,9 @@ export class CanvasRealtime {
 
         // Occupancy singleton: fallback presence for canvases this client is not
         // connected to (e.g. the sidebar list).
-        const pSocket = new PartySocket({
-            host,
-            party: "rooms",
-            room: SINGLETON_ROOM_ID,
-        });
+        const pSocket = new RealtimeSocket(
+            buildRoomUrl({ host, party: "rooms", room: SINGLETON_ROOM_ID }),
+        );
         pSocket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -191,20 +195,18 @@ export class CanvasRealtime {
     }
 }
 
-let globalSocket: PartySocket | null = null;
+let globalSocket: RealtimeSocket | null = null;
 const globalListeners = new Set<() => void>();
 const pendingGlobalMessages: string[] = [];
 
-function ensureGlobalSocket(): PartySocket | null {
+function ensureGlobalSocket(): RealtimeSocket | null {
     if (typeof window === "undefined") return null;
     if (globalSocket) return globalSocket;
-    const host = getPartykitHost();
+    const host = getRealtimeHost();
     if (!host) return null;
-    const socket = new PartySocket({
-        host,
-        party: "rooms",
-        room: SINGLETON_ROOM_ID,
-    });
+    const socket = new RealtimeSocket(
+        buildRoomUrl({ host, party: "rooms", room: SINGLETON_ROOM_ID }),
+    );
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);

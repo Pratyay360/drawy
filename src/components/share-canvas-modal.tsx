@@ -176,7 +176,7 @@ export function ShareCanvasModal() {
 
                             <Divider />
 
-                            {/* Public link section — read-only, no account needed */}
+                            {/* Public link section: read-only, no account needed */}
                             <VStack gap={2}>
                                 <Switch
                                     label="Anyone with the link can view"

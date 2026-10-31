@@ -28,7 +28,7 @@ const handler = new RPCHandler(router, {
 async function handle({ request }: { request: Request }) {
     const user = await getCurrentUser();
 
-    // Anonymous requests are allowed through — individual procedures enforce
+    // Anonymous requests are allowed through; individual procedures enforce
     // authentication (e.g. `getPublic` is a public read-only endpoint).
     const { response } = await handler.handle(request, {
         prefix: "/api/rpc",

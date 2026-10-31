@@ -1,7 +1,6 @@
+import { DurableObject } from "cloudflare:workers";
 import * as decoding from "lib0/decoding";
 import * as encoding from "lib0/encoding";
-import { getServerByName, Server } from "partyserver";
-import type { Connection, ConnectionContext } from "partyserver";
 import * as awarenessProtocol from "y-protocols/awareness";
 import * as syncProtocol from "y-protocols/sync";
 import * as Y from "yjs";
@@ -11,7 +10,6 @@ import type { RoomsEnv } from "./rooms";
 const messageSync = 0;
 const messageAwareness = 1;
 const messageQueryAwareness = 3;
-const BATCH_SENTINEL = "y-pk-batch";
 
 type IncomingMessage = string | ArrayBuffer | ArrayBufferView;
 
@@ -23,89 +21,15 @@ function isBlobLike(value: unknown): value is Blob {
     return typeof Blob !== "undefined" && value instanceof Blob;
 }
 
-interface BatchMarker {
-    type: "start" | "end";
-    id: string;
-    count: number;
-    size: number;
-}
-
-/** Copy a WebSocket frame into a Uint8Array without dragging in the whole
- * underlying buffer when the frame arrives as a view. */
-function toBytes(data: ArrayBuffer | ArrayBufferView): Uint8Array {
-    if (data instanceof ArrayBuffer) return new Uint8Array(data);
-    return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-}
-
-/** Normalize any binary frame to a Uint8Array, awaiting Blobs. */
-async function toBytesAsync(data: ArrayBuffer | ArrayBufferView | Blob): Promise<Uint8Array> {
+/** Normalize any binary frame to a Uint8Array without dragging in the whole
+ * underlying buffer when the frame arrives as a view, awaiting Blobs. */
+async function toFrameBytes(data: unknown): Promise<Uint8Array> {
     if (isBlobLike(data)) return new Uint8Array(await data.arrayBuffer());
-    return toBytes(data);
-}
-
-function createMessageReceiver(
-    receive: (data: Uint8Array) => void,
-): (message: IncomingMessage) => Promise<boolean> {
-    let chunks: Uint8Array[] | null = null;
-    let start: BatchMarker | null = null;
-    let failed = false;
-
-    const abortBatch = () => {
-        chunks = null;
-        start = null;
-        failed = true;
-    };
-
-    return async (message: IncomingMessage): Promise<boolean> => {
-        if (typeof message === "string") {
-            if (!message.startsWith(BATCH_SENTINEL)) return false;
-            const json = message.slice(message.indexOf("#") + 1);
-            try {
-                const marker = JSON.parse(json) as BatchMarker;
-                if (marker.type === "start") {
-                    chunks = [];
-                    start = marker;
-                    failed = false;
-                } else if (marker.type === "end" && chunks && start) {
-                    const batch = chunks;
-                    const expected = start;
-                    chunks = null;
-                    start = null;
-                    const size = batch.reduce((sum, c) => sum + c.byteLength, 0);
-                    if (
-                        !failed &&
-                        expected.id === marker.id &&
-                        expected.count === batch.length &&
-                        expected.size === size
-                    ) {
-                        const bytes = new Uint8Array(size);
-                        let offset = 0;
-                        for (const chunk of batch) {
-                            bytes.set(chunk, offset);
-                            offset += chunk.byteLength;
-                        }
-                        receive(bytes);
-                    } else {
-                    }
-                }
-            } catch {
-                abortBatch();
-            }
-            return true;
-        }
-        if (isBlobLike(message)) {
-            const bytes = await toBytesAsync(message);
-            if (chunks) chunks.push(bytes);
-            else receive(bytes);
-            return true;
-        }
-        if (chunks) {
-            chunks.push(toBytes(message));
-            return true;
-        }
-        receive(toBytes(message));
-        return true;
-    };
+    if (data instanceof ArrayBuffer) return new Uint8Array(data);
+    if (ArrayBuffer.isView(data)) {
+        return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+    }
+    throw new Error("Unsupported WebSocket frame");
 }
 
 function isTruncatedUpdate(error: unknown): boolean {
@@ -113,53 +37,84 @@ function isTruncatedUpdate(error: unknown): boolean {
 }
 
 interface Client {
+    /** Which broadcasts this connection subscribed to: the `scene` socket
+     * carries JSON scene/cursor messages, the `presence` socket carries the
+     * Yjs sync + awareness stream. Read from the `kind` query parameter when
+     * the socket is accepted, the equivalent of PartyServer's connection
+     * tags. */
+    kind: string | null;
+    /** Awareness client ids this connection is responsible for, so its
+     * presence is withdrawn when it disconnects. */
     controlledStates: Set<number>;
-    receive: (message: IncomingMessage) => Promise<boolean>;
 }
 
-export class EditorServer extends Server<Env> {
+/** One drawing room: a Yjs document relay plus JSON scene broadcasts.
+ *
+ * A plain Cloudflare Durable Object (replacing PartyServer's `Server` base
+ * class). Sockets are accepted with the non-hibernating API (`ws.accept()`
+ * plus event listeners), so the in-memory Yjs document and awareness state
+ * survive exactly as long as the connections that depend on them. Nothing is
+ * persisted to storage: the browser saves each canvas to Postgres. */
+export class EditorServer extends DurableObject<Env> {
     doc: Y.Doc | null = null;
     awareness: awarenessProtocol.Awareness | null = null;
 
-    private clients = new Map<Connection, Client>();
+    private clients = new Map<WebSocket, Client>();
     private legacyStorageCleaned = false;
 
-    getConnectionTags(_connection: Connection, context: ConnectionContext) {
-        const kind = new URL(context.request.url).searchParams.get("kind");
-        return kind ? [kind] : [];
+    /** Accept a WebSocket upgrade for this room. The worker entry routes
+     * `/parties/main/:room` here; everything else is a client mistake. */
+    async fetch(request: Request): Promise<Response> {
+        if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
+            return new Response("This Durable Object only accepts WebSocket connections.", {
+                status: 405,
+            });
+        }
+
+        const kind = new URL(request.url).searchParams.get("kind");
+        const pair = new WebSocketPair();
+        const client = pair[0];
+        const server = pair[1];
+        server.accept();
+        // Some runtimes default binaryType to "blob"; a Blob has no .buffer,
+        // so its frames decode as "Unexpected end of array". Forcing
+        // arraybuffer fixes that; toFrameBytes still handles Blobs too.
+        try {
+            server.binaryType = "arraybuffer";
+        } catch {
+            // Some runtimes may refuse the assignment.
+        }
+
+        this.clients.set(server, { kind, controlledStates: new Set() });
+        server.addEventListener("message", (event: { data: unknown }) => {
+            void this.onMessage(server, event.data as IncomingMessage).catch((error) => {
+                console.error("[drawy] room message handler failed:", error);
+            });
+        });
+        server.addEventListener("close", () => this.removeClient(server));
+        server.addEventListener("error", () => this.removeClient(server));
+
+        try {
+            await this.onConnect(server);
+        } catch (error) {
+            console.error("[drawy] room handshake failed:", error);
+            try {
+                server.close(1011, "session setup failed");
+            } catch {
+                // Already gone; the client will reconnect.
+            }
+        }
+        return new Response(null, { status: 101, webSocket: client });
     }
 
-    async onConnect(conn: Connection) {
-        // Normalize binary frames to ArrayBuffer. Some runtimes default
-        // binaryType to "blob", which delivers binary frames as Blob — a Blob
-        // has no .buffer, so the old toBytes produced an empty Uint8Array that
-        // decoded as "Unexpected end of array". Setting arraybuffer fixes
-        // dev/prod parity.
-        try {
-            // Connection extends WebSocket; binaryType may be absent on
-            // some runtimes, so guard with an optional cast.
-            (conn as unknown as { binaryType?: string }).binaryType = "arraybuffer";
-        } catch {
-            // Some runtimes don't expose binaryType; toBytesAsync handles Blobs.
-        }
+    /** Initial handshake: request the client's missing state and share
+     * the awareness states we already know about. */
+    private async onConnect(conn: WebSocket) {
         await this.cleanLegacyStorage();
         this.ensureDoc();
         const { doc, awareness } = this;
         if (!doc || !awareness) return;
 
-        this.clients.set(conn, {
-            controlledStates: new Set(),
-            receive: createMessageReceiver((bytes) => {
-                try {
-                    this.handleYjsMessage(conn, bytes);
-                } catch {
-                    // pass
-                }
-            }),
-        });
-
-        // Initial handshake: request the client's missing state and share
-        // the awareness states we already know about.
         try {
             const syncEncoder = encoding.createEncoder();
             encoding.writeVarUint(syncEncoder, messageSync);
@@ -176,38 +131,44 @@ export class EditorServer extends Server<Env> {
                 );
                 conn.send(encoding.toUint8Array(awarenessEncoder));
             }
-        } catch {}
+        } catch {
+            // The handshake is best effort; the client's own sync step 1
+            // recovers anything that was not sent.
+        }
     }
 
-    async onMessage(sender: Connection, message: IncomingMessage) {
-        const client = this.clients.get(sender);
-        if (client && (await client.receive(message))) {
+    private async onMessage(conn: WebSocket, message: IncomingMessage) {
+        if (typeof message === "string") {
+            let data: Record<string, unknown>;
+            try {
+                data = JSON.parse(message) as Record<string, unknown>;
+            } catch {
+                return;
+            }
+            if (
+                data.type === "scene" ||
+                data.type === "saved" ||
+                data.event === "realtime-cursor-move"
+            ) {
+                this.broadcastToTag("scene", message, conn);
+            }
             return;
         }
-        if (typeof message !== "string") return;
 
-        let data: Record<string, unknown>;
+        let bytes: Uint8Array;
         try {
-            data = JSON.parse(message) as Record<string, unknown>;
+            bytes = await toFrameBytes(message);
         } catch {
             return;
         }
-        if (
-            data.type === "scene" || data.type === "saved" || data.event === "realtime-cursor-move"
-        ) {
-            this.broadcastToTag("scene", message, sender.id);
+        try {
+            this.handleYjsMessage(conn, bytes);
+        } catch {
+            // A malformed frame must not tear down the room.
         }
     }
 
-    onClose(conn: Connection) {
-        this.removeClient(conn);
-    }
-
-    onError(conn: Connection, _error: Error) {
-        this.removeClient(conn);
-    }
-
-    private removeClient(conn: Connection) {
+    private removeClient(conn: WebSocket) {
         const client = this.clients.get(conn);
         if (!client) return;
         this.clients.delete(conn);
@@ -225,14 +186,13 @@ export class EditorServer extends Server<Env> {
      * canvases the user is not editing can still show live presence. */
     private async reportOccupancy() {
         try {
-            const rooms = await getServerByName(this.env.Rooms, SINGLETON_ROOM_ID);
+            const room = this.ctx.id.name;
+            if (room === undefined) return;
+            const rooms = this.env.Rooms.getByName(SINGLETON_ROOM_ID);
             await rooms.fetch(
                 new Request("https://occupancy.local/", {
                     method: "POST",
-                    body: JSON.stringify({
-                        room: this.name,
-                        count: Array.from(this.getConnections("presence")).length,
-                    }),
+                    body: JSON.stringify({ room, count: this.countByKind("presence") }),
                 }),
             );
         } catch {
@@ -241,13 +201,19 @@ export class EditorServer extends Server<Env> {
         }
     }
 
-    private broadcastToTag(tag: string, message: string | Uint8Array, excludeId?: string) {
-        for (const conn of this.getConnections(tag)) {
-            if (conn.id === excludeId) continue;
+    private countByKind(kind: string): number {
+        let count = 0;
+        for (const client of this.clients.values()) if (client.kind === kind) count++;
+        return count;
+    }
+
+    private broadcastToTag(tag: string, message: string | Uint8Array, exclude?: WebSocket | null) {
+        for (const [conn, client] of this.clients) {
+            if (client.kind !== tag || conn === exclude) continue;
             try {
                 conn.send(message);
             } catch {
-                // A dead connection is cleaned up by onClose/onError.
+                // A dead connection is cleaned up by its close/error handler.
             }
         }
     }
@@ -261,7 +227,9 @@ export class EditorServer extends Server<Env> {
         try {
             const entries = await this.ctx.storage.list({ limit: 1 });
             if (entries.size > 0) await this.ctx.storage.deleteAll();
-        } catch {}
+        } catch {
+            // Cleaning up legacy chunks is best effort.
+        }
     }
 
     private ensureDoc() {
@@ -277,7 +245,7 @@ export class EditorServer extends Server<Env> {
                 { added, updated, removed }: { added: number[]; updated: number[]; removed: number[] },
                 origin: unknown,
             ) => {
-                const sender = origin as Connection | null;
+                const sender = origin as WebSocket | null;
                 const changed = [...added, ...updated, ...removed];
                 if (sender !== null) {
                     const client = this.clients.get(sender);
@@ -305,14 +273,15 @@ export class EditorServer extends Server<Env> {
             encoding.writeVarUint(encoder, messageSync);
             syncProtocol.writeUpdate(encoder, update);
             const bytes = encoding.toUint8Array(encoder);
-            this.broadcastToTag("presence", bytes, (origin as Connection | null)?.id);
+            const sender = origin as WebSocket;
+            this.broadcastToTag("presence", bytes, this.clients.has(sender) ? sender : null);
         });
 
         this.doc = doc;
         this.awareness = awareness;
     }
 
-    private handleYjsMessage(conn: Connection, bytes: Uint8Array) {
+    private handleYjsMessage(conn: WebSocket, bytes: Uint8Array) {
         const doc = this.doc;
         const awareness = this.awareness;
         if (!doc || !awareness) return;
@@ -337,7 +306,6 @@ export class EditorServer extends Server<Env> {
                     awarenessProtocol.applyAwarenessUpdate(awareness, update, conn);
                 } catch (e) {
                     if (isTruncatedUpdate(e)) {
-                        // console.warn("[drawy] corrupted awareness update dropped");
                         return;
                     }
                     throw e;
@@ -356,7 +324,6 @@ export class EditorServer extends Server<Env> {
                 break;
             }
             default:
-            // console.warn("[drawy] unknown yjs message type", messageType);
         }
     }
 }

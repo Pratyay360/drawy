@@ -53,7 +53,6 @@ export function CanvasViewer({ id }: { id: string }) {
                 });
             }
         } catch (error) {
-            // console.error("Failed to load shared canvas:", error);
             setLoadError(
                 error instanceof Error
                     ? error.message
@@ -81,7 +80,6 @@ export function CanvasViewer({ id }: { id: string }) {
                 await import("@excalidraw/excalidraw/index.css");
                 if (!cancelled) setExcalidrawModule(mod);
             } catch (err) {
-                // console.error("Failed to load Excalidraw:", err);
                 if (!cancelled) {
                     setModuleError(
                         err instanceof Error

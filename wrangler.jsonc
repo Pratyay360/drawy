@@ -1,57 +1,50 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "drawyparty",
-  // One worker for the whole app: the entry routes /parties/* to the
-  // PartyServer Durable Objects and delegates everything else to the Nitro
-  // bundle. Nitro's "cloudflare_module" preset emits that bundle into
-  // .output/server, so run `bun run build` before deploying or running
-  // `wrangler dev` — otherwise the entry's import is missing.
-  "main": "src/party/index.ts",
-  "compatibility_date": "2025-02-04",
-  // Nitro's cloudflare preset needs the Node.js compat layer (node:process,
-  // node:crypto, ...) for the server bundle.
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-      "hyperdrive": [
-    {
-      "binding": "HYPERDRIVE",
-      "id": "965a2592d5a34ff393287de2cdc46821",
-    }
-  ],
-  "workers_dev": true,
-  "preview_urls": false,
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "Main",
-        "class_name": "EditorServer"
-      },
-      {
-        "name": "Rooms",
-        "class_name": "OccupancyServer"
-      }
-    ]
-  },
-  // wrangler does not create Durable Object migrations for you: add a new
-  // entry whenever a server class is added, renamed or removed.
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_sqlite_classes": [
-        "EditorServer",
-        "OccupancyServer"
-      ]
-    }
-  ],
-  "assets": {
-    // The client bundle that Nitro writes to .output/public. The binding name
-    // has to stay "ASSETS": the generated worker reads env.ASSETS.fetch(...)
-    // for public files.
-    "directory": ".output/public",
-    "binding": "ASSETS",
-  },
-  "observability": {
-    "enabled": true
-  },
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "drawy",
+	"main": "src/party/index.ts",
+	"compatibility_date": "2025-02-04",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "965a2592d5a34ff393287de2cdc46821",
+			"localConnectionString": "${DATABASE_URL}",
+		},
+	],
+	"workers_dev": true,
+	"preview_urls": true,
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "Main",
+				"class_name": "EditorServer",
+			},
+			{
+				"name": "Rooms",
+				"class_name": "OccupancyServer",
+			},
+		],
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": [
+				"EditorServer",
+				"OccupancyServer"
+			],
+		},
+	],
+	"assets": {
+		// The client bundle that Nitro writes to .output/public. The binding name
+		// has to stay "ASSETS": the generated worker reads env.ASSETS.fetch(...)
+		// for public files.
+		"directory": ".output/public",
+		"binding": "ASSETS",
+	},
+	"observability": {
+		"enabled": true,
+	},
+	"previews": {},
 }

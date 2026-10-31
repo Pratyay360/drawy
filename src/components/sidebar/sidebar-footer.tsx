@@ -45,7 +45,7 @@ export function SidebarFooter() {
                 }
             })
             .catch(() => {
-                // Slow network: keep previous user if any, otherwise stay null — don't block sidebar
+                // Slow network: keep previous user if any, otherwise stay null; don't block sidebar
             });
 
         return () => {

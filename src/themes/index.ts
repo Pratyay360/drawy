@@ -16,7 +16,7 @@ export interface ThemeEntry {
 
 /**
  * Selectable app themes, keyed by the name persisted to localStorage.
- * Gothic is dark-only — the mode is forced to "dark" for it
+ * Gothic is dark-only: the mode is forced to "dark" for it
  * (see getEffectiveMode in hooks/usetheme.ts).
  */
 export const themeRegistry = {

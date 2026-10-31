@@ -19,14 +19,14 @@ export interface ShareModalState {
 }
 
 interface UIState {
-    /** Libraries browser modal — opened from the sidebar or a library panel. */
+    /** Libraries browser modal: opened from the sidebar or a library panel. */
     libraryModal: {
         isOpen: boolean;
         initialBrowseId: string | null;
     };
-    /** Share-canvas modal — opened from the canvas editor's "Share" action. */
+    /** Share-canvas modal: opened from the canvas editor's "Share" action. */
     shareModal: ShareModalState;
-    /** Version-history modal — opened from the canvas editor's "History" action. */
+    /** Version-history modal: opened from the canvas editor's "History" action. */
     versionModal: {
         isOpen: boolean;
         canvasId: string | null;

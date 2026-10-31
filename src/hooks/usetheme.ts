@@ -2,7 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { isThemeName, type ThemeName, themeRegistry } from "../themes/index.ts";
 
 export type ColorMode = "light" | "dark";
-/** Persisted preference — "system" follows the OS and resolves to light/dark. */
+/** Persisted preference: "system" follows the OS and resolves to light/dark. */
 export type ModePreference = ColorMode | "system";
 
 const STORAGE_KEY = "drawy-theme";
@@ -36,7 +36,7 @@ function applyDocumentState(name: ThemeName, mode: ColorMode) {
 function readStoredName(): ThemeName {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored === "light" || stored === "dark") return SERVER_THEME; // legacy value — ignore
+        if (stored === "light" || stored === "dark") return SERVER_THEME; // legacy value, ignore
         if (isThemeName(stored)) return stored;
     } catch {
         // Ignore storage errors (e.g. private browsing).

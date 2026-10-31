@@ -10,7 +10,7 @@ tags:
   - hosting
   - self hosting
   - drawy
-  - partyserver
+  - durable objects
   - cloudflare workers
 isCJKLanguage: false
 headless: false
