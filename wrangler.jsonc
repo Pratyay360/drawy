@@ -7,18 +7,30 @@
   // .output/server, so run `bun run build` before deploying or running
   // `wrangler dev` — otherwise the entry's import is missing.
   "main": "src/party/index.ts",
-  "compatibility_date": "2026-10-22",
+  "compatibility_date": "2025-02-04",
   // Nitro's cloudflare preset needs the Node.js compat layer (node:process,
   // node:crypto, ...) for the server bundle.
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+      "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "965a2592d5a34ff393287de2cdc46821",
+    }
+  ],
   "workers_dev": true,
   "preview_urls": false,
-  // Realtime rooms. Binding names kebab-case to the party paths clients
-  // already use: Main -> /parties/main/:room, Rooms -> /parties/rooms/:room.
   "durable_objects": {
     "bindings": [
-      { "name": "Main", "class_name": "EditorServer" },
-      { "name": "Rooms", "class_name": "OccupancyServer" }
+      {
+        "name": "Main",
+        "class_name": "EditorServer"
+      },
+      {
+        "name": "Rooms",
+        "class_name": "OccupancyServer"
+      }
     ]
   },
   // wrangler does not create Durable Object migrations for you: add a new
@@ -26,7 +38,10 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["EditorServer", "OccupancyServer"]
+      "new_sqlite_classes": [
+        "EditorServer",
+        "OccupancyServer"
+      ]
     }
   ],
   "assets": {
@@ -36,5 +51,7 @@
     "directory": ".output/public",
     "binding": "ASSETS",
   },
-  "observability": { "enabled": true },
+  "observability": {
+    "enabled": true
+  },
 }
