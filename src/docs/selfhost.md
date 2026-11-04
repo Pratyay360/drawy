@@ -93,8 +93,7 @@ Then set `VITE_PARTYKIT_URL=http://localhost:8787` and restart `bun run dev`.
 
 ## 6. Deploy the app to Cloudflare Workers
 
-The build targets the `cloudflare_module` Nitro preset, so the app ships as a
-Cloudflare Worker with the client bundle attached as static assets.
+By targeting the `cloudflare_module` Nitro preset, the application is packaged as a Cloudflare Worker, with the client bundle delivered as static assets.
 
 ```bash
 bun run build          # writes .output/server and .output/public
