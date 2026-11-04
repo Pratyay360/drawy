@@ -89,7 +89,7 @@ as well:
 bun run cf:dev   # built worker on http://localhost:8787 (app + rooms)
 ```
 
-Then set `VITE_PARTYKIT_URL=http://localhost:8787` and restart `bun run dev`.
+
 
 ## 6. Deploy the app to Cloudflare Workers
 
