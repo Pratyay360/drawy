@@ -1,8 +1,8 @@
 ---
 title: Self hosting Drawy
 description: >-
-  Run your own instance of drawy the TanStack Start app, the realtime worker and
-  Postgres.
+  Run your own instance of drawy the TanStack Start app, the real time worker
+  and Postgres.
 date: '1111-11-11T11:11:00Z'
 draft: false
 tags:
