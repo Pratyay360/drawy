@@ -122,7 +122,7 @@ Neon over its HTTP API and signs sessions with the same secret as your local
 `.env`. `bun run cf:dev` runs the built worker locally; put the two values in  
 `.dev.vars` (git-ignored) so the local run has them too.
 
-Variables prefixed with `VITE_` are inlined into the bundle during the build process, so they must be defined before running `bun run build`. Set `VITE_PARTYKIT_URL` to specify the real‑time host (leaving it unset defaults too same‑origin, as the rooms operate within this worker). Use `VITE_SITE_URL` to define the canonical URL that appears in the sitemap and `robots.txt`.
+Variables prefixed with `VITE_` are inlined into the bundle during the build process, so they must be defined before running `bun run build`. Use `VITE_SITE_URL` to define the canonical URL that appears in the sitemap and `robots.txt`.
 
 ## Operational Notes
 
@@ -139,3 +139,7 @@ serve the app over HTTPS.
 
 - [Privacy and security](/docs/privacy-and-security) — what your instance stores
 - [Getting started](/docs/getting-started) — using Drawy as an end user
+
+
+
+&nbsp;
