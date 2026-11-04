@@ -2,7 +2,7 @@
 title: Self hosting Drawy
 description: >-
   Run your own instance of drawy the TanStack Start app, the real time worker
-  and Postgres.
+  and Postgres
 date: '1111-11-11T11:11:00Z'
 draft: false
 tags:
@@ -12,6 +12,8 @@ tags:
   - drawy
   - partyserver
   - cloudflare workers
+  - durable
+  - worker
 isCJKLanguage: false
 headless: false
 order: 5
@@ -116,18 +118,14 @@ bunx wrangler secret put DATABASE_URL
 bunx wrangler secret put SESSION_SECRET
 ```
 
-Both values are read at runtime from the worker bindings, so the app talks to
-Neon over its HTTP API and signs sessions with the same secret as your local
-`.env`. `bun run cf:dev` runs the built worker locally; put the two values in
+Both values are read at runtime from the worker bindings, so the app talks to  
+Neon over its HTTP API and signs sessions with the same secret as your local  
+`.env`. `bun run cf:dev` runs the built worker locally; put the two values in  
 `.dev.vars` (git-ignored) so the local run has them too.
 
-Variables prefixed with `VITE_` are inlined into the bundle at build time, so
-they have to be set before `bun run build`: `VITE_PARTYKIT_URL` for the
-realtime host (unset means same-origin, since the rooms live in this worker)
-and `VITE_SITE_URL` for the canonical URL that the sitemap and `robots.txt`
-advertise.
+Variables prefixed with `VITE_` are inlined into the bundle during the build process, so they must be defined before running `bun run build`. Set `VITE_PARTYKIT_URL` to specify the real‑time host (leaving it unset defaults to same‑origin, as the rooms operate within this worker). Use `VITE_SITE_URL` to define the canonical URL that appears in the sitemap and `robots.txt`.
 
-## Operational notes
+## Operational Notes
 
 - Your reverse proxy must forward WebSocket upgrades on `/parties`; the browser  
 connects there directly for real time sync.
