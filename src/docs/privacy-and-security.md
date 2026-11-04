@@ -1,9 +1,10 @@
 ---
 title: Privacy and security
-description: What Drawy stores, what it deliberately does not, and how to get rid of it.
+description: 'What Drawy stores, what it deliberately does not, and how to get rid of it.'
 order: 4
+slug: privacy-and-security
+date: '2026-11-04T18:43:35.221Z'
 ---
-
 Drawy keeps your drawings private by default. This page is the short version;
 the [Privacy Policy](/privacy) and [Cookie Policy](/cookies) are the legal
 documents.
@@ -11,12 +12,12 @@ documents.
 ## What is stored
 
 - **Your account** — the username and a password hash. Passwords are hashed with
-  scrypt and a per-user salt, so the original password is never stored and
-  cannot be recovered from the database.
+scrypt and a per-user salt, so the original password is never stored and
+cannot be recovered from the database.
 - **Your canvases** — their content, title and version history, capped at the
-  newest 50 snapshots per canvas.
+newest 50 snapshots per canvas.
 - **Sharing settings** — the usernames a canvas is shared with, and whether its
-  public link is enabled.
+public link is enabled.
 
 ## What is not stored
 
@@ -73,3 +74,5 @@ a public issue. Include the steps to reproduce it and we will get back to you.
 
 - [Sharing and collaboration](/docs/sharing) — who can see a canvas
 - [Self-hosting](/docs/selfhost) — keep the data on your own database
+
+![](https://i.ibb.co/TBKGbjM1/Screenshot-2026-11-04-at-17-05-26-Drawy-png.png)
