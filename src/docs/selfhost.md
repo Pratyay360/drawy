@@ -27,7 +27,7 @@ drawings. This page walks through all three.
 - A PostgreSQL database — Neon, Supabase or any
 - A Cloudflare account — the realtime Durable Objects live in the same Worker
 as the app, so `wrangler deploy` publishes everything.
-- Any serverless platform like vercel, netlify, cloudflare worker.
+- Any serverless platform like cloudflare worker.
 
 ## 1. Install
 
@@ -42,13 +42,12 @@ mise deps
 ## 2. Configure the environment
 
 
-| Variable            | Required | Purpose                                                                                                      |
-| ------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `DATABASE_URL`      | yes      | Postgres connection string; prefer a pooled URL if your provider offers one                                  |
-| `SESSION_SECRET`    | yes      | Signs the session cookie — generate one with `openssl rand -hex 32`                                          |
-| `VITE_PARTYKIT_URL` | no       | Realtime host; leave unset to use the app's own origin (same worker), e.g. `drawyparty.username.workers.dev` |
-| `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`                                           |
-| `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build (optional)                                                              |
+| Variable            | Required | Purpose                                                                     |
+| ------------------- | -------- | --------------------------------------------------------------------------- |
+| `DATABASE_URL`      | yes      | Postgres connection string; prefer a pooled URL if your provider offers one |
+| `SESSION_SECRET`    | yes      | Signs the session cookie — generate one with `openssl rand -hex 32`         |
+| `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`          |
+| `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build (optional)                             |
 
 
 The repository's `.env.example` can be used as a reference. 
@@ -123,7 +122,7 @@ Neon over its HTTP API and signs sessions with the same secret as your local
 `.env`. `bun run cf:dev` runs the built worker locally; put the two values in  
 `.dev.vars` (git-ignored) so the local run has them too.
 
-Variables prefixed with `VITE_` are inlined into the bundle during the build process, so they must be defined before running `bun run build`. Set `VITE_PARTYKIT_URL` to specify the real‑time host (leaving it unset defaults to same‑origin, as the rooms operate within this worker). Use `VITE_SITE_URL` to define the canonical URL that appears in the sitemap and `robots.txt`.
+Variables prefixed with `VITE_` are inlined into the bundle during the build process, so they must be defined before running `bun run build`. Set `VITE_PARTYKIT_URL` to specify the real‑time host (leaving it unset defaults too same‑origin, as the rooms operate within this worker). Use `VITE_SITE_URL` to define the canonical URL that appears in the sitemap and `robots.txt`.
 
 ## Operational Notes
 
