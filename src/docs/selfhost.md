@@ -18,7 +18,7 @@ isCJKLanguage: false
 headless: false
 order: 5
 ---
-Drawy has three components, frontend, backend and data store which holds the  
+Drawy has three components, front end, back end, and data store which holds the  
 drawings. This page walks through all three.
 
 ## What you need
