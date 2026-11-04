@@ -1,7 +1,7 @@
 ---
-title: Self-hosting Drawy Party
+title: Self hosting Drawy
 description: >-
-  Run your own instance — the TanStack Start app, the realtime worker and
+  Run your own instance of drawy the TanStack Start app, the realtime worker and
   Postgres.
 date: '1111-11-11T11:11:00Z'
 draft: false
@@ -24,7 +24,7 @@ drawings. This page walks through all three.
 - MISE the version manager
 - A PostgreSQL database — Neon, Supabase or any
 - A Cloudflare account — the realtime Durable Objects live in the same Worker
-  as the app, so `wrangler deploy` publishes everything.
+as the app, so `wrangler deploy` publishes everything.
 - Any serverless platform like vercel, netlify, cloudflare worker.
 
 ## 1. Install
@@ -40,13 +40,13 @@ mise deps
 ## 2. Configure the environment
 
 
-| Variable            | Required | Purpose                                                                     |
-| ------------------- | -------- | --------------------------------------------------------------------------- |
-| `DATABASE_URL`      | yes      | Postgres connection string; prefer a pooled URL if your provider offers one |
-| `SESSION_SECRET`    | yes      | Signs the session cookie — generate one with `openssl rand -hex 32`         |
+| Variable            | Required | Purpose                                                                                                      |
+| ------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`      | yes      | Postgres connection string; prefer a pooled URL if your provider offers one                                  |
+| `SESSION_SECRET`    | yes      | Signs the session cookie — generate one with `openssl rand -hex 32`                                          |
 | `VITE_PARTYKIT_URL` | no       | Realtime host; leave unset to use the app's own origin (same worker), e.g. `drawyparty.username.workers.dev` |
-| `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`          |
-| `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build (optional)                             |
+| `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`                                           |
+| `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build (optional)                                                              |
 
 
 The repository's `.env.example` can be used as a reference. 
@@ -105,8 +105,7 @@ bun run deploy         # builds and uploads to Cloudflare
 worker name, the compatibility date and flags, the `ASSETS` binding the
 generated server reads its public files from, and the `Main` / `Rooms`
 Durable Object bindings the realtime rooms run in. Nitro's generated
-`.output/server/wrangler.json` redirect is switched off (`cloudflare:
-{ deployConfig: false }` in `vite.config.ts`) so this root file stays the one
+`.output/server/wrangler.json` redirect is switched off (`cloudflare: { deployConfig: false }` in `vite.config.ts`) so this root file stays the one
 place to change things — its `main` points at `src/party/index.ts`, which
 wraps the Nitro bundle.
 
