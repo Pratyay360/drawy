@@ -60,8 +60,8 @@ bun run db:migrate
 bun run db:push
 ```
 
-This applies `src/lib/db/schema.ts` to `DATABASE_URL` and creates `app_users`,
-`canvases` and `canvas_versions`. If you prefer versioned migrations, run
+This applies `src/lib/db/schema.ts` to `DATABASE_URL` and creates `app_users`,  
+`canvases,` and `canvas_versions`. If you prefer versioned migrations, run
 `bun run db:generate` and then `bun run db:migrate`.
 
 ## 4. Realtime ships with the app
@@ -79,13 +79,6 @@ canvas to Postgres, which stays the source of truth.
 
 ```bash
 bun run dev
-```
-
-In development the Vite server proxies `/parties` to `VITE_PARTYKIT_URL`, so
-you can develop against an already-deployed worker. To run the worker locally
-as well:
-
-```bash
 bun run cf:dev   # built worker on http://localhost:8787 (app + rooms)
 ```
 
