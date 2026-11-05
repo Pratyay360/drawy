@@ -44,16 +44,41 @@
   },
   "observability": {
     "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": false,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true,
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+    },
+    "issues": {
+      "enabled": true,
+    },
   },
   "previews": {},
   // Hyperdrive for PostgreSQL (optional — falls back to DATABASE_URL)
   // Add a Hyperdrive binding in Cloudflare dashboard and set:
   //       "binding": "HYPERDRIVE",
   // "id": "",
-  "hyperdrive": [
+  // "hyperdrive": [
+  //   {
+  //     "binding": "HYPERDRIVE",
+  //     "id": "3f42f3d892b34ae09015c5ebaab5968d",
+  //   },
+  // ],
+  "routes": [
     {
-      "binding": "HYPERDRIVE",
-      "id": "3f42f3d892b34ae09015c5ebaab5968d",
+      "pattern": "drawy.pratyay.online",
+      "zone_name": "pratyay.online",
+      "custom_domain": true,
+      "enabled": true,
+      "previews_enabled": false,
     },
   ],
   // Hyperdrive disabled: app falls back to DATABASE_URL.

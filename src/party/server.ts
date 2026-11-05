@@ -1,10 +1,4 @@
-import * as decoding from "lib0/decoding";
-import * as encoding from "lib0/encoding";
 import { getServerByName, Server } from "partyserver";
-import type { Connection, ConnectionContext } from "partyserver";
-import * as awarenessProtocol from "y-protocols/awareness";
-import * as syncProtocol from "y-protocols/sync";
-import * as Y from "yjs";
 import { SINGLETON_ROOM_ID } from "./room-id";
 import type { RoomsEnv } from "./rooms";
 import { SNAPSHOT_DEBOUNCE_MS, SNAPSHOT_RETENTION, REDIS_PRESENCE_TTL } from "./constants";
