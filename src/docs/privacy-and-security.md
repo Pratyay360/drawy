@@ -66,7 +66,7 @@ everything attached to it, use the same page.
 ## Reporting a vulnerability
 
 If you find a security issue, please report it through the
-[vulnerability form](https://app.youform.com/forms/moki0tve) instead of opening
+[vulnerability form](https://app.youform.com/forms/8kgi7jvm) instead of opening
 a public issue. Include the steps to reproduce it and we will get back to you.
 
 ## Related

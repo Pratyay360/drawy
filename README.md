@@ -119,4 +119,66 @@ tech stack
 3. Tanstack start(frontend)
 4. vite-plus + nub (for dependency management)
 
+## Updated architecture
+
+```
+Excalidraw clients
+  Yjs · Y.Doc · Awareness
+        │
+Cloudflare Workers — WebSocket collaboration gateway
+        │
+Durable Objects — Room coordination · Authorization · Lifecycle
+        │
+  ├─ Upstash Redis — Pub/Sub · Presence · Live update distribution
+  ├─ Hyperdrive → PostgreSQL — Metadata · Durable update log
+  └─ Amazon S3 — Snapshots · Attachments · Exports
+```
+
+| Data                        | Storage       |
+| --------------------------- | ------------- |
+| Live Yjs updates            | Redis Pub/Sub |
+| Durable incremental updates | PostgreSQL    |
+| Compacted Yjs snapshots     | S3            |
+| Images and attachments      | S3            |
+| Room metadata               | PostgreSQL    |
+| Temporary presence          | Redis         |
+
+### S3 structure
+
+```
+bucket/
+  documents/
+    {roomId}/
+      snapshots/
+        {version}.bin
+      attachments/
+        {attachmentId}
+      exports/
+        {exportId}.png
+```
+
+### Durability model
+
+- Postgres is the source of truth for canvas metadata and the durable `canvas_updates` log.
+- The Durable Object replays `canvas_updates` after the latest S3 snapshot on first connect.
+- Snapshots are `Y.encodeStateAsUpdate(doc)` written with `PutObject` to `documents/{roomId}/snapshots/{version}.bin`.
+- Checkpoint is atomic: after the S3 object is verified, a single Postgres transaction updates `canvases.checkpoint_seq`, inserts `canvas_snapshots`, and deletes `canvas_updates` with `seq <= checkpoint`.
+- Old snapshots beyond retention (5) are deleted from S3; set a bucket lifecycle policy for older exports.
+- Attachments use presigned `PUT` URLs (`presignAttachment`) for direct browser uploads; confirm metadata via `confirmAttachment`.
+- Redis is ephemeral only: presence hashes (TTL 120s, heartbeat 30s) and Pub/Sub fan-out — never durable storage.
+
+#### Wrangler secrets
+
+```bash
+bunx wrangler secret put DATABASE_URL
+bunx wrangler secret put SESSION_SECRET
+bunx wrangler secret put S3_BUCKET
+bunx wrangler secret put S3_ACCESS_KEY_ID
+bunx wrangler secret put S3_SECRET_ACCESS_KEY
+bunx wrangler secret put UPSTASH_REDIS_REST_URL
+bunx wrangler secret put UPSTASH_REDIS_REST_TOKEN
+```
+
+Hyperdrive is optional — add `"hyperdrive": [{ "binding": "HYPERDRIVE", "id": "<id>" }]` in `wrangler.jsonc` and `DATABASE_URL` can fall back to the Hyperdrive connection string.
+
 If this has helped you, consider [supporting me](https://pratyayupi.surge.sh/).

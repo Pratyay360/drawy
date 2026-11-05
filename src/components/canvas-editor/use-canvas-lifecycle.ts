@@ -215,13 +215,25 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         };
     }, [id, fetchCanvas]);
 
-    // --- Realtime sync ---
+    // --- Realtime sync (Yjs) ---
     useEffect(() => {
         if (!id || !excalidrawAPI) return;
         const rt = new CanvasRealtime(id, username || "Anonymous");
         realtimeRef.current = rt;
         rt.connect();
         setAwareness(rt.getAwareness());
+
+        // Seed Y.Doc with whatever we loaded from Postgres (first run / snapshot miss).
+        // Afterwards Y.Doc is the scene source; subsequent syncs come from the DO.
+        const ydoc = rt.getYDoc();
+        if (ydoc) {
+            const existing = (ydoc as unknown as { _hydrated?: boolean })._hydrated;
+            if (!existing) {
+                const initial = elements.length > 0 ? elements : (useCanvasStore.getState().elements ?? []);
+                if (initial.length > 0) rt.pushLocalScene(initial);
+                (ydoc as unknown as { _hydrated?: boolean })._hydrated = true;
+            }
+        }
 
         const offScene = rt.onScene((payload: ScenePayload) => {
             const api = excalidrawAPI;
@@ -232,6 +244,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
             }
             const local = api.getSceneElements();
             const merged = mergeElements(local, payload.elements);
+            if (merged.length === 0) return;
             applyingRemoteRef.current = true;
             lastSavedData.current = {
                 elements: merged.map((e) => ({ id: e.id, version: e.version })),
@@ -243,7 +256,6 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
 
         const offSaved = rt.onSaved(() => {
             if (!id) return;
-            // Don't clobber the local user's in-progress edits.
             if (Date.now() - lastLocalEditRef.current < 4000) return;
             void fetchCanvas(id, false);
         });
@@ -260,7 +272,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         };
     }, [id, excalidrawAPI, fetchCanvas, setCollaborators, username]);
 
-    // --- Auto-save ---
+    // --- Auto-save (metadata/appState only; scene syncs via Yjs DO) ---
     useEffect(() => {
         if (loading || isChangingCanvas || !id || saveStatus !== "unsaved") return;
 

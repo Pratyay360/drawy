@@ -186,6 +186,23 @@ export async function uploadCanvasAsset(
     });
 }
 
+export async function getCanvasSync(id: string) {
+    return client.canvases.sync({ id });
+}
+
+export async function listCanvasSnapshots(canvasId: string) {
+    return client.canvases.listSnapshots({ canvasId });
+}
+
+export async function presignAttachment(
+    canvasId: string,
+    fileId: string,
+    mimeType: string,
+    sizeBytes: number,
+): Promise<{ url: string; key: string; publicUrl: string | null; enabled: boolean }> {
+    return client.canvases.presignAttachment({ canvasId, fileId, mimeType, sizeBytes });
+}
+
 /** Keep only the app-state fields we persist, dropping transient editor state. */
 export function sanitizeExcalidrawAppState(appState: Partial<AppState>): Partial<AppState> {
     if (!appState) return {};

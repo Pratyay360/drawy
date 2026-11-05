@@ -9,9 +9,20 @@ type RoomReport = { room: string; count: number; at: number };
 
 export type RoomsEnv = {
   Rooms: DurableObjectNamespace<OccupancyServer>;
+  ASSETS: Fetcher;
+  SESSION_SECRET: string;
+  DATABASE_URL: string;
+  S3_BUCKET: string;
+  UPSTASH_REDIS_REST_URL: string;
+  UPSTASH_REDIS_REST_TOKEN: string;
+  PARTYKIT_SECRET: string;
+  VITE_PARTYKIT_URL: string;
+  SENTRY_AUTH_TOKEN: string;
+  VITE_SITE_URL: string;
+  Main: DurableObjectNamespace<never>;
 };
 
-export class OccupancyServer extends Server<RoomsEnv> {
+export class OccupancyServer extends Server<RoomsEnv, Record<string, unknown>> {
   private rooms = new Map<string, RoomReport>();
 
   onConnect(connection: Connection) {

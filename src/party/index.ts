@@ -12,8 +12,8 @@ export { EditorServer, OccupancyServer };
 export default {
   ...nitroWorker,
   async fetch(request: Request, env: Env, context: unknown): Promise<Response> {
-    const partyResponse = await routePartykitRequest(request, env);
+    const partyResponse = await routePartykitRequest(request, env as never);
     if (partyResponse) return partyResponse;
-    return nitroWorker.fetch(request, env, context);
+    return nitroWorker.fetch(request, env as never, context);
   },
 };
