@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useRef } from "react";
 import { getCurrentUser } from "#/lib/session";
-import { useCanvasStore } from "#/stores/canvas";
+import { type SaveStatus, useCanvasStore } from "#/stores/canvas";
 import { useUIStore } from "#/stores/ui";
 import { useTheme } from "../../hooks/usetheme";
 import { updateCanvasTitle } from "../../services/canvases";
@@ -43,8 +43,14 @@ import { useCanvasHandlers } from "./use-canvas-handlers";
 import { useCanvasLifecycle } from "./use-canvas-lifecycle";
 
 const RealtimeCursors = lazy(() =>
-    import("../realtime-cursors").then((m) => ({ default: m.RealtimeCursors })),
+	import("../realtime-cursors").then((m) => ({ default: m.RealtimeCursors })),
 );
+
+const SAVE_STATUS_LABELS: Record<SaveStatus, string> = {
+	saved: "Saved",
+	unsaved: "Unsaved",
+	saving: "Saving...",
+};
 
 interface CanvasEditorProps {
     id: string;
@@ -55,11 +61,9 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
     const navigate = useNavigate();
     const { mode } = useTheme();
 
-    // --- Lifecycle hook (loading, saving, realtime) ---
-    const lifecycle = useCanvasLifecycle({ id });
+	const lifecycle = useCanvasLifecycle({ id });
 
-    // --- Handlers hook (export, import, save, change) ---
-    const handlers = useCanvasHandlers({
+	const handlers = useCanvasHandlers({
         id,
         filesRef: lifecycle.filesRef,
         excalidrawAPI: lifecycle.excalidrawAPI,
@@ -73,8 +77,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
     const openShareCanvas = useUIStore((s) => s.openShareCanvas);
     const openVersionHistory = useUIStore((s) => s.openVersionHistory);
 
-    // --- Username initialization ---
-    const setUsername = useCanvasStore((s) => s.setUsername);
+	const setUsername = useCanvasStore((s) => s.setUsername);
     useEffect(() => {
         if (propUsername) {
             setUsername(propUsername);
@@ -91,8 +94,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         };
     }, [propUsername, setUsername]);
 
-    // --- Library change handler ---
-    const librarySaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const librarySaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pendingLibraryRef = useRef<import("@excalidraw/excalidraw/types").LibraryItem[] | null>(
         null,
     );
@@ -144,7 +146,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         const rawLibraryUrl = params.get("addLibrary");
         if (!rawLibraryUrl) return;
 
-        // Clear the hash immediately so a refresh doesn't re-import.
+		// Clear the hash before fetching so a refresh cannot import twice.
         globalThis.history.replaceState(
             null,
             "",
@@ -155,7 +157,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
             try {
                 const contentUrl = getLibraryAssetUrl(rawLibraryUrl);
                 const response = await fetch(contentUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+				if (!response.ok) throw new Error(`Library request failed (${response.status})`);
                 const content = (await response.json()) as ExcalidrawLibraryFile;
                 const libraryId =
                     contentUrl
@@ -175,35 +177,24 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         })();
     }, [lifecycle.excalidrawAPI]);
 
-    // --- Title editing ---
-    const isEditingTitle = useCanvasStore((s) => s.isEditingTitle);
+	const isEditingTitle = useCanvasStore((s) => s.isEditingTitle);
     const titleInput = useCanvasStore((s) => s.titleInput);
     const setIsEditingTitle = useCanvasStore((s) => s.setIsEditingTitle);
     const setTitleInput = useCanvasStore((s) => s.setTitleInput);
 
-    const handleTitleSave = useCallback(async () => {
-        if (!id || !titleInput.trim()) return;
-        try {
-            const withTimeout = <T,>(p: Promise<T>) =>
-                Promise.race([
-                    p,
-                    new Promise<never>((_, rej) =>
-                        setTimeout(
-                            () => rej(new Error("Saving title timed out — slow network")),
-                            12000,
-                        ),
-                    ),
-                ]);
-            await withTimeout(updateCanvasTitle(id, titleInput.trim()));
-            if (lifecycle.canvasData) {
-                lifecycle.setCanvasData({
-                    ...lifecycle.canvasData,
-                    title: titleInput.trim(),
-                });
-            }
-            setIsEditingTitle(false);
-            globalThis.dispatchEvent(new Event("canvas-updated"));
-        } catch (error) {
+	const handleTitleSave = useCallback(async () => {
+		const title = titleInput.trim();
+		if (!id || !title) return;
+		try {
+			await updateCanvasTitle(id, title);
+			if (lifecycle.canvasData) {
+				lifecycle.setCanvasData({
+					...lifecycle.canvasData,
+					title,
+				});
+			}
+			setIsEditingTitle(false);
+		} catch (error) {
             console.error("Failed to update title:", error);
         }
     }, [id, titleInput, lifecycle.canvasData, lifecycle.setCanvasData, setIsEditingTitle]);
@@ -220,8 +211,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
         [handleTitleSave, lifecycle.canvasData?.title, setTitleInput, setIsEditingTitle],
     );
 
-    // --- Loading / error states (slow-network aware) ---
-    if (lifecycle.loading) {
+	if (lifecycle.loading) {
         return (
             <AppShell contentPadding={0} sideNav={<Sidebar />}>
                 <Center height="100%">
@@ -248,7 +238,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                             <Button
                                 label="Retry"
                                 icon={<Icon icon={Loader2} size="sm" />}
-                                onClick={() => void lifecycle.fetchCanvas(id, true)}
+                                onClick={() => void lifecycle.fetchCanvas(id, "load")}
                             />
                             <Button
                                 label="Back to workspace"
@@ -325,13 +315,9 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                                         {lifecycle.collaborators === 1 ? "user" : "users"}
                                     </Text>
                                 )}
-                                <Text type="supporting">
-                                    {lifecycle.saveStatus === "saving"
-                                        ? "Saving..."
-                                        : lifecycle.saveStatus === "saved"
-                                          ? "Saved"
-                                          : "Unsaved"}
-                                </Text>
+								<Text type="supporting">
+									{SAVE_STATUS_LABELS[lifecycle.saveStatus]}
+								</Text>
                                 <IconButton
                                     label="Save"
                                     variant="ghost"
@@ -382,10 +368,9 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                                 {lifecycle.excalidrawModule ? (
                                     <lifecycle.excalidrawModule.Excalidraw
                                         excalidrawAPI={lifecycle.setExcalidrawAPI}
-                                        theme={mode}
-                                        isCollaborating
-                                        onPointerUpdate={() => {}}
-                                        initialData={{
+										 theme={mode}
+										 isCollaborating
+										 initialData={{
                                             elements: lifecycle.elements,
                                             appState: lifecycle.appState,
                                             files: lifecycle.filesRef.current,
@@ -458,20 +443,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                                             </lifecycle.excalidrawModule.Sidebar.Tab>
                                         </lifecycle.excalidrawModule.DefaultSidebar>
                                     </lifecycle.excalidrawModule.Excalidraw>
-                                ) : lifecycle.moduleError ? (
-                                    <Center height="100%">
-                                        <VStack gap={2} hAlign="center" maxWidth={360}>
-                                            <Text weight="medium">Editor failed to load</Text>
-                                            <Text type="supporting" justify="center">
-                                                {lifecycle.moduleError}
-                                            </Text>
-                                            <Button
-                                                label="Retry"
-                                                onClick={() => globalThis.location.reload()}
-                                            />
-                                        </VStack>
-                                    </Center>
-                                ) : (
+								) : (
                                     <Center height="100%">
                                         <VStack gap={2} hAlign="center">
                                             <Icon icon={Loader2} size="lg" />

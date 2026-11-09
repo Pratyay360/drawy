@@ -56,7 +56,9 @@ export async function withRetry<T>(query: () => Promise<T>, attempts = 4): Promi
 function resolveDatabaseUrl(): string {
     // In Workers the binding is injected as global env via cloudflare:workers if needed.
     // Here we prefer DATABASE_URL, falling back to Hyperdrive connectionString when available.
-    const g = globalThis as unknown as { HYPERDRIVE?: { connectionString: string } };
+    const g = globalThis as unknown as {
+        HYPERDRIVE?: { connectionString: string };
+    };
     if (g.HYPERDRIVE?.connectionString) return g.HYPERDRIVE.connectionString;
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error("DATABASE_URL is not set");
@@ -96,7 +98,3 @@ const client = usesNeon
     : drizzleTcp(createPostgresClient(), { schema });
 
 export const db = client as unknown as ReturnType<typeof drizzleTcp<typeof schema>>;
-
-export function getDb(): typeof db {
-    return db;
-}

@@ -7,8 +7,7 @@ export interface ShareModalState {
     isOwner: boolean;
     sharedWith: string[];
     isPublic: boolean;
-    /** Transient share-form state. */
-    targetUser: string;
+	targetUser: string;
     availableUsers: string[];
     isSharing: boolean;
     isTogglingPublic: boolean;
@@ -19,15 +18,12 @@ export interface ShareModalState {
 }
 
 interface UIState {
-    /** Libraries browser modal — opened from the sidebar or a library panel. */
-    libraryModal: {
+	libraryModal: {
         isOpen: boolean;
         initialBrowseId: string | null;
     };
-    /** Share-canvas modal — opened from the canvas editor's "Share" action. */
-    shareModal: ShareModalState;
-    /** Version-history modal — opened from the canvas editor's "History" action. */
-    versionModal: {
+	shareModal: ShareModalState;
+	versionModal: {
         isOpen: boolean;
         canvasId: string | null;
     };

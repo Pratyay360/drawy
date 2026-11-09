@@ -6,7 +6,6 @@ import { TopNav, TopNavHeading, TopNavItem } from "@astryxdesign/core/TopNav";
 import { useRouterState } from "@tanstack/react-router";
 import { PenTool } from "lucide-react";
 
-/** Public destinations surfaced in the top navigation. */
 const NAV_ITEMS = [
     { label: "Docs", href: "/docs" },
     { label: "About", href: "/about" },

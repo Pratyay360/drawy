@@ -8,6 +8,22 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import router from "#/orpc/router";
 
+/**
+ * Procedures whose payload carries the whole scene (elements + embedded
+ * files). Those requests can be megabytes, so a slow uplink needs a real
+ * budget instead of the metadata timeout — otherwise every save on a slow
+ * connection is aborted mid-upload and retried forever.
+ */
+const HEAVY_PATHS = new Set([
+    "canvases.get",
+    "canvases.getPublic",
+    "canvases.save",
+    "canvases.uploadAsset",
+    "canvases.versions.get",
+]);
+const DEFAULT_TIMEOUT_MS = 30_000;
+const HEAVY_TIMEOUT_MS = 60_000;
+
 const getORPCClient = createIsomorphicFn()
     .server(() =>
         createRouterClient(router, {
@@ -19,14 +35,17 @@ const getORPCClient = createIsomorphicFn()
     .client((): RouterClient<typeof router> => {
         const link = new RPCLink({
             url: `${location.origin}/api/rpc`,
-            fetch: (request, init) => {
+            fetch: (request, init, _options, path) => {
                 const controller = new AbortController();
+                const timeoutMs = HEAVY_PATHS.has(path.join("."))
+                    ? HEAVY_TIMEOUT_MS
+                    : DEFAULT_TIMEOUT_MS;
                 const timeout = setTimeout(
                     () =>
                         controller.abort(
                             new DOMException("Request timed out — slow network", "AbortError"),
                         ),
-                    15000,
+                    timeoutMs,
                 );
                 // The abort signal of the request itself is on the Request
                 // object; `init` only carries the redirect mode.

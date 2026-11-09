@@ -1,5 +1,5 @@
 import { ORPCError } from "@orpc/server";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/lib/db";
 import { canvases } from "#/lib/db/schema";
@@ -28,14 +28,28 @@ export const list = base
                 message: "Not authenticated",
             });
 
-        const rows = await db.select().from(canvases).orderBy(desc(canvases.updatedAt));
-        return rows
-            .filter(
-                (row) =>
-                    row.userId === username ||
-                    parseCanvasAppState(row.appState).sharedWith.includes(username),
+        // Only metadata is needed here: selecting `elements` would ship every
+        // scene (megabytes each) over the wire just to build a list.
+        const rows = await db
+            .select({
+                id: canvases.id,
+                userId: canvases.userId,
+                title: canvases.title,
+                createdAt: canvases.createdAt,
+                updatedAt: canvases.updatedAt,
+                appState: canvases.appState,
+                isPublic: canvases.isPublic,
+            })
+            .from(canvases)
+            .where(
+                or(
+                    eq(canvases.userId, username),
+                    sql`${canvases.appState} -> 'sharedWith' @> ${JSON.stringify([username])}::jsonb`,
+                ),
             )
-            .map((row) => toMeta(row, username));
+            .orderBy(desc(canvases.updatedAt));
+
+        return rows.map((row) => toMeta(row, username));
     });
 
 const canvasDataSchema = z.object({

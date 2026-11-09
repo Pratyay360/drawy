@@ -40,7 +40,9 @@ export function CanvasViewer({ id }: { id: string }) {
         setLoading(true);
         setLoadError(null);
         try {
-            const data = await withTimeout(loadPublicCanvas(id), 12000, "Loading canvas");
+            // The RPC link owns the timeout (heavy payload budget), so a
+            // local race would only fake a failure mid-download.
+            const data = await loadPublicCanvas(id);
             if (!data) {
                 setLoadError(
                     "This drawing isn't available. It may not exist or link sharing may be turned off.",
@@ -73,9 +75,10 @@ export function CanvasViewer({ id }: { id: string }) {
         let cancelled = false;
         (async () => {
             try {
+                // The editor bundle is megabytes — give a slow link room.
                 const mod = await withTimeout(
                     import("@excalidraw/excalidraw"),
-                    15000,
+                    30000,
                     "Loading editor",
                 );
                 await import("@excalidraw/excalidraw/index.css");

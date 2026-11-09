@@ -3,8 +3,8 @@ import { Link } from "@astryxdesign/core/Link";
 import { VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { createFileRoute } from "@tanstack/react-router";
-import { CONTACT_URL } from "#/components/site-footer";
 import { PublicPage } from "#/components/public-page";
+import { CONTACT_URL } from "#/components/site-footer";
 
 export const Route = createFileRoute("/terms")({
     head: () => ({

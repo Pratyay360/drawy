@@ -6,6 +6,15 @@ Project-specific guidance for AI coding agents.
 
 [yjs](https://docs.yjs.dev/~gitbook/mcp)
 
+## Drizzle Kit
+
+`drizzle-kit` connects over direct TCP with postgres.js, not the Neon HTTP driver.
+On networks where DNS returns IPv6 first but IPv6 is unreachable, Node's Happy
+Eyeballs (`autoSelectFamily`) times out and drizzle-kit exits 1 with no error.
+`db:push` / `db:migrate` set `NODE_OPTIONS=--no-network-family-autoselection`;
+use the same flag when invoking `drizzle-kit` directly. `db:generate` does not
+connect to the database.
+
 <!-- ASTRYX:START -->
 
 Astryx v0.5.0 · 163 components

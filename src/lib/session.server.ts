@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync, timingSafeEqual, createHmac } from "node:crypto";
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import * as Sentry from "@sentry/tanstackstart-react";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import { eq } from "drizzle-orm";
@@ -99,13 +99,13 @@ function verifyPassword(password: string, storedHash: string): boolean {
     return timingSafeEqual(expected, derivedKey);
 }
 
-function validateCredentials(username: string, _password: string): void {
+function validateUsername(username: string): void {
     if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
         throw new Error("Username can only contain letters, numbers, underscores, and hyphens.");
     }
 }
 
-async function loadCurrentUser(): Promise<CurrentUser | null> {
+export async function loadCurrentUser(): Promise<CurrentUser | null> {
     const raw = getCookie(SESSION_COOKIE_NAME);
     if (!raw) {
         Sentry.setUser(null);
@@ -149,12 +149,8 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
     }
 }
 
-export async function resolveCurrentUserServer(): Promise<CurrentUser | null> {
-    return loadCurrentUser();
-}
-
-export async function signInServer(username: string, _password: string): Promise<CurrentUser> {
-    validateCredentials(username, _password);
+export async function signInServer(username: string, password: string): Promise<CurrentUser> {
+    validateUsername(username);
 
     const [user] = await db
         .select({
@@ -169,7 +165,7 @@ export async function signInServer(username: string, _password: string): Promise
         throw new Error("Invalid username or password.");
     }
 
-    const matches = verifyPassword(_password, user.passwordHash);
+    const matches = verifyPassword(password, user.passwordHash);
 
     if (!matches) {
         throw new Error("Invalid username or password.");
@@ -182,7 +178,7 @@ export async function signInServer(username: string, _password: string): Promise
 }
 
 export async function signUpServer(username: string, password: string): Promise<CurrentUser> {
-    validateCredentials(username, password);
+    validateUsername(username);
 
     const [existing] = await db
         .select({ username: appUsers.username })

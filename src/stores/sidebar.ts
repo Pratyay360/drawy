@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { Canvas } from "#/services/canvases";
 
-export interface DisplayUser {
+interface DisplayUser {
     username: string;
 }
 

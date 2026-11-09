@@ -12,7 +12,13 @@ export function parseCanvasAppState(raw: unknown): { sharedWith: string[] } {
     return shared.success ? shared.data : { sharedWith: [] };
 }
 
-export function toMeta(row: Canvas, currentUser?: string) {
+/** Columns needed to describe a canvas without loading its scene. */
+type CanvasMetaRow = Pick<
+    Canvas,
+    "id" | "userId" | "title" | "createdAt" | "updatedAt" | "appState" | "isPublic"
+>;
+
+export function toMeta(row: CanvasMetaRow, currentUser?: string) {
     const shared = parseCanvasAppState(row.appState).sharedWith;
     return {
         id: row.id,

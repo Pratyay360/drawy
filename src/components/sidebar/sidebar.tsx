@@ -54,14 +54,6 @@ function SidebarNewCanvasButton({
     );
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-    let timer: ReturnType<typeof setTimeout>;
-    const timeout = new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
-    });
-    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer)) as Promise<T>;
-}
-
 export function Sidebar() {
     const isCollapsed = useSidebarStore((s) => s.isCollapsed);
     const setIsCollapsed = useSidebarStore((s) => s.setIsCollapsed);
@@ -86,7 +78,11 @@ export function Sidebar() {
         if (!hasStale) setIsLoadingCanvases(true);
         setCanvasesError(null);
         try {
-            const result = await withTimeout(listCanvases(), 12000, "Loading canvases");
+            // Single timeout authority: the RPC link aborts this with a
+            // slow-link budget. A local Promise.race would fail the load
+            // while the request is still alive and leave it holding a
+            // connection, so the next attempt queues behind a zombie.
+            const result = await listCanvases();
             if (seq !== loadSeqRef.current) return;
             setCanvases(result);
             setCanvasesError(null);
@@ -122,7 +118,7 @@ export function Sidebar() {
                 hour: "2-digit",
                 minute: "2-digit",
             });
-            const newCanvas = await withTimeout(createCanvas(title), 12000, "Create canvas");
+            const newCanvas = await createCanvas(title);
             dispatchEvent(new Event("canvas-updated"));
             void navigate({ to: "/canvas/$id", params: { id: newCanvas.id } });
         } catch (error) {
@@ -138,7 +134,7 @@ export function Sidebar() {
 
         setDeletingId(canvasId);
         try {
-            await withTimeout(deleteCanvas(canvasId), 12000, "Delete canvas");
+            await deleteCanvas(canvasId);
             dispatchEvent(new Event("canvas-updated"));
             if (canvasId === currentCanvasId) {
                 void navigate({ to: "/" });

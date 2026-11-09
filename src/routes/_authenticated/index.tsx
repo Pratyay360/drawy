@@ -39,14 +39,6 @@ function formatUpdatedAt(iso: string): string {
     });
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-    let timer: ReturnType<typeof setTimeout>;
-    const timeout = new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
-    });
-    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer)) as Promise<T>;
-}
-
 function Home() {
     const navigate = useNavigate();
     const [canvases, setCanvases] = useState<Canvas[]>([]);
@@ -62,7 +54,10 @@ function Home() {
         if (!hasStale) setIsLoading(true);
         setLoadError(null);
         try {
-            const result = await withTimeout(listCanvases(), 12000, "Loading canvases");
+            // The RPC link owns the timeout: a local race would fail this
+            // while the request is still in flight and leave it holding a
+            // connection for the next attempt to queue behind.
+            const result = await listCanvases();
             setCanvases(result);
             setLoadError(null);
         } catch (error) {
@@ -98,7 +93,7 @@ function Home() {
                 hour: "2-digit",
                 minute: "2-digit",
             });
-            const canvas = await withTimeout(createCanvas(title), 12000, "Create canvas");
+            const canvas = await createCanvas(title);
             void navigate({ to: "/canvas/$id", params: { id: canvas.id } });
         } catch (error) {
             console.error("Failed to create canvas:", error);
@@ -112,7 +107,7 @@ function Home() {
         event.stopPropagation();
         setDeletingId(canvasId);
         try {
-            await withTimeout(deleteCanvas(canvasId), 12000, "Delete canvas");
+            await deleteCanvas(canvasId);
         } catch (error) {
             console.error("Failed to delete canvas:", error);
         } finally {

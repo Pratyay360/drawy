@@ -1,4 +1,4 @@
-// Sentry initialization should be imported first!
+// Initialize Sentry before importing application code.
 import "./instrument.client";
 
 import { StartClient } from "@tanstack/react-start/client";

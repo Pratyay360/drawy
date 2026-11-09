@@ -7,18 +7,13 @@ import { butterTheme } from "./butter/butterTheme";
 import { gothicTheme } from "./gothic/gothicTheme";
 
 export interface ThemeEntry {
-    label: string;
-    description: string;
-    /** True when the theme only looks right in dark mode. */
-    darkOnly: boolean;
+	label: string;
+	description: string;
+	darkOnly: boolean;
     theme: DefinedTheme;
 }
 
-/**
- * Selectable app themes, keyed by the name persisted to localStorage.
- * Gothic is dark-only — the mode is forced to "dark" for it
- * (see getEffectiveMode in hooks/usetheme.ts).
- */
+// Keys are persisted to localStorage; dark-only themes override the color mode.
 export const themeRegistry = {
     butter: {
         label: "Butter",

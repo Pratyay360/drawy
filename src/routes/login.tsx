@@ -9,7 +9,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { LockKeyhole, PenTool, User } from "lucide-react";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { SiteFooter } from "#/components/site-footer";
 import { getCurrentUser, signIn, signUp } from "#/lib/session";
 import { normalizeUsername, usernameError } from "#/lib/username";
@@ -75,89 +75,100 @@ function LoginPage() {
         }
     }
 
+    function onFormSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        void handleSubmit();
+    }
+
     return (
         <VStack gap={0} height="100vh">
             <StackItem size="fill">
                 <Center height="100%" padding={4} width="100%">
                     <Card width={380} padding={6}>
-                        <VStack gap={5}>
-                            <VStack gap={1} hAlign="center">
-                                <Icon icon={PenTool} size="lg" />
-                                <Heading level={1}>Drawy</Heading>
-                                <Text type="supporting">
-                                    {mode === "signin"
-                                        ? "Sign in to access your drawings"
-                                        : "Create your Drawy account"}
-                                </Text>
-                            </VStack>
+                        <form onSubmit={onFormSubmit} style={{ width: "100%" }}>
+                            <VStack gap={5}>
+                                <VStack gap={1} hAlign="center">
+                                    <Icon icon={PenTool} size="lg" />
+                                    <Heading level={1}>Drawy</Heading>
+                                    <Text type="supporting">
+                                        {mode === "signin"
+                                            ? "Sign in to access your drawings"
+                                            : "Create your Drawy account"}
+                                    </Text>
+                                </VStack>
 
-                            <VStack gap={3}>
-                                <TextInput
-                                    label="Username"
-                                    value={username}
-                                    onChange={(value) => {
-                                        setUsername(value);
-                                        setUsernameTouched(true);
-                                    }}
-                                    onBlur={() => setUsernameTouched(true)}
-                                    onEnter={handleSubmit}
-                                    hasAutoFocus
-                                    placeholder="your_username"
-                                    startIcon={<Icon icon={User} size="sm" />}
-                                    isRequired
-                                    status={
-                                        showUsernameError
-                                            ? {
-                                                  type: "error",
-                                                  message: usernameInvalid,
-                                              }
-                                            : undefined
+                                <VStack gap={3}>
+                                    <TextInput
+                                        label="Username"
+                                        value={username}
+                                        onChange={(value) => {
+                                            setUsername(value);
+                                            setUsernameTouched(true);
+                                        }}
+                                        onBlur={() => setUsernameTouched(true)}
+                                        onEnter={handleSubmit}
+                                        hasAutoFocus
+                                        placeholder="your_username"
+                                        startIcon={<Icon icon={User} size="sm" />}
+                                        isRequired
+                                        status={
+                                            showUsernameError
+                                                ? {
+                                                      type: "error",
+                                                      message: usernameInvalid,
+                                                  }
+                                                : undefined
+                                        }
+                                    />
+                                    <TextInput
+                                        label="Password"
+                                        type="password"
+                                        value={password}
+                                        onChange={setPassword}
+                                        onEnter={handleSubmit}
+                                        placeholder="••••••••"
+                                        startIcon={<Icon icon={LockKeyhole} size="sm" />}
+                                        isRequired
+                                        status={
+                                            error ? { type: "error", message: error } : undefined
+                                        }
+                                    />
+                                </VStack>
+
+                                <Button
+                                    label={mode === "signin" ? "Sign in" : "Create an account"}
+                                    type="submit"
+                                    isLoading={busy}
+                                    width="100%"
+                                />
+                                {mode === "signup" && (
+                                    <Text as="p" size="sm" type="supporting">
+                                        By creating an account, You agree to our{" "}
+                                        <Link href="/terms" isStandalone>
+                                            Terms of Service
+                                        </Link>{" "}
+                                        and{" "}
+                                        <Link href="/privacy" isStandalone>
+                                            Privacy Policy
+                                        </Link>
+                                        .
+                                    </Text>
+                                )}
+                                <Button
+                                    label={
+                                        mode === "signin"
+                                            ? "New here? Create an account"
+                                            : "Already have an account? Sign in"
                                     }
-                                />
-                                <TextInput
-                                    label="Password"
-                                    type="password"
-                                    value={password}
-                                    onChange={setPassword}
-                                    onEnter={handleSubmit}
-                                    placeholder="••••••••"
-                                    startIcon={<Icon icon={LockKeyhole} size="sm" />}
-                                    isRequired
-                                    status={error ? { type: "error", message: error } : undefined}
+                                    variant="ghost"
+                                    onClick={() =>
+                                        switchMode(mode === "signin" ? "signup" : "signin")
+                                    }
+                                    isDisabled={busy}
+                                    width="100%"
                                 />
                             </VStack>
-
-                            <Button
-                                label={mode === "signin" ? "Sign in" : "Create an account"}
-                                onClick={handleSubmit}
-                                isLoading={busy}
-                                width="100%"
-                            />
-                            {mode === "signup" && (
-                                <Text as="p" size="sm" type="supporting">
-                                    By creating an account, You agree to our{" "}
-                                    <Link href="/terms" isStandalone>
-                                        Terms of Service
-                                    </Link>{" "}
-                                    and{" "}
-                                    <Link href="/privacy" isStandalone>
-                                        Privacy Policy
-                                    </Link>
-                                    .
-                                </Text>
-                            )}
-                            <Button
-                                label={
-                                    mode === "signin"
-                                        ? "New here? Create an account"
-                                        : "Already have an account? Sign in"
-                                }
-                                variant="ghost"
-                                onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}
-                                isDisabled={busy}
-                                width="100%"
-                            />
-                        </VStack>
+                        </form>
                     </Card>
                 </Center>
             </StackItem>

@@ -22,11 +22,6 @@ export interface CanvasVersion {
     createdBy: string | null;
 }
 
-export interface CanvasVersionDetail extends CanvasVersion {
-    elements: ExcalidrawElement[];
-    appState: Partial<AppState>;
-}
-
 export interface CanvasData extends Canvas {
     elements: ExcalidrawElement[];
     appState: Partial<AppState>;
@@ -35,8 +30,14 @@ export interface CanvasData extends Canvas {
 
 const CANVAS_UPDATED_EVENT = "canvas-updated";
 
-function notifyCanvasUpdated() {
-    dispatchEvent(new Event(CANVAS_UPDATED_EVENT));
+function publishCanvasUpdated() {
+	dispatchEvent(new Event(CANVAS_UPDATED_EVENT));
+	publishCanvasEvent();
+}
+
+function publishCanvasListUpdated() {
+	publishCanvasUpdated();
+	publishCanvasListChanged();
 }
 
 function toCanvasData(row: {
@@ -62,8 +63,8 @@ function toCanvasData(row: {
         sharedWith: row.sharedWith,
         isPublic: row.isPublic,
         elements: Array.isArray(row.elements) ? (row.elements as ExcalidrawElement[]) : [],
-        appState: row.appState as Partial<AppState>,
-        files: row.files as BinaryFiles,
+		appState: (row.appState ?? {}) as Partial<AppState>,
+		files: (row.files ?? {}) as BinaryFiles,
     };
 }
 
@@ -72,18 +73,14 @@ export async function listCanvases(): Promise<Canvas[]> {
 }
 
 export async function createCanvas(title: string): Promise<Canvas> {
-    const canvas = await client.canvases.create({ title });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
-    publishCanvasListChanged();
+	const canvas = await client.canvases.create({ title });
+	publishCanvasListUpdated();
     return canvas;
 }
 
 export async function deleteCanvas(id: string): Promise<void> {
-    await client.canvases.remove({ id });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
-    publishCanvasListChanged();
+	await client.canvases.remove({ id });
+	publishCanvasListUpdated();
 }
 
 export async function loadCanvas(id: string): Promise<CanvasData | null> {
@@ -101,34 +98,17 @@ export async function loadPublicCanvas(id: string): Promise<CanvasData | null> {
 
 export async function setCanvasPublic(id: string, isPublic: boolean): Promise<void> {
     await client.canvases.setPublic({ id, isPublic });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
-    publishCanvasListChanged();
+	publishCanvasListUpdated();
 }
 
 export async function listCanvasVersions(canvasId: string): Promise<CanvasVersion[]> {
     return client.canvases.versions.list({ canvasId });
 }
 
-export async function getCanvasVersion(
-    canvasId: string,
-    versionId: string,
-): Promise<CanvasVersionDetail> {
-    const version = await client.canvases.versions.get({
-        canvasId,
-        versionId,
-    });
-    return {
-        ...version,
-        elements: Array.isArray(version.elements) ? (version.elements as ExcalidrawElement[]) : [],
-        appState: (version.appState ?? {}) as Partial<AppState>,
-    };
-}
-
 export async function restoreCanvasVersion(canvasId: string, versionId: string): Promise<void> {
-    await client.canvases.versions.restore({ canvasId, versionId });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
+	await client.canvases.versions.restore({ canvasId, versionId });
+	dispatchEvent(new Event(CANVAS_UPDATED_EVENT));
+	publishCanvasEvent({ sceneReplaced: true });
 }
 
 export async function saveCanvas(
@@ -141,31 +121,24 @@ export async function saveCanvas(
         id,
         elements: [...elements],
         appState: sanitizeExcalidrawAppState(appState),
-        files: files || {},
-    });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
+		files: files ?? {},
+	});
+	publishCanvasUpdated();
 }
 
 export async function updateCanvasTitle(id: string, title: string): Promise<void> {
-    await client.canvases.rename({ id, title });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
-    publishCanvasListChanged();
+	await client.canvases.rename({ id, title });
+	publishCanvasListUpdated();
 }
 
 export async function shareCanvas(id: string, targetUsername: string): Promise<void> {
-    await client.canvases.share({ id, targetUsername });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
-    publishCanvasListChanged();
+	await client.canvases.share({ id, targetUsername });
+	publishCanvasListUpdated();
 }
 
 export async function unshareCanvas(id: string, targetUsername: string): Promise<void> {
-    await client.canvases.unshare({ id, targetUsername });
-    notifyCanvasUpdated();
-    publishCanvasEvent();
-    publishCanvasListChanged();
+	await client.canvases.unshare({ id, targetUsername });
+	publishCanvasListUpdated();
 }
 
 export async function listAvailableUsers(): Promise<string[]> {
@@ -186,27 +159,27 @@ export async function uploadCanvasAsset(
     });
 }
 
-export async function getCanvasSync(id: string) {
-    return client.canvases.sync({ id });
-}
-
-export async function listCanvasSnapshots(canvasId: string) {
-    return client.canvases.listSnapshots({ canvasId });
-}
-
 export async function presignAttachment(
     canvasId: string,
     fileId: string,
     mimeType: string,
     sizeBytes: number,
-): Promise<{ url: string; key: string; publicUrl: string | null; enabled: boolean }> {
-    return client.canvases.presignAttachment({ canvasId, fileId, mimeType, sizeBytes });
+): Promise<{
+    url: string;
+    key: string;
+    publicUrl: string | null;
+    enabled: boolean;
+}> {
+    return client.canvases.presignAttachment({
+        canvasId,
+        fileId,
+        mimeType,
+        sizeBytes,
+    });
 }
 
-/** Keep only the app-state fields we persist, dropping transient editor state. */
 export function sanitizeExcalidrawAppState(appState: Partial<AppState>): Partial<AppState> {
-    if (!appState) return {};
-    return {
+	return {
         viewBackgroundColor: appState.viewBackgroundColor,
         gridSize: appState.gridSize,
         zenModeEnabled: appState.zenModeEnabled,

@@ -2,8 +2,7 @@ import { create } from "zustand";
 import type { CursorEventPayload } from "../hooks/realtime-cursor-react";
 
 interface RealtimeCursorState {
-    /** Map of peer client id -> latest cursor position/presence. */
-    cursors: Record<string, CursorEventPayload>;
+	cursors: Record<string, CursorEventPayload>;
 
     setCursors: (
         value:

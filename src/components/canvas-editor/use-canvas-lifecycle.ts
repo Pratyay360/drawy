@@ -4,10 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useCanvasStore } from "#/stores/canvas";
 import { loadCanvas, sanitizeExcalidrawAppState, saveCanvas } from "../../services/canvases";
 import { getUserLibrary } from "../../services/libraries";
-import { pruneUnusedFiles } from "../../utils/assets";
+import { pruneUnusedFiles } from "../../utils/assets/pruning";
 import { CanvasRealtime, mergeElements, type ScenePayload } from "../../utils/canvas-realtime";
-import { subscribeCanvasEvents } from "../../utils/realtime";
-import { getPersistentAppState } from "./utils";
+import { CANVAS_SCENE_REPLACED_EVENT, subscribeCanvasEvents } from "../../utils/realtime";
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
     let timer: ReturnType<typeof setTimeout>;
@@ -23,6 +22,9 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 interface UseCanvasLifecycleOptions {
     id: string;
 }
+
+const AUTO_SAVE_DELAY_MS = 1500;
+const AUTO_SAVE_MAX_RETRY_DELAY_MS = 30000;
 
 export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
     const navigate = useNavigate();
@@ -62,6 +64,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         initialLibraryItemsRef.current = getUserLibrary();
     }
     const isSavingRef = useRef(false);
+    const autoSaveFailuresRef = useRef(0);
     const realtimeRef = useRef<CanvasRealtime | null>(null);
     const [awareness, setAwareness] = useState<
         import("y-protocols/awareness").Awareness | undefined
@@ -82,9 +85,10 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         (async () => {
             try {
                 setModuleError(null);
+				// Excalidraw needs a longer timeout than metadata requests.
                 const mod = await withTimeout(
                     import("@excalidraw/excalidraw"),
-                    15000,
+                    30000,
                     "Loading editor",
                 );
                 await import("@excalidraw/excalidraw/index.css");
@@ -108,50 +112,71 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         };
     }, [setExcalidrawModule, setModuleError]);
 
-    // --- Fetch canvas ---
-    const fetchSeqRef = useRef(0);
-    const fetchCanvas = useCallback(
-        async (canvasId: string, isInitialMount: boolean) => {
-            const seq = ++fetchSeqRef.current;
-            if (isInitialMount) {
-                setLoading(true);
-            } else {
-                setIsChangingCanvas(true);
+	const fetchSeqRef = useRef(0);
+	const fetchCanvas = useCallback(
+		async (canvasId: string, mode: "load" | "refresh") => {
+			// Refresh only metadata; replacing the Yjs scene can erase edits made
+			// while the HTTP request is in flight.
+			const applyScene = mode === "load";
+            if (applyScene) {
+                setLoadError(null);
+            } else if (useCanvasStore.getState().loadError) {
+				// Only an explicit retry may clear a visible load error.
+				return;
             }
-            setLoadError(null);
+
+            const seq = ++fetchSeqRef.current;
+            const isInitialMount = applyScene && !excalidrawAPI;
+            if (applyScene) {
+                if (isInitialMount) setLoading(true);
+                else setIsChangingCanvas(true);
+            }
 
             try {
-                const data = await withTimeout(loadCanvas(canvasId), 12000, "Loading canvas");
+				// The RPC link owns the timeout so retries cannot overlap a live request.
+				const data = await loadCanvas(canvasId);
                 if (seq !== fetchSeqRef.current) return;
                 if (data) {
                     const sanitizedAppState = sanitizeExcalidrawAppState(data.appState);
                     const resolvedElements = data.elements || [];
                     const resolvedFiles = data.files || {};
 
-                    filesRef.current = resolvedFiles;
                     setCanvasData({
                         ...data,
                         appState: sanitizedAppState,
                         files: resolvedFiles,
                     });
+                    setLoadError(null);
+
+                    if (!applyScene) {
+						// Local uploads in flight take precedence over the server copy.
+                        const missing = Object.entries(resolvedFiles).filter(
+                            ([fileId]) => !filesRef.current[fileId],
+                        );
+                        filesRef.current = { ...resolvedFiles, ...filesRef.current };
+                        if (excalidrawAPI && missing.length > 0) {
+                            excalidrawAPI.addFiles(missing.map(([, file]) => file));
+                        }
+                        return;
+                    }
+
+                    filesRef.current = resolvedFiles;
                     setElements(resolvedElements);
                     setAppState(sanitizedAppState);
-                    setLoadError(null);
 
                     lastSavedData.current = {
                         elements: resolvedElements.map((e) => ({
                             id: e.id,
                             version: e.version,
                         })),
-                        appState: getPersistentAppState(sanitizedAppState),
+						appState: sanitizeExcalidrawAppState(sanitizedAppState),
                     };
 
                     if (excalidrawAPI) {
                         if (resolvedFiles && Object.keys(resolvedFiles).length > 0) {
                             excalidrawAPI.addFiles(Object.values(resolvedFiles));
                         }
-                        // SAFETY: sanitizedAppState is Partial<AppState> produced by sanitizeExcalidrawAppState.
-                        excalidrawAPI.updateScene({
+						excalidrawAPI.updateScene({
                             elements: resolvedElements,
                             appState: {
                                 ...sanitizedAppState,
@@ -164,15 +189,17 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
             } catch (error) {
                 if (seq !== fetchSeqRef.current) return;
                 console.error("Failed to load canvas:", error);
-                setLoadError(
-                    error instanceof Error
-                        ? error.message
-                        : "Failed to load canvas — check network and retry",
-                );
+				// A failed metadata refresh does not invalidate the visible scene.
+                if (applyScene) {
+                    setLoadError(
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to load canvas — check network and retry",
+                    );
+                }
             } finally {
-                // A stale request must not touch the loading state, but a
-                // `return` here would swallow the error of the try block.
-                if (seq === fetchSeqRef.current) {
+				// Stale requests must not change the current loading state.
+                if (seq === fetchSeqRef.current && applyScene) {
                     if (isInitialMount) {
                         setLoading(false);
                     } else {
@@ -196,44 +223,43 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
     useEffect(() => {
         if (!id) return;
         setSaveStatus("saved");
-        const isInitialMount = !excalidrawAPI;
-        void fetchCanvas(id, isInitialMount);
-    }, [id, excalidrawAPI, fetchCanvas, setSaveStatus]);
+        void fetchCanvas(id, "load");
+    }, [id, fetchCanvas, setSaveStatus]);
 
-    // --- Subscribe to canvas events ---
-    useEffect(() => {
+	useEffect(() => {
         const refreshCanvas = () => {
             if (!id) return;
-            void fetchCanvas(id, false);
+			// Ignore the event echoed by our own in-flight save.
+            if (isSavingRef.current) return;
+            void fetchCanvas(id, "refresh");
+        };
+		// A version restore replaces the scene and requires a full reload.
+        const reloadScene = () => {
+            if (!id) return;
+            void fetchCanvas(id, "load");
         };
 
         addEventListener("canvas-updated", refreshCanvas);
+        addEventListener(CANVAS_SCENE_REPLACED_EVENT, reloadScene);
         const unsubscribe = subscribeCanvasEvents(refreshCanvas);
         return () => {
             removeEventListener("canvas-updated", refreshCanvas);
+            removeEventListener(CANVAS_SCENE_REPLACED_EVENT, reloadScene);
             unsubscribe();
         };
     }, [id, fetchCanvas]);
 
-    // --- Realtime sync (Yjs) ---
-    useEffect(() => {
+	useEffect(() => {
         if (!id || !excalidrawAPI) return;
         const rt = new CanvasRealtime(id, username || "Anonymous");
         realtimeRef.current = rt;
         rt.connect();
         setAwareness(rt.getAwareness());
 
-        // Seed Y.Doc with whatever we loaded from Postgres (first run / snapshot miss).
-        // Afterwards Y.Doc is the scene source; subsequent syncs come from the DO.
-        const ydoc = rt.getYDoc();
-        if (ydoc) {
-            const existing = (ydoc as unknown as { _hydrated?: boolean })._hydrated;
-            if (!existing) {
-                const initial = elements.length > 0 ? elements : (useCanvasStore.getState().elements ?? []);
-                if (initial.length > 0) rt.pushLocalScene(initial);
-                (ydoc as unknown as { _hydrated?: boolean })._hydrated = true;
-            }
-        }
+
+		// Read directly to avoid reconnecting whenever the scene changes.
+		const initialElements = useCanvasStore.getState().elements;
+		if (initialElements.length > 0) rt.pushLocalScene(initialElements);
 
         const offScene = rt.onScene((payload: ScenePayload) => {
             const api = excalidrawAPI;
@@ -257,7 +283,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         const offSaved = rt.onSaved(() => {
             if (!id) return;
             if (Date.now() - lastLocalEditRef.current < 4000) return;
-            void fetchCanvas(id, false);
+			void fetchCanvas(id, "refresh");
         });
 
         const offPresence = rt.onPresence((count) => setCollaborators(count));
@@ -272,45 +298,77 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         };
     }, [id, excalidrawAPI, fetchCanvas, setCollaborators, username]);
 
-    // --- Auto-save (metadata/appState only; scene syncs via Yjs DO) ---
-    useEffect(() => {
+	useEffect(() => {
         if (loading || isChangingCanvas || !id || saveStatus !== "unsaved") return;
 
-        const timer = setTimeout(async () => {
+        let cancelled = false;
+        let timer: ReturnType<typeof setTimeout> | null = null;
+
+        const schedule = (delay: number) => {
+            if (cancelled) return;
+            timer = setTimeout(runSave, delay);
+        };
+
+        const runSave = async () => {
+            if (cancelled) return;
+			// Avoid overlapping full-scene uploads.
+            if (isSavingRef.current) {
+                schedule(1000);
+                return;
+            }
+            const editAtStart = lastLocalEditRef.current;
             setSaveStatus("saving");
             isSavingRef.current = true;
             try {
-                const prunedFiles = pruneUnusedFiles(filesRef.current, elements);
+                const { elements: currentElements, appState: currentAppState } =
+                    useCanvasStore.getState();
+                const prunedFiles = pruneUnusedFiles(filesRef.current, currentElements);
                 filesRef.current = prunedFiles;
-                await withTimeout(
-                    saveCanvas(id, elements, appState, prunedFiles),
-                    12000,
-                    "Saving canvas",
-                );
-                setSaveStatus("saved");
+                await saveCanvas(id, currentElements, currentAppState, prunedFiles);
                 realtimeRef.current?.broadcastSaved();
+				autoSaveFailuresRef.current = 0;
+				// Edits made during this save remain dirty. A cancelled effect may
+				// update the status only while no newer save has claimed it.
+                if (!cancelled || useCanvasStore.getState().saveStatus === "saving") {
+                    setSaveStatus(lastLocalEditRef.current > editAtStart ? "unsaved" : "saved");
+                }
             } catch (error) {
                 console.error("Failed to auto-save canvas:", error);
-                setSaveStatus("unsaved");
+				autoSaveFailuresRef.current = Math.min(autoSaveFailuresRef.current + 1, 5);
+				// Failed saves remain dirty and are rescheduled.
+                if (!cancelled || useCanvasStore.getState().saveStatus === "saving") {
+                    setSaveStatus("unsaved");
+                }
             } finally {
                 isSavingRef.current = false;
             }
-        }, 1500);
+        };
 
-        return () => clearTimeout(timer);
-    }, [elements, appState, id, loading, isChangingCanvas, saveStatus, setSaveStatus]);
+        const retryDelay = Math.min(
+            AUTO_SAVE_DELAY_MS * 2 ** autoSaveFailuresRef.current,
+            AUTO_SAVE_MAX_RETRY_DELAY_MS,
+        );
+        schedule(retryDelay);
 
-    // --- Reset store state on unmount ---
-    useEffect(() => {
+        return () => {
+            cancelled = true;
+            if (timer) clearTimeout(timer);
+        };
+    }, [id, loading, isChangingCanvas, saveStatus, setSaveStatus]);
+
+	useEffect(() => {
+		if (saveStatus === "saved") autoSaveFailuresRef.current = 0;
+	}, [saveStatus]);
+
+	useEffect(() => {
         return () => {
             resetCanvas();
         };
     }, [resetCanvas]);
 
-    return {
-        awareness,
-        // State
-        canvasData,
+	return {
+		awareness,
+		canvasData,
         loading,
         loadError,
         isChangingCanvas,
@@ -320,27 +378,17 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         excalidrawModule,
         moduleError,
         saveStatus,
-        collaborators,
-        username,
-        // Refs
-        filesRef,
+		collaborators,
+		username,
+		filesRef,
         initialLibraryItemsRef,
         isSavingRef,
         realtimeRef,
         applyingRemoteRef,
-        lastLocalEditRef,
-        lastSavedData,
-        // Setters
-        setCanvasData,
-        setElements,
-        setAppState,
-        setExcalidrawAPI,
-        setSaveStatus,
-        setIsEditingTitle: useCanvasStore.getState().setIsEditingTitle,
-        setTitleInput: useCanvasStore.getState().setTitleInput,
-        setLoadError,
-        setModuleError,
-        // Functions
-        fetchCanvas,
-    };
+		lastLocalEditRef,
+		lastSavedData,
+		setCanvasData,
+		setExcalidrawAPI,
+		fetchCanvas,
+	};
 }

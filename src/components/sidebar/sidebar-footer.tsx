@@ -28,7 +28,10 @@ export function SidebarFooter() {
     const [carbonUrl, setCarbonUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        setCarbonUrl(window.location.href);
+        const href = window.location.href;
+        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+            return;
+        setCarbonUrl(href);
     }, []);
 
     useEffect(() => {

@@ -1,10 +1,8 @@
 import { create } from "zustand";
 
 interface LibraryItemState {
-    /** Search filter for the items within a single saved library. */
-    query: string;
-    /** Content refresh in progress. */
-    refreshing: boolean;
+	query: string;
+	refreshing: boolean;
 
     setQuery: (query: string) => void;
     setRefreshing: (refreshing: boolean) => void;

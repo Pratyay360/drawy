@@ -116,6 +116,3 @@ if (typeof window === "undefined") {
         (globalThis as any).HTMLCanvasElement = class HTMLCanvasElement extends ElementStub {};
     }
 }
-export default function () {
-    // Polyfills executed at module load
-}

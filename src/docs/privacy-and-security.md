@@ -28,12 +28,10 @@ documents.
 
 ## Images
 
-Images you paste or upload while drawing are sent to an external image host
-(imgcdn.dev), and only the resulting URL is saved with the canvas. Anything
-already on that host is outside our control — ask us through the
-[contact page](/contact) if you need something taken down. Self-hosters who
-would rather keep images on their own infrastructure can replace the upload
-call in `src/lib/s3.ts`.
+Images you paste or upload while drawing are sent to the app's object storage
+bucket, and only the resulting URL is saved with the canvas. Ask us through the
+[contact page](/contact) if you need something taken down. Self-hosters keep
+images on their own infrastructure with the `S3_*` variables.
 
 ## Libraries
 
@@ -61,9 +59,8 @@ edited. Signing out deletes it.
 ## Deleting your data
 
 Deleting a canvas from the sidebar removes the canvas and its version history.
-Images already uploaded to imgcdn.dev stay on that host, so use the
-[contact page](/contact) if you need them removed. To delete your account and
-everything attached to it, use the same page.
+Use the [contact page](/contact) if you need uploaded images removed. To delete
+your account and everything attached to it, use the same page.
 
 ## Reporting a vulnerability
 

@@ -1,5 +1,3 @@
-import type { BinaryFileData, BinaryFiles } from "@excalidraw/excalidraw/types";
-
 const MAX_IMAGE_DIMENSION = 1920;
 const COMPRESSION_QUALITY = 0.82;
 const MAX_DATA_URL_LENGTH_BEFORE_COMPRESS = 300_000;
@@ -72,43 +70,4 @@ export async function compressDataUrl(
 
         img.src = dataURL;
     });
-}
-
-/**
- * Optimize all binary files by compressing large images and returning an updated dictionary.
- */
-export async function optimizeBinaryFiles(files: BinaryFiles): Promise<BinaryFiles> {
-    if (!files || Object.keys(files).length === 0) return {};
-
-    const optimized: BinaryFiles = {};
-    const promises = Object.entries(files).map(async ([id, file]) => {
-        if (!file?.dataURL) return;
-        try {
-            const { dataURL, mimeType } = await compressDataUrl(file.dataURL, file.mimeType);
-            optimized[id] = {
-                ...file,
-                dataURL: dataURL as BinaryFileData["dataURL"],
-                mimeType: mimeType as BinaryFileData["mimeType"],
-            };
-        } catch {
-            optimized[id] = file;
-        }
-    });
-
-    await Promise.all(promises);
-    return optimized;
-}
-
-/**
- * Estimate the total size in bytes of all stored binary files.
- */
-export function calculateAssetsSize(files: BinaryFiles | undefined): number {
-    if (!files) return 0;
-    let bytes = 0;
-    for (const file of Object.values(files)) {
-        if (file?.dataURL) {
-            bytes += file.dataURL.length;
-        }
-    }
-    return bytes;
 }

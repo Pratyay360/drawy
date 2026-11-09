@@ -1,91 +1,91 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "drawy",
-  // One worker for the whole app: the entry routes /parties/* to the
-  // PartyServer Durable Objects and delegates everything else to the Nitro
-  // bundle. Nitro's "cloudflare_module" preset emits that bundle into
-  // .output/server, so run `bun run build` before deploying or running
-  // `wrangler dev` — otherwise the entry's import is missing.
-  "main": "src/party/index.ts",
-  "compatibility_date": "2026-10-22",
-  // Nitro's cloudflare preset needs the Node.js compat layer (node:process,
-  // node:crypto, ...) for the server bundle.
-  "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": true,
-  "preview_urls": true,
-  // Realtime rooms. Binding names kebab-case to the party paths clients
-  // already use: Main -> /parties/main/:room, Rooms -> /parties/rooms/:room.
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "Main",
-        "class_name": "EditorServer",
-      },
-      {
-        "name": "Rooms",
-        "class_name": "OccupancyServer",
-      },
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "drawy",
+    // One worker for the whole app: the entry routes /parties/* to the
+    // PartyServer Durable Objects and delegates everything else to the Nitro
+    // bundle. Nitro's "cloudflare_module" preset emits that bundle into
+    // .output/server, so run `bun run build` before deploying or running
+    // `wrangler dev` — otherwise the entry's import is missing.
+    "main": "src/party/index.ts",
+    "compatibility_date": "2026-10-22",
+    // Nitro's cloudflare preset needs the Node.js compat layer (node:process,
+    // node:crypto, ...) for the server bundle.
+    "compatibility_flags": ["nodejs_compat"],
+    "workers_dev": true,
+    "preview_urls": true,
+    // Realtime rooms. Binding names kebab-case to the party paths clients
+    // already use: Main -> /parties/main/:room, Rooms -> /parties/rooms/:room.
+    "durable_objects": {
+        "bindings": [
+            {
+                "name": "Main",
+                "class_name": "EditorServer",
+            },
+            {
+                "name": "Rooms",
+                "class_name": "OccupancyServer",
+            },
+        ],
+    },
+    // wrangler does not create Durable Object migrations for you: add a new
+    // entry whenever a server class is added, renamed or removed.
+    "migrations": [
+        {
+            "tag": "v1",
+            "new_sqlite_classes": ["EditorServer", "OccupancyServer"],
+        },
     ],
-  },
-  // wrangler does not create Durable Object migrations for you: add a new
-  // entry whenever a server class is added, renamed or removed.
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_sqlite_classes": ["EditorServer", "OccupancyServer"],
+    "assets": {
+        // The client bundle that Nitro writes to .output/public. The binding name
+        // has to stay "ASSETS": the generated worker reads env.ASSETS.fetch(...)
+        // for public files.
+        "directory": ".output/public",
+        "binding": "ASSETS",
     },
-  ],
-  "assets": {
-    // The client bundle that Nitro writes to .output/public. The binding name
-    // has to stay "ASSETS": the generated worker reads env.ASSETS.fetch(...)
-    // for public files.
-    "directory": ".output/public",
-    "binding": "ASSETS",
-  },
-  "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1,
-    "redact_query_string": false,
-    "logs": {
-      "enabled": true,
-      "head_sampling_rate": 1,
-      "invocation_logs": true,
-      "persist": true,
+    "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": false,
+        "logs": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "invocation_logs": true,
+            "persist": true,
+        },
+        "traces": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "persist": true,
+        },
+        "issues": {
+            "enabled": true,
+        },
     },
-    "traces": {
-      "enabled": true,
-      "head_sampling_rate": 1,
-      "persist": true,
-    },
-    "issues": {
-      "enabled": true,
-    },
-  },
-  "previews": {},
-  // Hyperdrive for PostgreSQL (optional — falls back to DATABASE_URL)
-  // Add a Hyperdrive binding in Cloudflare dashboard and set:
-  //       "binding": "HYPERDRIVE",
-  // "id": "",
-  // "hyperdrive": [
-  //   {
-  //     "binding": "HYPERDRIVE",
-  //     "id": "3f42f3d892b34ae09015c5ebaab5968d",
-  //   },
-  // ],
-  "routes": [
-    {
-      "pattern": "drawy.pratyay.online",
-      "zone_name": "pratyay.online",
-      "custom_domain": true,
-      "enabled": true,
-      "previews_enabled": false,
-    },
-  ],
-  // Hyperdrive disabled: app falls back to DATABASE_URL.
-  // Secrets: DATABASE_URL fallback, SESSION_SECRET, plus S3_* and UPSTASH_REDIS_* below.
-  // S3_*: S3_BUCKET, S3_REGION, S3_ENDPOINT (if S3-compatible), S3_ACCESS_KEY_ID,
-  // S3_SECRET_ACCESS_KEY, S3_PUBLIC_URL (optional CDN URL), S3_FORCE_PATH_STYLE
-  // AWS_SESSION_TOKEN: required while S3 credentials are temporary (Upstash Blob
-  // mints ~12h credentials); re-mint and rotate secrets before expiry.
-  // Upstash Redis: UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
+    "previews": {},
+    // Hyperdrive for PostgreSQL (optional — falls back to DATABASE_URL)
+    // Add a Hyperdrive binding in Cloudflare dashboard and set:
+    //       "binding": "HYPERDRIVE",
+    // "id": "",
+    // "hyperdrive": [
+    //   {
+    //     "binding": "HYPERDRIVE",
+    //     "id": "3f42f3d892b34ae09015c5ebaab5968d",
+    //   },
+    // ],
+    "routes": [
+        {
+            "pattern": "drawy.pratyay.online",
+            "zone_name": "pratyay.online",
+            "custom_domain": true,
+            "enabled": true,
+            "previews_enabled": false,
+        },
+    ],
+    // Hyperdrive disabled: app falls back to DATABASE_URL.
+    // Secrets: DATABASE_URL fallback, SESSION_SECRET, plus S3_* and UPSTASH_REDIS_* below.
+	// S3_*: S3_BUCKET, S3_REGION, S3_ENDPOINT_URL_S3 (preferred) or S3_ENDPOINT,
+	// S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_PUBLIC_URL, S3_FORCE_PATH_STYLE
+    // AWS_SESSION_TOKEN: required while S3 credentials are temporary (Upstash Blob
+    // mints ~12h credentials); re-mint and rotate secrets before expiry.
+    // Upstash Redis: UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
 }

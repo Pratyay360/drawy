@@ -2,27 +2,19 @@ import { create } from "zustand";
 import type { ExcalidrawLibrary, SavedLibrary } from "#/services/libraries";
 
 interface LibraryState {
-    /** Catalog of all browsable Excalidraw libraries. */
-    libraries: ExcalidrawLibrary[];
-    /** Catalog filtered by the search query. */
-    filteredLibraries: ExcalidrawLibrary[];
-    /** Libraries bookmarked/saved by the user (shared with the panel tab). */
-    savedLibraries: SavedLibrary[];
+	libraries: ExcalidrawLibrary[];
+	filteredLibraries: ExcalidrawLibrary[];
+	savedLibraries: SavedLibrary[];
     savingId: string | null;
     refreshingId: string | null;
     removingId: string | null;
-    /** Catalog still loading. */
-    loading: boolean;
-    /** Saved-library list has loaded at least once. */
-    savedLoaded: boolean;
-    searchQuery: string;
-    /** Library currently being browsed (deep link into items). */
-    browsingId: string | null;
-    /** Pending deep-link that waits for saved libraries to load. */
-    pendingBrowseId: string | null;
+	loading: boolean;
+	savedLoaded: boolean;
+	searchQuery: string;
+	browsingId: string | null;
+	pendingBrowseId: string | null;
 
-    /** Seed browse state from a modal open request. */
-    init: (initialBrowseId: string | null) => void;
+	init: (initialBrowseId: string | null) => void;
     setLibraries: (libraries: ExcalidrawLibrary[]) => void;
     setFilteredLibraries: (libraries: ExcalidrawLibrary[]) => void;
     setSavedLibraries: (

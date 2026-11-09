@@ -54,7 +54,7 @@ function stripTitle(content: string): string {
 }
 
 function parseDoc(path: string, raw: string): Doc {
-    const slug = path.split("/").pop()!.replace(/\.md$/, "");
+    const slug = path.split("/").pop()?.replace(/\.md$/, "") ?? "";
     const match = raw.match(FRONT_MATTER);
     const fields = match ? parseFrontMatter(match[1]) : {};
     const body = match ? raw.slice(match[0].length) : raw;

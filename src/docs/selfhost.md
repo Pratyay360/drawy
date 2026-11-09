@@ -1,23 +1,26 @@
 ---
+
 title: Self hosting Drawy
 description: >-
-  Run your own instance of drawy the TanStack Start app, the real time worker
-  and Postgres
+Run your own instance of drawy the TanStack Start app, the real time worker
+and Postgres
 date: '1111-11-11T11:11:00Z'
 draft: false
 tags:
-  - self
-  - hosting
-  - self hosting
-  - drawy
-  - partyserver
-  - cloudflare workers
-  - durable
-  - worker
-isCJKLanguage: false
-headless: false
-order: 5
+- self
+- hosting
+- self hosting
+- drawy
+- partyserver
+- cloudflare workers
+- durable
+- worker
+  isCJKLanguage: false
+  headless: false
+  order: 5
+
 ---
+
 Drawy has three components, front end, back end, and data store which holds the  
 drawings. This page walks through all three.
 
@@ -26,7 +29,7 @@ drawings. This page walks through all three.
 - MISE the version manager
 - A PostgreSQL database — Neon, Supabase or any
 - A Cloudflare account — the realtime Durable Objects live in the same Worker
-as the app, so `wrangler deploy` publishes everything.
+  as the app, so `wrangler deploy` publishes everything.
 - Any serverless platform like cloudflare worker.
 
 ## 1. Install
@@ -41,7 +44,6 @@ mise deps
 
 ## 2. Configure the environment
 
-
 | Variable            | Required | Purpose                                                                     |
 | ------------------- | -------- | --------------------------------------------------------------------------- |
 | `DATABASE_URL`      | yes      | Postgres connection string; prefer a pooled URL if your provider offers one |
@@ -49,8 +51,7 @@ mise deps
 | `VITE_SITE_URL`     | no       | Canonical app URL; defaults to `https://drawyparty.pratyay.online`          |
 | `SENTRY_AUTH_TOKEN` | no       | Uploads source maps during the build (optional)                             |
 
-
-The repository's `.env.example` can be used as a reference. 
+The repository's `.env.example` can be used as a reference.
 
 ## 3. Create the tables
 
@@ -81,8 +82,6 @@ canvas to Postgres, which stays the source of truth.
 bun run dev
 bun run cf:dev   # built worker on http://localhost:8787 (app + rooms)
 ```
-
-
 
 ## 6. Deploy the app to Cloudflare Workers
 
@@ -119,19 +118,17 @@ Variables prefixed with `VITE_` are inlined into the bundle during the build pro
 ## Operational Notes
 
 - Your reverse proxy must forward WebSocket upgrades on `/parties`; the browser  
-connects there directly for real time sync.
-- Image uploads go to imgcdn.dev from `src/lib/s3.ts`. Replace that function if
-you would rather keep objects on your own storage.
+  connects there directly for real time sync.
+- Image uploads go to the S3-compatible bucket configured with the `S3_*`
+  variables.
 - The session cookie is only marked `Secure` when `NODE_ENV=production`, so
-serve the app over HTTPS.
+  serve the app over HTTPS.
 - Lint and format are mise tasks: `mise run lint` (oxlint) and `mise run format`
-(oxfmt).
+  (oxfmt).
 
 ## Related
 
 - [Privacy and security](/docs/privacy-and-security) — what your instance stores
 - [Getting started](/docs/getting-started) — using Drawy as an end user
-
-
 
 &nbsp;

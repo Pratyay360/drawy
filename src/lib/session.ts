@@ -2,12 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { normalizeUsername } from "#/lib/username";
-import {
-    logoutServer,
-    resolveCurrentUserServer,
-    signInServer,
-    signUpServer,
-} from "./session.server";
+import { loadCurrentUser, logoutServer, signInServer, signUpServer } from "./session.server";
 
 export interface CurrentUser {
     username: string;
@@ -15,16 +10,11 @@ export interface CurrentUser {
 
 const authInput = z.object({
     username: z.string().min(1, "Username is required"),
-    password: z
-        .string()
-        .min(1, "Password must be at least 1 characters")
-        .max(128, "Password is too long"),
+    password: z.string().min(1, "Password is required").max(128, "Password is too long"),
 });
 
 export const getCurrentUser = createServerFn({ method: "GET" }).handler(
-    async (): Promise<CurrentUser | null> => {
-        return resolveCurrentUserServer();
-    },
+    async (): Promise<CurrentUser | null> => loadCurrentUser(),
 );
 
 export const signIn = createServerFn({ method: "POST" })
